@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Clientes{% endblock %}
+
+{% block content %}
+<h2>Clientes</h2>
+<form method="get" class="mb-4">
+    <input type="text" name="search" class="form-control" placeholder="Buscar cliente...">
+</form>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Teléfono</th>
+            <th>Empresa</th>
+            <th>Activo</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for customer in customers %}
+        <tr>
+            <td><a href="{% url 'customer_detail' customer.pk %}">{{ customer.name }}</a></td>
+            <td>{{ customer.email }}</td>
+            <td>{{ customer.phone }}</td>
+            <td>{{ customer.company }}</td>
+            <td>{% if customer.is_active %}<span class="badge bg-success">Activo</span>{% else %}<span class="badge bg-danger">Inactivo</span>{% endif %}</td>
+            <td>
+                <a href="{% url 'customer_update' customer.pk %}" class="btn btn-sm btn-primary">Editar</a>
+                <a href="{% url 'customer_delete' customer.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<a href="{% url 'customer_create' %}" class="btn btn-success">Nuevo Cliente</a>
+{% endblock %}

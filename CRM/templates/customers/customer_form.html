@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Formulario de Cliente{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-header bg-white">
+    <h4 class="mb-0"><i class="bi bi-person-plus me-2"></i>{% if object %}Editar{% else %}Nuevo{% endif %} Cliente</h4>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <div class="mb-3">
+        <label for="id_name" class="form-label">Nombre</label>
+        {{ form.name }}
+        {% if form.name.errors %}
+          <div class="text-danger small mt-1">{{ form.name.errors }}</div>
+        {% endif %}
+      </div>
+      <div class="mb-3">
+        <label for="id_email" class="form-label">Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}
+          <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+        {% endif %}
+      </div>
+      <div class="mb-3">
+        <label for="id_phone" class="form-label">Teléfono</label>
+        {{ form.phone }}
+      </div>
+      <div class="mb-3">
+        <label for="id_company" class="form-label">Empresa</label>
+        {{ form.company }}
+      </div>
+      <div class="mb-3">
+        <label for="id_is_active" class="form-label">Activo</label>
+        {{ form.is_active }}
+      </div>
+      <button type="submit" class="btn btn-primary me-2">{% if object %}Guardar Cambios{% else %}Crear Cliente{% endif %}</button>
+      <a href="{% url 'customer_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

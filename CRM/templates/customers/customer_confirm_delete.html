@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Eliminar Cliente{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-header bg-danger text-white">
+    <h4 class="mb-0"><i class="bi bi-trash me-2"></i>Eliminar Cliente</h4>
+  </div>
+  <div class="card-body">
+    <p>¿Seguro que deseas eliminar el cliente <strong>{{ object.name }}</strong>? Esta acción no se puede deshacer.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger me-2">Eliminar</button>
+      <a href="{% url 'customer_detail' object.pk %}" class="btn btn-outline-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

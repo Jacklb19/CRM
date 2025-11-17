@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Detalle del Cliente{% endblock %}
+{% block content %}
+<div class="card mt-4">
+  <div class="card-header bg-white">
+    <h4 class="mb-0"><i class="bi bi-person-fill me-2"></i>{{ object.name }}</h4>
+  </div>
+  <div class="card-body">
+    <p><strong>Email:</strong> {{ object.email }}</p>
+    <p><strong>Teléfono:</strong> {{ object.phone|default:"Sin especificar" }}</p>
+    <p><strong>Empresa:</strong> {{ object.company|default:"Sin especificar" }}</p>
+    <p>
+        <strong>Estado:</strong>
+        {% if object.is_active %}
+          <span class="badge bg-success">Activo</span>
+        {% else %}
+          <span class="badge bg-danger">Inactivo</span>
+        {% endif %}
+    </p>
+    <p class="mb-3"><strong>Creado:</strong> {{ object.created_at|date:"d/m/Y" }}</p>
+    <a href="{% url 'customer_update' object.pk %}" class="btn btn-primary me-2">Editar</a>
+    <a href="{% url 'customer_delete' object.pk %}" class="btn btn-danger">Eliminar</a>
+    <a href="{% url 'customer_list' %}" class="btn btn-outline-secondary">Volver al Listado</a>
+  </div>
+</div>
+{% endblock %}
