@@ -9,7 +9,7 @@ urlpatterns = [
     path('logout/', views.UserLogoutView.as_view(), name='logout'),
     path('profile/', views.ProfileView.as_view(), name='profile'),
 
-        path('password-reset/', 
+    path('password-reset/', 
          auth_views.PasswordResetView.as_view(
              template_name='users/password_reset.html',
              email_template_name='users/password_reset_email.html',
@@ -36,4 +36,17 @@ urlpatterns = [
              template_name='users/password_reset_complete.html'
          ),
          name='password_reset_complete'),
+
+    path('password-change/', 
+         auth_views.PasswordChangeView.as_view(
+             template_name='users/password_change.html',
+             success_url='/profile/'
+         ),
+         name='password_change'),
+
+    path('password-change/done/', 
+         auth_views.PasswordChangeDoneView.as_view(
+             template_name='users/password_change_done.html'
+         ),
+         name='password_change_done'),
 ]
