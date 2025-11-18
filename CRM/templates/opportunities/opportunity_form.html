@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 900px;">
+
+    <div class="card shadow-sm border-0" style="border-radius: 16px; overflow: hidden;">
+
+        <!-- ENCABEZADO -->
+        <div class="p-4" 
+             style="background: linear-gradient(135deg, #6A4EF5, #4C8CF5); color: #fff;">
+            
+            <h2 class="mb-0 fw-bold">
+                <i class="bi bi-lightbulb-fill me-2"></i> Nueva Oportunidad
+            </h2>
+
+            <p class="mt-1 mb-0" style="font-size: 0.95rem; opacity: .95;">
+                Registra una oportunidad vinculada a un cliente existente.
+            </p>
+        </div>
+
+        <!-- FORMULARIO -->
+        <div class="p-4" style="background: #FFFFFF;">
+            <form method="post" class="row g-4">
+                {% csrf_token %}
+
+                {% for field in form %}
+                <div class="col-md-6">
+
+                    <label class="form-label fw-semibold text-secondary">
+                        {{ field.label }}
+                    </label>
+
+                    <!-- CAMPO NORMAL SIN ADD_CLASS -->
+                    {{ field }}
+
+                    {% if field.errors %}
+                        <div class="text-danger small mt-1">{{ field.errors }}</div>
+                    {% endif %}
+
+                </div>
+                {% endfor %}
+
+                <!-- BOTONES -->
+                <div class="col-12 mt-4 d-flex justify-content-end gap-3">
+
+                    <!-- CANCELAR -->
+                    <a href="{% url 'opportunities:list' %}" 
+                       class="btn px-4 py-2 fw-semibold"
+                       style="background: #F1F3F5; color: #4C4F58; border-radius: 10px;">
+                        <i class="bi bi-arrow-left me-1"></i> Cancelar
+                    </a>
+
+                    <!-- GUARDAR -->
+                    <button type="submit" 
+                            class="btn text-white px-4 py-2 fw-semibold"
+                            style="background: linear-gradient(135deg, #6A4EF5, #4C8CF5); border-radius: 10px;">
+                        <i class="bi bi-check-circle me-1"></i> Guardar
+                    </button>
+
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

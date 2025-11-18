@@ -32,54 +32,31 @@
         font-size: 1.5rem;
         margin-bottom: 1rem;
     }
-    
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-    
-    .stat-label {
-        color: #6c757d;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .activity-item {
-        padding: 1rem;
-        border-bottom: 1px solid #f0f0f0;
-        transition: background 0.2s ease;
-    }
-    
-    .activity-item:hover {
-        background-color: #f8f9fa;
-    }
-    
-    .activity-item:last-child {
-        border-bottom: none;
-    }
-    
+
     .quick-action-btn {
-        width: 100%;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        text-align: left;
-        border: 1px solid #dee2e6;
-        background: white;
-        border-radius: 0.5rem;
-        transition: all 0.3s ease;
+    display: block;
+    width: 100%;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.8rem;
+    text-decoration: none;
+    border: 1px solid #dee2e6;
+    background: #ffffff;
+    color: #333;
+    border-radius: 0.5rem;
+    transition: all 0.25s ease-in-out;
     }
-    
+
     .quick-action-btn:hover {
         border-color: #667eea;
-        background: #f8f9ff;
-        transform: translateX(5px);
+        background: #f0f3ff;
+        transform: translateX(4px);
+        text-decoration: none;
     }
 </style>
 {% endblock %}
 
 {% block content %}
+
 <!-- Welcome Card -->
 <div class="welcome-card">
     <h2 class="mb-2">¡Bienvenido, {{ user.username }}! 👋</h2>
@@ -130,7 +107,7 @@
     </div>
 </div>
 
-<!-- Main Content Row -->
+<!-- Main Row -->
 <div class="row">
     <!-- Recent Activity -->
     <div class="col-lg-8 mb-4">
@@ -152,35 +129,51 @@
         </div>
     </div>
     
-    <!-- Quick Actions -->
-    <div class="col-lg-4 mb-4">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h5 class="mb-0"><i class="bi bi-lightning-fill me-2"></i>Acciones Rápidas</h5>
-            </div>
-            <div class="card-body">
-                <button class="quick-action-btn">
-                    <i class="bi bi-person-plus me-2 text-primary"></i>
-                    <strong>Nuevo Cliente</strong>
-                </button>
-                <button class="quick-action-btn">
-                    <i class="bi bi-graph-up-arrow me-2 text-warning"></i>
-                    <strong>Nueva Oportunidad</strong>
-                </button>
-                <button class="quick-action-btn">
-                    <i class="bi bi-chat-dots me-2 text-info"></i>
-                    <strong>Registrar Seguimiento</strong>
-                </button>
-                <button class="quick-action-btn">
-                    <i class="bi bi-file-earmark-bar-graph me-2 text-success"></i>
-                    <strong>Ver Reportes</strong>
-                </button>
-            </div>
+<!-- Quick Actions -->
+<div class="col-lg-4 mb-4">
+    <div class="card">
+        <div class="card-header bg-white">
+            <h5 class="mb-0"><i class="bi bi-lightning-fill me-2"></i>Acciones Rápidas</h5>
+        </div>
+
+        <div class="card-body">
+
+            {% if user.profile.role != "cliente" %}
+
+            <a href="{% url 'customer_create' %}"
+               class="quick-action-btn d-flex align-items-center">
+                <i class="bi bi-person-plus me-2 text-primary"></i>
+                <strong>Nuevo Cliente</strong>
+            </a>
+
+            <a href="{% url 'opportunities:create' %}"
+               class="quick-action-btn d-flex align-items-center">
+                <i class="bi bi-graph-up-arrow me-2 text-warning"></i>
+                <strong>Nueva Oportunidad</strong>
+            </a>
+
+            <a href="#"
+               class="quick-action-btn d-flex align-items-center">
+                <i class="bi bi-chat-dots me-2 text-info"></i>
+                <strong>Registrar Seguimiento</strong>
+            </a>
+
+            <a href="#"
+               class="quick-action-btn d-flex align-items-center">
+                <i class="bi bi-file-earmark-bar-graph me-2 text-success"></i>
+                <strong>Ver Reportes</strong>
+            </a>
+
+            {% else %}
+            <p class="text-muted">No tienes permisos para acciones rápidas.</p>
+            {% endif %}
+
         </div>
     </div>
 </div>
 
-<!-- Additional Stats -->
+
+<!-- Opportunity Stats -->
 <div class="row">
     <div class="col-lg-6 mb-4">
         <div class="card">
@@ -203,7 +196,8 @@
             </div>
         </div>
     </div>
-    
+
+    <!-- Tasks -->
     <div class="col-lg-6 mb-4">
         <div class="card">
             <div class="card-header bg-white">
@@ -216,4 +210,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}

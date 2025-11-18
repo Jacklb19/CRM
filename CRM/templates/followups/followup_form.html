@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm p-4">
+
+        <h2 class="mb-3">
+            {% if form.instance.pk %}
+                <i class="bi bi-pencil-square me-2"></i> Editar Seguimiento
+            {% else %}
+                <i class="bi bi-plus-circle me-2"></i> Nuevo Seguimiento
+            {% endif %}
+        </h2>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+
+            <button class="btn btn-success mt-3">Guardar</button>
+
+            <a href="{% url 'followups:list' %}"
+               class="btn btn-secondary mt-3">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

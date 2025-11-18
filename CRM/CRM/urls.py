@@ -24,4 +24,6 @@ urlpatterns = [
     path('',include('users.urls')),
     path('customers/', include('customers.urls')),
     path('dashboard/', dashboard_view, name='dashboard'),
+    path("oportunidades/", include("opportunities.urls", namespace="opportunities")),
+    path("seguimientos/", include("followups.urls")),
 ]

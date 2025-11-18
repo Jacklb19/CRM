@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5 col-md-6">
+
+    <div class="card shadow-sm p-4 text-center">
+
+        <h3 class="mb-3 text-danger">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            ¿Eliminar Seguimiento?
+        </h3>
+
+        <p>Esta acción no se puede deshacer.</p>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <button class="btn btn-danger">Eliminar</button>
+
+            <a href="{% url 'followups:list' %}"
+               class="btn btn-secondary ms-2">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

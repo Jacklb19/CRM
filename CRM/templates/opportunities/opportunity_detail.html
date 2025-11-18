@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-2xl font-semibold mb-4">{{ opportunity.title }}</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white shadow rounded-lg p-4">
+            <h2 class="font-semibold mb-2">Información general</h2>
+
+            <p><strong>Cliente:</strong> {{ opportunity.customer }}</p>
+            <p><strong>Vendedor:</strong> {{ opportunity.owner }}</p>
+            <p><strong>Estado:</strong> {{ opportunity.get_status_display }}</p>
+            <p><strong>Monto:</strong> ${{ opportunity.amount }}</p>
+            <p><strong>Probabilidad:</strong> {{ opportunity.probability }}%</p>
+            <p><strong>Fecha estimada de cierre:</strong> 
+                {{ opportunity.expected_close_date|date:"d/m/Y" }}
+            </p>
+        </div>
+
+        <div class="bg-white shadow rounded-lg p-4">
+            <h2 class="font-semibold mb-2">Descripción</h2>
+            <p>{{ opportunity.description|default:"Sin descripción" }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

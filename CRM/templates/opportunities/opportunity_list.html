@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+
+    <!-- Encabezado + botón -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Oportunidades</h1>
+        <a href="{% url 'opportunities:create' %}" class="btn btn-success">
+            <i class="bi bi-plus-circle me-1"></i> Nueva Oportunidad
+        </a>
+    </div>
+
+    {% if opportunities %}
+<table class="table table-hover table-bordered shadow-sm align-middle">
+    <thead class="table-light">
+        <tr>
+            <th class="text-start fw-semibold">Título</th>
+            <th class="text-start fw-semibold">Cliente</th>
+            <th class="text-start fw-semibold">Vendedor</th>
+            <th class="text-end fw-semibold">Monto</th>
+            <th class="text-center fw-semibold">Estado</th>
+            <th class="text-center fw-semibold">Creado</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for opportunity in opportunities %}
+        <tr class="bg-light">
+            
+            <!-- Título -->
+            <td>
+                <a href="{% url 'opportunities:detail' opportunity.pk %}"
+                   class="fw-semibold text-primary text-decoration-none">
+                    {{ opportunity.title }}
+                </a>
+            </td>
+
+            <!-- Cliente -->
+            <td class="text-capitalize">{{ opportunity.customer }}</td>
+
+            <!-- Vendedor -->
+            <td class="text-capitalize">{{ opportunity.owner }}</td>
+
+            <!-- Monto -->
+            <td class="text-end fw-semibold">
+                ${{ opportunity.amount }}
+            </td>
+
+            <!-- Estado -->
+            <td class="text-center">
+                {% if opportunity.status == "open" %}
+                    <span class="badge bg-success">Abierta</span>
+                {% elif opportunity.status == "won" %}
+                    <span class="badge bg-primary">Ganada</span>
+                {% elif opportunity.status == "lost" %}
+                    <span class="badge bg-danger">Perdida</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ opportunity.get_status_display }}</span>
+                {% endif %}
+            </td>
+
+            <!-- Fecha -->
+            <td class="text-center text-muted">
+                {{ opportunity.created_at|date:"d/m/Y" }}
+            </td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+    {% else %}
+        <p>No hay oportunidades registradas todavía.</p>
+    {% endif %}
+</div>
+{% endblock %}
