@@ -131,28 +131,50 @@
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
             {% if user.is_authenticated %}
+            <!-- Dashboard (todos los usuarios autenticados) -->
             <li class="nav-item">
               <a class="nav-link" href="{% url 'dashboard' %}">
                 <i class="bi bi-house-door me-1"></i>Dashboard
               </a>
             </li>
-            {% if user.is_authenticated and user.profile.role == 'vendedor' %}
+
+            <!-- Clientes (vendedor y administrador) -->
+            {% if user.profile.role in 'vendedor,administrador,gerente' %}
             <li class="nav-item">
               <a class="nav-link" href="{% url 'customer_list' %}">
                 <i class="bi bi-people me-1"></i>Clientes
               </a>
             </li>
             {% endif %}
+
+            <!-- Oportunidades (vendedor y administrador) -->
+            {% if user.profile.role in 'vendedor,administrador,gerente' %}
             <li class="nav-item">
               <a class="nav-link" href="#">
                 <i class="bi bi-graph-up me-1"></i>Oportunidades
               </a>
             </li>
+            {% endif %}
+
+            <!-- Seguimientos (vendedor y administrador) -->
+            {% if user.profile.role in 'vendedor,administrador,gerente' %}
             <li class="nav-item">
               <a class="nav-link" href="#">
                 <i class="bi bi-chat-dots me-1"></i>Seguimientos
               </a>
             </li>
+            {% endif %}
+
+            <!-- Gestión de Usuarios (solo administrador) -->
+            {% if user.profile.role == 'administrador' %}
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'user_list' %}">
+                <i class="bi bi-gear me-1"></i>Gestión de Usuarios
+              </a>
+            </li>
+            {% endif %}
+
+            <!-- Menú de usuario -->
             <li class="nav-item dropdown">
               <a
                 class="nav-link dropdown-toggle"
@@ -166,6 +188,11 @@
                 <li>
                   <a class="dropdown-item" href="{% url 'profile' %}">
                     <i class="bi bi-person me-2"></i>Mi Perfil
+                  </a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'password_change' %}">
+                    <i class="bi bi-key me-2"></i>Cambiar Contraseña
                   </a>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
@@ -185,14 +212,10 @@
               </ul>
             </li>
             {% else %}
+            <!-- Si no está autenticado, solo mostrar login -->
             <li class="nav-item">
               <a class="nav-link" href="{% url 'login' %}">
                 <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar Sesión
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'register' %}">
-                <i class="bi bi-person-plus me-1"></i>Registrarse
               </a>
             </li>
             {% endif %}
