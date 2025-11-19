@@ -1,5 +1,4 @@
-{% extends "base.html" %} {% block title %}Mi Perfil - CRM Pro{% endblock %} 
-
+{% extends "base.html" %} {% block title %}Mi Perfil - CRM Pro{% endblock %}
 {%block extra_css %}
 <style>
   .profile-header {
@@ -57,9 +56,7 @@
     color: #212529;
   }
 </style>
-{% endblock %} 
-
-{% block content %}
+{% endblock %} {% block content %}
 <div class="row">
   <div class="col-lg-12">
     <div class="profile-header text-center">
@@ -138,12 +135,16 @@
         </div>
 
         <div class="mb-3">
-          <label for="{{ form.role.id_for_label }}" class="form-label"
-            >Rol</label
+          <label class="form-label">Rol</label>
+          <input
+            type="text"
+            class="form-control"
+            value="{{ user.profile.get_role_display }}"
+            disabled
+          />
+          <small class="text-muted"
+            >El rol solo puede ser cambiado por un administrador.</small
           >
-          {{ form.role }} {% if form.role.errors %}
-          <div class="text-danger small mt-1">{{ form.role.errors }}</div>
-          {% endif %}
         </div>
 
         <button type="submit" class="btn btn-primary">

@@ -35,6 +35,33 @@ class RegistrationForm(UserCreationForm):
             user.profile.save()
         return user
 
+
+class AdminRegistrationForm(UserCreationForm):
+    """Formulario para crear administradores: NO pide rol"""
+
+    email = forms.EmailField(
+        required=True,
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Email'})
+    )
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password1', 'password2']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Usuario'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password1'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Contraseña'})
+        self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Confirmar contraseña'})
+
+    def save(self, commit=True):
+        user = super().save(commit=False)  # Usa el save de UserCreationForm
+        user.email = self.cleaned_data['email']
+        if commit:
+            user.save()
+        return user
 class LoginForm(AuthenticationForm):
     username = forms.CharField(
         widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Usuario'})
@@ -48,10 +75,9 @@ class ProfileUpdateForm(forms.ModelForm):
     
     class Meta:
         model = Profile
-        fields = ['phone', 'role']
+        fields = ['phone']
         widgets = {
             'phone': forms.TextInput(attrs={'class': 'form-control'}),
-            'role': forms.Select(attrs={'class': 'form-control'}),
         }
     
     def __init__(self, *args, **kwargs):

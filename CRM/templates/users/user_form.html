@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Nuevo Usuario - CRM Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-container {
+    max-width: 600px;
+    margin: 3rem auto;
+  }
+  .auth-card {
+    padding: 2.5rem;
+    background: white;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <div class="card auth-card">
+    <div class="mb-4 text-center">
+      <i class="bi bi-person-plus-fill text-primary" style="font-size: 3rem;"></i>
+      <h2 class="mt-2">Crear Usuario</h2>
+      <p class="text-muted mb-0">Solo los administradores pueden crear cuentas nuevas.</p>
+    </div>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label for="{{ form.username.id_for_label }}" class="form-label">
+          Usuario
+        </label>
+        {{ form.username }}
+        {% if form.username.errors %}
+          <div class="text-danger small mt-1">{{ form.username.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.email.id_for_label }}" class="form-label">
+          Email
+        </label>
+        {{ form.email }}
+        {% if form.email.errors %}
+          <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.role.id_for_label }}" class="form-label">
+          Rol
+        </label>
+        {{ form.role }}
+        {% if form.role.errors %}
+          <div class="text-danger small mt-1">{{ form.role.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.password1.id_for_label }}" class="form-label">
+          Contraseña
+        </label>
+        {{ form.password1 }}
+        {% if form.password1.errors %}
+          <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.password2.id_for_label }}" class="form-label">
+          Confirmar contraseña
+        </label>
+        {{ form.password2 }}
+        {% if form.password2.errors %}
+          <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 mt-2">
+        <i class="bi bi-check-circle me-2"></i>Guardar Usuario
+      </button>
+    </form>
+
+    <div class="text-center mt-3">
+      <a href="{% url 'user_list' %}" class="text-decoration-none">
+        Volver a la lista de usuarios
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
