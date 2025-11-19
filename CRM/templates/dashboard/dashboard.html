@@ -1,219 +1,287 @@
 {% extends "base.html" %}
-
 {% block title %}Dashboard - CRM Pro{% endblock %}
 
 {% block extra_css %}
 <style>
-    .welcome-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        margin-bottom: 2rem;
-    }
-    
-    .stat-card {
-        padding: 1.5rem;
-        height: 100%;
-        transition: transform 0.3s ease;
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-5px);
-    }
-    
-    .stat-icon {
-        width: 60px;
-        height: 60px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        margin-bottom: 1rem;
-    }
-    
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-    
-    .stat-label {
-        color: #6c757d;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    
-    .activity-item {
-        padding: 1rem;
-        border-bottom: 1px solid #f0f0f0;
-        transition: background 0.2s ease;
-    }
-    
-    .activity-item:hover {
-        background-color: #f8f9fa;
-    }
-    
-    .activity-item:last-child {
-        border-bottom: none;
-    }
-    
-    .quick-action-btn {
-        width: 100%;
-        padding: 1rem;
-        margin-bottom: 1rem;
-        text-align: left;
-        border: 1px solid #dee2e6;
-        background: white;
-        border-radius: 0.5rem;
-        transition: all 0.3s ease;
-    }
-    
-    .quick-action-btn:hover {
-        border-color: #667eea;
-        background: #f8f9ff;
-        transform: translateX(5px);
-    }
+  .stat-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: transform 0.3s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  }
+
+  .stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #212529;
+  }
+
+  .stat-label {
+    color: #6c757d;
+    font-weight: 500;
+  }
+
+  .welcome-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Welcome Card -->
 <div class="welcome-card">
-    <h2 class="mb-2">¡Bienvenido, {{ user.username }}! 👋</h2>
-    <p class="mb-0">Aquí tienes un resumen de tu actividad en el CRM</p>
-    <small class="opacity-75">Rol: {{ user.profile.get_role_display }}</small>
+  <h1 class="mb-2">¡Bienvenido, {{ user.username }}! 👋</h1>
+  <p class="mb-0">
+    <i class="bi bi-person-badge me-2"></i>{{ user.profile.get_role_display }}
+  </p>
 </div>
 
-<!-- Statistics Cards -->
-<div class="row mb-4">
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card stat-card">
-            <div class="stat-icon" style="background-color: #e3f2fd; color: #2196f3;">
-                <i class="bi bi-people-fill"></i>
-            </div>
-            <div class="stat-number">0</div>
-            <div class="stat-label">Total Clientes</div>
+<!-- ========== VISTA PARA VENDEDOR ========== -->
+{% if role == 'vendedor' %}
+  <h4 class="section-title">
+    <i class="bi bi-briefcase me-2"></i>Mis Clientes
+  </h4>
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon text-primary">
+          <i class="bi bi-people-fill"></i>
         </div>
+        <div class="stat-value">{{ total_customers }}</div>
+        <div class="stat-label">Mis Clientes</div>
+      </div>
     </div>
-    
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card stat-card">
-            <div class="stat-icon" style="background-color: #fff3e0; color: #ff9800;">
-                <i class="bi bi-graph-up"></i>
-            </div>
-            <div class="stat-number">0</div>
-            <div class="stat-label">Oportunidades Abiertas</div>
-        </div>
-    </div>
-    
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card stat-card">
-            <div class="stat-icon" style="background-color: #e8f5e9; color: #4caf50;">
-                <i class="bi bi-check-circle-fill"></i>
-            </div>
-            <div class="stat-number">0</div>
-            <div class="stat-label">Ventas Ganadas</div>
-        </div>
-    </div>
-    
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card stat-card">
-            <div class="stat-icon" style="background-color: #fce4ec; color: #e91e63;">
-                <i class="bi bi-currency-dollar"></i>
-            </div>
-            <div class="stat-number">$0</div>
-            <div class="stat-label">Ingresos Totales</div>
-        </div>
-    </div>
-</div>
 
-<!-- Main Content Row -->
-<div class="row">
-    <!-- Recent Activity -->
-    <div class="col-lg-8 mb-4">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Actividad Reciente</h5>
-            </div>
-            <div class="card-body p-0">
-                <div class="activity-item">
-                    <div class="d-flex align-items-center">
-                        <div class="flex-grow-1">
-                            <p class="mb-1"><strong>Sistema iniciado</strong></p>
-                            <small class="text-muted">No hay actividad registrada aún</small>
-                        </div>
-                        <small class="text-muted">Ahora</small>
-                    </div>
-                </div>
-            </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon text-success">
+          <i class="bi bi-check-circle-fill"></i>
         </div>
+        <div class="stat-value">{{ active_customers }}</div>
+        <div class="stat-label">Activos</div>
+      </div>
     </div>
-    
-    <!-- Quick Actions -->
-    <div class="col-lg-4 mb-4">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h5 class="mb-0"><i class="bi bi-lightning-fill me-2"></i>Acciones Rápidas</h5>
-            </div>
-            <div class="card-body">
-                <button class="quick-action-btn">
-                    <i class="bi bi-person-plus me-2 text-primary"></i>
-                    <strong>Nuevo Cliente</strong>
-                </button>
-                <button class="quick-action-btn">
-                    <i class="bi bi-graph-up-arrow me-2 text-warning"></i>
-                    <strong>Nueva Oportunidad</strong>
-                </button>
-                <button class="quick-action-btn">
-                    <i class="bi bi-chat-dots me-2 text-info"></i>
-                    <strong>Registrar Seguimiento</strong>
-                </button>
-                <button class="quick-action-btn">
-                    <i class="bi bi-file-earmark-bar-graph me-2 text-success"></i>
-                    <strong>Ver Reportes</strong>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Additional Stats -->
-<div class="row">
-    <div class="col-lg-6 mb-4">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h5 class="mb-0"><i class="bi bi-bar-chart me-2"></i>Estado de Oportunidades</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3 d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-circle-fill text-primary me-2"></i>Abiertas</span>
-                    <span class="badge bg-primary">0</span>
-                </div>
-                <div class="mb-3 d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-circle-fill text-success me-2"></i>Ganadas</span>
-                    <span class="badge bg-success">0</span>
-                </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <span><i class="bi bi-circle-fill text-danger me-2"></i>Perdidas</span>
-                    <span class="badge bg-danger">0</span>
-                </div>
-            </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon text-warning">
+          <i class="bi bi-pause-circle-fill"></i>
         </div>
+        <div class="stat-value">{{ inactive_customers }}</div>
+        <div class="stat-label">Inactivos</div>
+      </div>
     </div>
-    
-    <div class="col-lg-6 mb-4">
-        <div class="card">
-            <div class="card-header bg-white">
-                <h5 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Tareas Pendientes</h5>
-            </div>
-            <div class="card-body text-center py-5">
-                <i class="bi bi-check-circle text-success" style="font-size: 3rem;"></i>
-                <p class="text-muted mt-3">No hay tareas pendientes</p>
-            </div>
+  </div>
+
+  <h4 class="section-title">
+    <i class="bi bi-lightning me-2"></i>Acciones Rápidas
+  </h4>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <a href="{% url 'customer_list' %}" class="text-decoration-none">
+        <div class="stat-card">
+          <i class="bi bi-people text-primary" style="font-size: 2rem;"></i>
+          <p class="mt-2 mb-0 fw-bold">Ver mis Clientes</p>
         </div>
+      </a>
     </div>
-</div>
+    <div class="col-md-6 mb-3">
+      <a href="{% url 'customer_create' %}" class="text-decoration-none">
+        <div class="stat-card">
+          <i class="bi bi-person-plus text-success" style="font-size: 2rem;"></i>
+          <p class="mt-2 mb-0 fw-bold">Agregar Cliente</p>
+        </div>
+      </a>
+    </div>
+  </div>
+
+<!-- ========== VISTA PARA GERENTE ========== -->
+{% elif role == 'gerente' %}
+  <h4 class="section-title">
+    <i class="bi bi-graph-up me-2"></i>Resumen General
+  </h4>
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon text-primary">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="stat-value">{{ total_customers }}</div>
+        <div class="stat-label">Total Clientes</div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon text-success">
+          <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div class="stat-value">{{ active_customers }}</div>
+        <div class="stat-label">Activos</div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon text-warning">
+          <i class="bi bi-pause-circle-fill"></i>
+        </div>
+        <div class="stat-value">{{ inactive_customers }}</div>
+        <div class="stat-label">Inactivos</div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon text-info">
+          <i class="bi bi-person-badge"></i>
+        </div>
+        <div class="stat-value">{{ total_salespeople }}</div>
+        <div class="stat-label">Vendedores</div>
+      </div>
+    </div>
+  </div>
+
+  <h4 class="section-title">
+    <i class="bi bi-speedometer2 me-2"></i>Gestión del Equipo
+  </h4>
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <a href="{% url 'customer_list' %}" class="text-decoration-none">
+        <div class="stat-card">
+          <i class="bi bi-people text-primary" style="font-size: 2rem;"></i>
+          <p class="mt-2 mb-0 fw-bold">Todos los Clientes</p>
+        </div>
+      </a>
+    </div>
+    <!-- Agregar más enlaces cuando tengas opportunities y followups -->
+  </div>
+
+<!-- ========== VISTA PARA ADMINISTRADOR ========== -->
+{% elif role == 'administrador' %}
+  <h4 class="section-title">
+    <i class="bi bi-bar-chart me-2"></i>Estadísticas del Sistema
+  </h4>
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon text-primary">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="stat-value">{{ total_customers }}</div>
+        <div class="stat-label">Clientes</div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon text-success">
+          <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div class="stat-value">{{ active_customers }}</div>
+        <div class="stat-label">Activos</div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon text-warning">
+          <i class="bi bi-pause-circle-fill"></i>
+        </div>
+        <div class="stat-value">{{ inactive_customers }}</div>
+        <div class="stat-label">Inactivos</div>
+      </div>
+    </div>
+
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon text-info">
+          <i class="bi bi-person-circle"></i>
+        </div>
+        <div class="stat-value">{{ total_users }}</div>
+        <div class="stat-label">Usuarios</div>
+      </div>
+    </div>
+  </div>
+
+  <h4 class="section-title">
+    <i class="bi bi-people me-2"></i>Distribución de Roles
+  </h4>
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon text-danger">
+          <i class="bi bi-shield-fill"></i>
+        </div>
+        <div class="stat-value">{{ total_admins }}</div>
+        <div class="stat-label">Administradores</div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon text-primary">
+          <i class="bi bi-award-fill"></i>
+        </div>
+        <div class="stat-value">{{ total_managers }}</div>
+        <div class="stat-label">Gerentes</div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon text-success">
+          <i class="bi bi-person-badge-fill"></i>
+        </div>
+        <div class="stat-value">{{ total_salespeople }}</div>
+        <div class="stat-label">Vendedores</div>
+      </div>
+    </div>
+  </div>
+
+  <h4 class="section-title">
+    <i class="bi bi-gear me-2"></i>Administración
+  </h4>
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <a href="{% url 'user_list' %}" class="text-decoration-none">
+        <div class="stat-card">
+          <i class="bi bi-gear text-secondary" style="font-size: 2rem;"></i>
+          <p class="mt-2 mb-0 fw-bold">Gestión de Usuarios</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-md-4 mb-3">
+      <a href="{% url 'customer_list' %}" class="text-decoration-none">
+        <div class="stat-card">
+          <i class="bi bi-people text-primary" style="font-size: 2rem;"></i>
+          <p class="mt-2 mb-0 fw-bold">Gestión de Clientes</p>
+        </div>
+      </a>
+    </div>
+  </div>
+{% endif %}
+
 {% endblock %}
