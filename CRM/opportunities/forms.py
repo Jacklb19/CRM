@@ -1,5 +1,6 @@
 from django import forms
 from .models import Opportunity
+from django.contrib.auth.models import User
 
 class OpportunityForm(forms.ModelForm):
     class Meta:
@@ -14,3 +15,7 @@ class OpportunityForm(forms.ModelForm):
             'expected_close_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Descripción de la oportunidad'}),
         }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Solo mostrar vendedores para el campo assigned_to
+        self.fields['assigned_to'].queryset = User.objects.filter(profile__role='vendedor')

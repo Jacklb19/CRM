@@ -6,9 +6,11 @@
   <h2 class="mb-0">
     <i class="bi bi-graph-up me-2"></i>Oportunidades de Venta
   </h2>
+  {% if user.profile.role != "vendedor" %}
   <a href="{% url 'opportunity_create' %}" class="btn btn-primary">
     <i class="bi bi-plus-circle me-2"></i>Nueva Oportunidad
   </a>
+  {% endif %}
 </div>
 
 <div class="card mb-3">
@@ -58,8 +60,10 @@
               <span class="badge bg-warning">Abierta</span>
             {% elif opp.status == 'ganada' %}
               <span class="badge bg-success">Ganada</span>
-            {% else %}
+            {% elif opp.status == 'perdida' %}
               <span class="badge bg-danger">Perdida</span>
+            {% else %}
+              <span class="badge bg-secondary">{{ opp.status }}</span>
             {% endif %}
           </td>
           <td>{{ opp.expected_close_date|date:"d/m/Y" }}</td>
