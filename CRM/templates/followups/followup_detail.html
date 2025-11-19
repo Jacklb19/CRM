@@ -2,82 +2,49 @@
 {% block title %}Detalle Seguimiento - CRM Pro{% endblock %}
 
 {% block content %}
-<div class="mt-4 mb-3 d-flex justify-content-between align-items-center">
-  <h2 class="mb-0">
-    <i class="bi bi-chat-dots-fill me-2"></i>{{ object.subject }}
+<div class="mt-4 mb-3">
+  <h2>
+    <i class="bi bi-chat-dots me-2"></i>{{ object.subject }}
   </h2>
-  <a href="{% url 'followup_list' %}" class="btn btn-outline-secondary">
-    <i class="bi bi-arrow-left me-1"></i>Volver
-  </a>
 </div>
 
-<div class="row">
-  <div class="col-md-8">
-    <div class="card mb-3">
-      <div class="card-body">
-        <h5 class="card-title">Información del Seguimiento</h5>
-        
-        <div class="mb-3">
-          <strong>Tipo:</strong>
-          {% if object.type == 'llamada' %}
-            <span class="badge bg-primary"><i class="bi bi-telephone me-1"></i>Llamada</span>
-          {% elif object.type == 'email' %}
-            <span class="badge bg-info"><i class="bi bi-envelope me-1"></i>Email</span>
-          {% elif object.type == 'reunion' %}
-            <span class="badge bg-success"><i class="bi bi-calendar-event me-1"></i>Reunión</span>
-          {% else %}
-            <span class="badge bg-warning"><i class="bi bi-sticky me-1"></i>Nota</span>
-          {% endif %}
-        </div>
-
-        <p><strong>Cliente:</strong> 
-          <a href="{% url 'customer_detail' object.customer.pk %}">{{ object.customer.name }}</a>
+<div class="card">
+  <div class="card-body">
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <p><strong>Tipo:</strong> {{ object.get_type_display }}</p>
+        <p><strong>Cliente:</strong> <a href="{% url 'customer_detail' object.customer.pk %}">{{ object.customer.name }}</a></p>
+        <p><strong>Usuario responsable:</strong> {{ object.user.username }}</p>
+      </div>
+      <div class="col-md-6">
+        <p>
+          <strong>Estado:</strong>
+          <span class="badge {% if object.status == 'pendiente' %}bg-warning{% elif object.status == 'completado' %}bg-success{% else %}bg-danger{% endif %}">
+            {{ object.get_status_display }}
+          </span>
         </p>
-
+        <p><strong>Fecha programada:</strong> {{ object.date|date:"d/m/Y H:i" }}</p>
         {% if object.opportunity %}
-        <p><strong>Oportunidad relacionada:</strong> 
-          <a href="{% url 'opportunity_detail' object.opportunity.pk %}">{{ object.opportunity.title }}</a>
-        </p>
+          <p><strong>Oportunidad:</strong> <a href="{% url 'opportunity_detail' object.opportunity.pk %}">{{ object.opportunity.title }}</a></p>
         {% endif %}
-
-        <p><strong>Usuario:</strong> {{ object.user.username }}</p>
-        <p><strong>Fecha:</strong> {{ object.date|date:"d/m/Y H:i" }}</p>
-        <p><strong>Creado el:</strong> {{ object.created_at|date:"d/m/Y H:i" }}</p>
-
-        <hr>
-
-        <h6 class="mt-4"><strong>Notas:</strong></h6>
-        <div class="bg-light p-3 rounded">
-          {{ object.notes|linebreaks }}
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-md-4">
-    <div class="card">
-      <div class="card-body">
-        <h5 class="card-title">Acciones</h5>
-        <a href="{% url 'followup_update' object.pk %}" class="btn btn-primary w-100 mb-2">
-          <i class="bi bi-pencil me-2"></i>Editar
-        </a>
-        <a href="{% url 'followup_delete' object.pk %}" class="btn btn-danger w-100">
-          <i class="bi bi-trash me-2"></i>Eliminar
-        </a>
       </div>
     </div>
 
-    <div class="card mt-3">
-      <div class="card-body">
-        <h6 class="card-title">Información del Cliente</h6>
-        <p class="mb-1"><strong>Nombre:</strong> {{ object.customer.name }}</p>
-        <p class="mb-1"><strong>Email:</strong> {{ object.customer.email }}</p>
-        <p class="mb-1"><strong>Teléfono:</strong> {{ object.customer.phone|default:"No especificado" }}</p>
-        <a href="{% url 'customer_detail' object.customer.pk %}" class="btn btn-sm btn-outline-primary mt-2 w-100">
-          Ver Cliente Completo
-        </a>
-      </div>
-    </div>
+    <hr>
+
+    <h4>Notas</h4>
+    <p>{{ object.notes|linebreaks }}</p>
+
+    <hr>
+
+    <p class="text-muted small">
+      <strong>Creado:</strong> {{ object.created_at|date:"d/m/Y H:i" }} | 
+      <strong>Actualizado:</strong> {{ object.updated_at|date:"d/m/Y H:i" }}
+    </p>
+
+    <a href="{% url 'followup_update' object.pk %}" class="btn btn-primary me-2">Editar</a>
+    <a href="{% url 'followup_delete' object.pk %}" class="btn btn-danger">Eliminar</a>
+    <a href="{% url 'followup_list' %}" class="btn btn-outline-secondary">Volver</a>
   </div>
 </div>
 {% endblock %}

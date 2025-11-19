@@ -11,19 +11,40 @@
   </a>
 </div>
 
+{% if overdue_count > 0 or due_soon_count > 0 %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong><i class="bi bi-exclamation-triangle me-2"></i>Atención</strong>
+  {% if overdue_count > 0 %}
+    Tienes <strong>{{ overdue_count }} seguimiento(s) vencido(s)</strong>.
+  {% endif %}
+  {% if due_soon_count > 0 %}
+    {% if overdue_count > 0 %} Y {% endif %}<strong>{{ due_soon_count }} seguimiento(s) vence en las próximas 24 horas</strong>.
+  {% endif %}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
 <div class="card mb-3">
   <div class="card-body">
     <form method="get" class="row g-3">
-      <div class="col-md-6">
+      <div class="col-md-4">
         <input type="text" name="search" class="form-control" placeholder="Buscar por asunto..." value="{{ request.GET.search }}">
       </div>
-      <div class="col-md-4">
+      <div class="col-md-3">
         <select name="type" class="form-control">
           <option value="">Todos los tipos</option>
           <option value="llamada" {% if request.GET.type == 'llamada' %}selected{% endif %}>Llamada</option>
           <option value="email" {% if request.GET.type == 'email' %}selected{% endif %}>Email</option>
           <option value="reunion" {% if request.GET.type == 'reunion' %}selected{% endif %}>Reunión</option>
           <option value="nota" {% if request.GET.type == 'nota' %}selected{% endif %}>Nota</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <select name="status" class="form-control">
+          <option value="">Todos los estados</option>
+          <option value="pendiente" {% if request.GET.status == 'pendiente' %}selected{% endif %}>Pendiente</option>
+          <option value="completado" {% if request.GET.status == 'completado' %}selected{% endif %}>Completado</option>
+          <option value="vencido" {% if request.GET.status == 'vencido' %}selected{% endif %}>Vencido</option>
         </select>
       </div>
       <div class="col-md-2">
@@ -42,13 +63,14 @@
           <th>Asunto</th>
           <th>Cliente</th>
           <th>Usuario</th>
-          <th>Fecha</th>
+          <th>Fecha programada</th>
+          <th>Estado</th>
           <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
         {% for followup in followups %}
-        <tr>
+        <tr {% if followup.is_overdue %}class="table-danger"{% elif followup.is_due_soon %}class="table-warning"{% endif %}>
           <td>
             {% if followup.type == 'llamada' %}
               <i class="bi bi-telephone text-primary"></i> Llamada
@@ -63,7 +85,16 @@
           <td><a href="{% url 'followup_detail' followup.pk %}">{{ followup.subject }}</a></td>
           <td>{{ followup.customer.name }}</td>
           <td>{{ followup.user.username }}</td>
-          <td>{{ followup.date|date:"d/m/Y H:i" }}</td>
+          <td>
+            {{ followup.date|date:"d/m/Y H:i" }}
+            {% if followup.is_overdue %}<br><small class="text-danger"><strong>VENCIDO</strong></small>{% endif %}
+            {% if followup.is_due_soon %}<br><small class="text-warning"><strong>Vence pronto</strong></small>{% endif %}
+          </td>
+          <td>
+            <span class="badge {% if followup.status == 'pendiente' %}bg-warning{% elif followup.status == 'completado' %}bg-success{% else %}bg-danger{% endif %}">
+              {{ followup.get_status_display }}
+            </span>
+          </td>
           <td>
             <a href="{% url 'followup_update' followup.pk %}" class="btn btn-sm btn-outline-primary me-1">
               <i class="bi bi-pencil-square"></i>
@@ -75,7 +106,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="6" class="text-center text-muted">
+          <td colspan="7" class="text-center text-muted">
             No hay seguimientos registrados aún.
           </td>
         </tr>
