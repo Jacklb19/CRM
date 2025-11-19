@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Seguimientos - CRM Pro{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+  <h2 class="mb-0">
+    <i class="bi bi-chat-dots me-2"></i>Seguimientos
+  </h2>
+  <a href="{% url 'followup_create' %}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-2"></i>Nuevo Seguimiento
+  </a>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form method="get" class="row g-3">
+      <div class="col-md-6">
+        <input type="text" name="search" class="form-control" placeholder="Buscar por asunto..." value="{{ request.GET.search }}">
+      </div>
+      <div class="col-md-4">
+        <select name="type" class="form-control">
+          <option value="">Todos los tipos</option>
+          <option value="llamada" {% if request.GET.type == 'llamada' %}selected{% endif %}>Llamada</option>
+          <option value="email" {% if request.GET.type == 'email' %}selected{% endif %}>Email</option>
+          <option value="reunion" {% if request.GET.type == 'reunion' %}selected{% endif %}>Reunión</option>
+          <option value="nota" {% if request.GET.type == 'nota' %}selected{% endif %}>Nota</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Filtrar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Asunto</th>
+          <th>Cliente</th>
+          <th>Usuario</th>
+          <th>Fecha</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for followup in followups %}
+        <tr>
+          <td>
+            {% if followup.type == 'llamada' %}
+              <i class="bi bi-telephone text-primary"></i> Llamada
+            {% elif followup.type == 'email' %}
+              <i class="bi bi-envelope text-info"></i> Email
+            {% elif followup.type == 'reunion' %}
+              <i class="bi bi-calendar-event text-success"></i> Reunión
+            {% else %}
+              <i class="bi bi-sticky text-warning"></i> Nota
+            {% endif %}
+          </td>
+          <td><a href="{% url 'followup_detail' followup.pk %}">{{ followup.subject }}</a></td>
+          <td>{{ followup.customer.name }}</td>
+          <td>{{ followup.user.username }}</td>
+          <td>{{ followup.date|date:"d/m/Y H:i" }}</td>
+          <td>
+            <a href="{% url 'followup_update' followup.pk %}" class="btn btn-sm btn-outline-primary me-1">
+              <i class="bi bi-pencil-square"></i>
+            </a>
+            <a href="{% url 'followup_delete' followup.pk %}" class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-trash"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted">
+            No hay seguimientos registrados aún.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

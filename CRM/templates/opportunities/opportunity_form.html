@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Editar{% else %}Nueva{% endif %} Oportunidad - CRM Pro{% endblock %}
+
+{% block content %}
+<div class="mt-4 mb-3">
+  <h2><i class="bi bi-graph-up me-2"></i>{% if object %}Editar{% else %}Nueva{% endif %} Oportunidad</h2>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      
+      <div class="mb-3">
+        <label for="{{ form.title.id_for_label }}" class="form-label">Título</label>
+        {{ form.title }}
+        {% if form.title.errors %}
+          <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.customer.id_for_label }}" class="form-label">Cliente</label>
+        {{ form.customer }}
+        {% if form.customer.errors %}
+          <div class="text-danger small mt-1">{{ form.customer.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.assigned_to.id_for_label }}" class="form-label">Asignado a</label>
+        {{ form.assigned_to }}
+        {% if form.assigned_to.errors %}
+          <div class="text-danger small mt-1">{{ form.assigned_to.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="{{ form.amount.id_for_label }}" class="form-label">Monto estimado</label>
+          {{ form.amount }}
+          {% if form.amount.errors %}
+            <div class="text-danger small mt-1">{{ form.amount.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label for="{{ form.expected_close_date.id_for_label }}" class="form-label">Fecha estimada de cierre</label>
+          {{ form.expected_close_date }}
+          {% if form.expected_close_date.errors %}
+            <div class="text-danger small mt-1">{{ form.expected_close_date.errors }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.status.id_for_label }}" class="form-label">Estado</label>
+        {{ form.status }}
+        {% if form.status.errors %}
+          <div class="text-danger small mt-1">{{ form.status.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.description.id_for_label }}" class="form-label">Descripción</label>
+        {{ form.description }}
+        {% if form.description.errors %}
+          <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn btn-primary me-2">
+        <i class="bi bi-check-circle me-2"></i>Guardar
+      </button>
+      <a href="{% url 'opportunity_list' %}" class="btn btn-outline-secondary">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

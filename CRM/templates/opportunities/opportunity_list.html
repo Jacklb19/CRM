@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Oportunidades - CRM Pro{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+  <h2 class="mb-0">
+    <i class="bi bi-graph-up me-2"></i>Oportunidades de Venta
+  </h2>
+  <a href="{% url 'opportunity_create' %}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-2"></i>Nueva Oportunidad
+  </a>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form method="get" class="row g-3">
+      <div class="col-md-6">
+        <input type="text" name="search" class="form-control" placeholder="Buscar por título..." value="{{ request.GET.search }}">
+      </div>
+      <div class="col-md-4">
+        <select name="status" class="form-control">
+          <option value="">Todos los estados</option>
+          <option value="abierta" {% if request.GET.status == 'abierta' %}selected{% endif %}>Abierta</option>
+          <option value="ganada" {% if request.GET.status == 'ganada' %}selected{% endif %}>Ganada</option>
+          <option value="perdida" {% if request.GET.status == 'perdida' %}selected{% endif %}>Perdida</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-outline-primary w-100">Filtrar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Cliente</th>
+          <th>Asignado a</th>
+          <th>Monto</th>
+          <th>Estado</th>
+          <th>Fecha cierre</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for opp in opportunities %}
+        <tr>
+          <td><a href="{% url 'opportunity_detail' opp.pk %}">{{ opp.title }}</a></td>
+          <td>{{ opp.customer.name }}</td>
+          <td>{{ opp.assigned_to.username|default:"Sin asignar" }}</td>
+          <td>${{ opp.amount }}</td>
+          <td>
+            {% if opp.status == 'abierta' %}
+              <span class="badge bg-warning">Abierta</span>
+            {% elif opp.status == 'ganada' %}
+              <span class="badge bg-success">Ganada</span>
+            {% else %}
+              <span class="badge bg-danger">Perdida</span>
+            {% endif %}
+          </td>
+          <td>{{ opp.expected_close_date|date:"d/m/Y" }}</td>
+          <td>
+            <a href="{% url 'opportunity_update' opp.pk %}" class="btn btn-sm btn-outline-primary me-1">
+              <i class="bi bi-pencil-square"></i>
+            </a>
+            <a href="{% url 'opportunity_delete' opp.pk %}" class="btn btn-sm btn-outline-danger">
+              <i class="bi bi-trash"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center text-muted">
+            No hay oportunidades registradas aún.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

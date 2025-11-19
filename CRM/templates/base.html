@@ -145,34 +145,33 @@
                 <i class="bi bi-people me-1"></i>Clientes
               </a>
             </li>
-            {% endif %}
-
-            <!-- Oportunidades (vendedor y administrador) -->
-            {% if user.profile.role in 'vendedor,administrador,gerente' %}
+            {% endif %} 
+            {% if user.profile.role in 'vendedor,gerente,administrador' %}
             <li class="nav-item">
-              <a class="nav-link" href="#">
+              <a class="nav-link" href="{% url 'opportunity_list' %}">
                 <i class="bi bi-graph-up me-1"></i>Oportunidades
               </a>
             </li>
-            {% endif %}
-
-            <!-- Seguimientos (vendedor y administrador) -->
-            {% if user.profile.role in 'vendedor,administrador,gerente' %}
             <li class="nav-item">
-              <a class="nav-link" href="#">
+              <a class="nav-link" href="{% url 'followup_list' %}">
                 <i class="bi bi-chat-dots me-1"></i>Seguimientos
               </a>
             </li>
-            {% endif %}
-
-            <!-- Gestión de Usuarios (solo administrador) -->
-            {% if user.profile.role == 'administrador' %}
+            {% endif %} {% if user.profile.role == 'administrador' %}
             <li class="nav-item">
               <a class="nav-link" href="{% url 'user_list' %}">
                 <i class="bi bi-gear me-1"></i>Gestión de Usuarios
               </a>
             </li>
             {% endif %}
+            {% if user.profile.role in 'administrador,gerente' %}
+<li class="nav-item">
+  <a class="nav-link" href="{% url 'report' %}">
+    <i class="bi bi-file-earmark-text me-1"></i>Reportes
+  </a>
+</li>
+{% endif %}
+
 
             <!-- Menú de usuario -->
             <li class="nav-item dropdown">

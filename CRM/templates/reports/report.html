@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Reportes - CRM Pro{% endblock %}
+
+{% block content %}
+<h2>Generar Reporte</h2>
+
+<form method="get" class="mb-4">
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Generar</button>
+</form>
+
+{% if report_data %}
+    <h3>Resultados</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Cliente</th>
+                <th>Vendedor</th>
+                <th>Estado</th>
+                <th>Fecha creación</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for opp in report_data %}
+            <tr>
+                <td>{{ opp.title }}</td>
+                <td>{{ opp.customer.name }}</td>
+                <td>{{ opp.assigned_to.username }}</td>
+                <td>{{ opp.get_status_display }}</td>
+                <td>{{ opp.created_at|date:"d/m/Y" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">No se encontraron registros.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+{% endblock %}
