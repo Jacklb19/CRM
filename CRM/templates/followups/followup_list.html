@@ -1,6 +1,62 @@
 {% extends "base.html" %}
 {% block title %}Seguimientos - CRM Pro{% endblock %}
 
+{% block extra_css %}
+<style>
+  .search-filters {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .filter-section {
+    margin-bottom: 1rem;
+  }
+  
+  .filter-section h6 {
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .stats-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+  
+  .stats-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #667eea;
+  }
+  
+  .stats-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+  
+  .checkbox-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .checkbox-container .form-check {
+    margin: 0;
+  }
+  
+  .checkbox-container label {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
   <h2 class="mb-0">
@@ -24,48 +80,142 @@
 </div>
 {% endif %}
 
-<div class="card mb-3">
-  <div class="card-body">
-    <form method="get" class="row g-3">
-      <div class="col-md-4">
-        <input type="text" name="search" class="form-control" placeholder="Buscar por asunto..." value="{{ request.GET.search }}">
-      </div>
-      <div class="col-md-3">
-        <select name="type" class="form-control">
-          <option value="">Todos los tipos</option>
-          <option value="llamada" {% if request.GET.type == 'llamada' %}selected{% endif %}>Llamada</option>
-          <option value="email" {% if request.GET.type == 'email' %}selected{% endif %}>Email</option>
-          <option value="reunion" {% if request.GET.type == 'reunion' %}selected{% endif %}>Reunión</option>
-          <option value="nota" {% if request.GET.type == 'nota' %}selected{% endif %}>Nota</option>
-        </select>
-      </div>
-      <div class="col-md-3">
-        <select name="status" class="form-control">
-          <option value="">Todos los estados</option>
-          <option value="pendiente" {% if request.GET.status == 'pendiente' %}selected{% endif %}>Pendiente</option>
-          <option value="completado" {% if request.GET.status == 'completado' %}selected{% endif %}>Completado</option>
-          <option value="vencido" {% if request.GET.status == 'vencido' %}selected{% endif %}>Vencido</option>
-        </select>
-      </div>
-      <div class="col-md-2">
-        <button type="submit" class="btn btn-outline-primary w-100">Filtrar</button>
-      </div>
-    </form>
+<!-- Estadísticas Rápidas -->
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="stats-card">
+      <div class="stats-value">{{ total_followups }}</div>
+      <div class="stats-label">Total de Seguimientos</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stats-card">
+      <div class="stats-value text-warning">{{ pending_followups }}</div>
+      <div class="stats-label">Pendientes</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stats-card">
+      <div class="stats-value text-success">{{ completed_followups }}</div>
+      <div class="stats-label">Completados</div>
+    </div>
   </div>
 </div>
 
+<!-- Búsqueda Avanzada -->
+<div class="search-filters">
+  <h5 class="mb-3"><i class="bi bi-search me-2"></i>Filtros Avanzados</h5>
+  <form method="get" id="search-form">
+    <div class="row g-3">
+      <!-- Búsqueda General -->
+      <div class="col-md-6">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-search me-1"></i>Búsqueda</label>
+          {{ form.search_query }}
+          <small class="text-muted d-block mt-1">Busca en asunto, notas o cliente</small>
+        </div>
+      </div>
+      
+      <!-- Cliente -->
+      <div class="col-md-6">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-person me-1"></i>Cliente</label>
+          {{ form.customer }}
+        </div>
+      </div>
+      
+      <!-- Tipo -->
+      <div class="col-md-4">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-tag me-1"></i>Tipos</label>
+          <div class="checkbox-container">
+            {% for choice_value, choice_label in form.type.field.choices %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="type" value="{{ choice_value }}" id="id_type_{{ forloop.counter }}" {% if choice_value in form.type.value %}checked{% endif %}>
+                <label class="form-check-label" for="id_type_{{ forloop.counter }}">
+                  {{ choice_label }}
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Estado -->
+      <div class="col-md-4">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-check-circle me-1"></i>Estados</label>
+          <div class="checkbox-container">
+            {% for choice_value, choice_label in form.status.field.choices %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="status" value="{{ choice_value }}" id="id_status_{{ forloop.counter }}" {% if choice_value in form.status.value %}checked{% endif %}>
+                <label class="form-check-label" for="id_status_{{ forloop.counter }}">
+                  {{ choice_label }}
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Usuario -->
+      <div class="col-md-4">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-person-badge me-1"></i>Usuario</label>
+          {{ form.assigned_to }}
+        </div>
+      </div>
+      
+      <!-- Fecha Desde -->
+      <div class="col-md-3">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-calendar me-1"></i>Desde</label>
+          {{ form.date_from }}
+        </div>
+      </div>
+      
+      <!-- Fecha Hasta -->
+      <div class="col-md-3">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-calendar me-1"></i>Hasta</label>
+          {{ form.date_to }}
+        </div>
+      </div>
+      
+      <!-- Ordenamiento -->
+      <div class="col-md-6">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-sort-down me-1"></i>Ordenar por</label>
+          {{ form.order_by }}
+        </div>
+      </div>
+      
+      <!-- Botones -->
+      <div class="col-md-6 d-flex gap-2 align-items-end">
+        <button type="submit" class="btn btn-primary flex-grow-1">
+          <i class="bi bi-search me-1"></i>Buscar
+        </button>
+        <a href="{% url 'followup_list' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+        </a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Tabla de Resultados -->
 <div class="card">
-  <div class="card-body">
-    <table class="table table-hover align-middle">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
       <thead>
         <tr>
-          <th>Tipo</th>
+          <th style="width: 80px;">Tipo</th>
           <th>Asunto</th>
           <th>Cliente</th>
           <th>Usuario</th>
-          <th>Fecha programada</th>
-          <th>Estado</th>
-          <th>Acciones</th>
+          <th style="width: 120px;">Fecha</th>
+          <th style="width: 80px;">Estado</th>
+          <th style="width: 100px;">Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -73,41 +223,52 @@
         <tr {% if followup.is_overdue %}class="table-danger"{% elif followup.is_due_soon %}class="table-warning"{% endif %}>
           <td>
             {% if followup.type == 'llamada' %}
-              <i class="bi bi-telephone text-primary"></i> Llamada
+              <i class="bi bi-telephone text-primary"></i>
             {% elif followup.type == 'email' %}
-              <i class="bi bi-envelope text-info"></i> Email
+              <i class="bi bi-envelope text-info"></i>
             {% elif followup.type == 'reunion' %}
-              <i class="bi bi-calendar-event text-success"></i> Reunión
+              <i class="bi bi-calendar-event text-success"></i>
             {% else %}
-              <i class="bi bi-sticky text-warning"></i> Nota
+              <i class="bi bi-sticky text-warning"></i>
             {% endif %}
+            <small>{{ followup.get_type_display }}</small>
           </td>
-          <td><a href="{% url 'followup_detail' followup.pk %}">{{ followup.subject }}</a></td>
+          <td>
+            <a href="{% url 'followup_detail' followup.pk %}" class="text-decoration-none">
+              <strong>{{ followup.subject }}</strong>
+            </a>
+          </td>
           <td>{{ followup.customer.name }}</td>
-          <td>{{ followup.user.username }}</td>
+          <td><small class="text-muted">{{ followup.user.username }}</small></td>
           <td>
             {{ followup.date|date:"d/m/Y H:i" }}
-            {% if followup.is_overdue %}<br><small class="text-danger"><strong>VENCIDO</strong></small>{% endif %}
-            {% if followup.is_due_soon %}<br><small class="text-warning"><strong>Vence pronto</strong></small>{% endif %}
+            {% if followup.is_overdue %}
+              <br><small class="text-danger"><strong>VENCIDO</strong></small>
+            {% elif followup.is_due_soon %}
+              <br><small class="text-warning"><strong>Próximo</strong></small>
+            {% endif %}
           </td>
           <td>
-            <span class="badge {% if followup.status == 'pendiente' %}bg-warning{% elif followup.status == 'completado' %}bg-success{% else %}bg-danger{% endif %}">
+            <span class="badge {% if followup.status == 'pendiente' %}bg-warning text-dark{% elif followup.status == 'completado' %}bg-success{% else %}bg-danger{% endif %}">
               {{ followup.get_status_display }}
             </span>
           </td>
           <td>
-            <a href="{% url 'followup_update' followup.pk %}" class="btn btn-sm btn-outline-primary me-1">
-              <i class="bi bi-pencil-square"></i>
-            </a>
-            <a href="{% url 'followup_delete' followup.pk %}" class="btn btn-sm btn-outline-danger">
-              <i class="bi bi-trash"></i>
-            </a>
+            <div class="btn-group btn-group-sm" role="group">
+              <a href="{% url 'followup_update' followup.pk %}" class="btn btn-outline-primary" title="Editar">
+                <i class="bi bi-pencil-square"></i>
+              </a>
+              <a href="{% url 'followup_delete' followup.pk %}" class="btn btn-outline-danger" title="Eliminar">
+                <i class="bi bi-trash"></i>
+              </a>
+            </div>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="7" class="text-center text-muted">
-            No hay seguimientos registrados aún.
+          <td colspan="7" class="text-center py-4">
+            <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+            <p class="text-muted mt-2">No hay seguimientos que coincidan con tu búsqueda</p>
           </td>
         </tr>
         {% endfor %}
@@ -115,4 +276,62 @@
     </table>
   </div>
 </div>
+
+<!-- Paginación -->
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="mt-4">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page=1{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Primera</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Anterior</a>
+    </li>
+    {% endif %}
+    
+    <li class="page-item active">
+      <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Siguiente</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Última</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+<script>
+// Búsqueda en tiempo real
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('search-form');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    let debounceTimer;
+    
+    inputs.forEach(input => {
+        input.addEventListener('change', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                form.submit();
+            }, 300);
+        });
+        
+        if (input.type === 'text') {
+            input.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    form.submit();
+                }, 800);
+            });
+        }
+    });
+});
+</script>
+
 {% endblock %}

@@ -1,37 +1,251 @@
 {% extends "base.html" %}
-{% block title %}Clientes{% endblock %}
+{% block title %}Clientes - CRM Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+  .search-filters {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .filter-section {
+    margin-bottom: 1rem;
+  }
+  
+  .filter-section h6 {
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .stats-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+  
+  .stats-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #667eea;
+  }
+  
+  .stats-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<h2>Clientes</h2>
-<form method="get" class="mb-4">
-    <input type="text" name="search" class="form-control" placeholder="Buscar cliente...">
-</form>
-<table class="table table-striped">
-    <thead>
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+  <h2 class="mb-0">
+    <i class="bi bi-people me-2"></i>Clientes
+  </h2>
+  <a href="{% url 'customer_create' %}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-2"></i>Nuevo Cliente
+  </a>
+</div>
+
+<!-- Estadísticas Rápidas -->
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="stats-card">
+      <div class="stats-value">{{ total_customers }}</div>
+      <div class="stats-label">Total de Clientes</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stats-card">
+      <div class="stats-value text-success">{{ active_customers }}</div>
+      <div class="stats-label">Clientes Activos</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stats-card">
+      <div class="stats-value text-warning">{{ inactive_customers }}</div>
+      <div class="stats-label">Clientes Inactivos</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stats-card">
+      <div class="stats-value text-info">{{ paginator.count }}</div>
+      <div class="stats-label">Resultados Encontrados</div>
+    </div>
+  </div>
+</div>
+
+<!-- Búsqueda Avanzada -->
+<div class="search-filters">
+  <h5 class="mb-3"><i class="bi bi-search me-2"></i>Búsqueda Avanzada</h5>
+  <form method="get" id="search-form">
+    <div class="row g-3">
+      <!-- Búsqueda General -->
+      <div class="col-md-4">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-search me-1"></i>Búsqueda General</label>
+          {{ form.search_query }}
+          <small class="text-muted d-block mt-1">Busca en nombre, email, ID o empresa</small>
+        </div>
+      </div>
+      
+      <!-- Tipo de Búsqueda -->
+      <div class="col-md-3">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-funnel me-1"></i>Tipo</label>
+          {{ form.search_by }}
+        </div>
+      </div>
+      
+      <!-- Estado -->
+      <div class="col-md-3">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-check-circle me-1"></i>Estado</label>
+          {{ form.status }}
+        </div>
+      </div>
+      
+      <!-- Vendedor -->
+      <div class="col-md-6">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-person-badge me-1"></i>Asignado a</label>
+          {{ form.assigned_to }}
+        </div>
+      </div>
+      
+      <!-- Fecha Desde -->
+      <div class="col-md-3">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-calendar me-1"></i>Desde</label>
+          {{ form.date_from }}
+        </div>
+      </div>
+      
+      <!-- Fecha Hasta -->
+      <div class="col-md-3">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-calendar me-1"></i>Hasta</label>
+          {{ form.date_to }}
+        </div>
+      </div>
+      
+      <!-- Ordenamiento -->
+      <div class="col-md-4">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-sort-down me-1"></i>Ordenar por</label>
+          {{ form.order_by }}
+        </div>
+      </div>
+      
+      <!-- Botones -->
+      <div class="col-md-8 d-flex gap-2 align-items-end">
+        <button type="submit" class="btn btn-primary flex-grow-1">
+          <i class="bi bi-search me-1"></i>Buscar
+        </button>
+        <a href="{% url 'customer_list' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+        </a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Tabla de Resultados -->
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
         <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Teléfono</th>
-            <th>Empresa</th>
-            <th>Activo</th>
-            <th>Acciones</th>
+          <th style="width: 50px;">#ID</th>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Teléfono</th>
+          <th>Empresa</th>
+          <th>Vendedor</th>
+          <th style="width: 80px;">Estado</th>
+          <th style="width: 100px;">Acciones</th>
         </tr>
-    </thead>
-    <tbody>
-    {% for customer in customers %}
+      </thead>
+      <tbody>
+        {% for customer in customers %}
         <tr>
-            <td><a href="{% url 'customer_detail' customer.pk %}">{{ customer.name }}</a></td>
-            <td>{{ customer.email }}</td>
-            <td>{{ customer.phone }}</td>
-            <td>{{ customer.company }}</td>
-            <td>{% if customer.is_active %}<span class="badge bg-success">Activo</span>{% else %}<span class="badge bg-danger">Inactivo</span>{% endif %}</td>
-            <td>
-                <a href="{% url 'customer_update' customer.pk %}" class="btn btn-sm btn-primary">Editar</a>
-                <a href="{% url 'customer_delete' customer.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
-            </td>
+          <td><small class="text-muted">#{{ customer.id }}</small></td>
+          <td>
+            <a href="{% url 'customer_detail' customer.pk %}" class="text-decoration-none">
+              <strong>{{ customer.name }}</strong>
+            </a>
+          </td>
+          <td>
+            <small>{{ customer.email }}</small>
+          </td>
+          <td>{{ customer.phone|default:"N/A" }}</td>
+          <td>{{ customer.company|default:"N/A" }}</td>
+          <td>
+            <small class="text-muted">{{ customer.assigned_to.username|default:"Sin asignar" }}</small>
+          </td>
+          <td>
+            {% if customer.is_active %}
+              <span class="badge bg-success">Activo</span>
+            {% else %}
+              <span class="badge bg-danger">Inactivo</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="btn-group btn-group-sm" role="group">
+              <a href="{% url 'customer_update' customer.pk %}" class="btn btn-outline-primary" title="Editar">
+                <i class="bi bi-pencil-square"></i>
+              </a>
+              <a href="{% url 'customer_delete' customer.pk %}" class="btn btn-outline-danger" title="Eliminar">
+                <i class="bi bi-trash"></i>
+              </a>
+            </div>
+          </td>
         </tr>
-    {% endfor %}
-    </tbody>
-</table>
-<a href="{% url 'customer_create' %}" class="btn btn-success">Nuevo Cliente</a>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center py-4">
+            <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+            <p class="text-muted mt-2">No hay clientes que coincidan con tu búsqueda</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Paginación -->
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="mt-4">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page=1{{ request.GET|urlencode }}">Primera</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{{ request.GET|urlencode }}">Anterior</a>
+    </li>
+    {% endif %}
+    
+    <li class="page-item active">
+      <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}{{ request.GET|urlencode }}">Siguiente</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{{ request.GET|urlencode }}">Última</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
 {% endblock %}

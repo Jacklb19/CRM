@@ -4,8 +4,11 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.urls import reverse_lazy
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
+from django.db.models import Q, Sum, Count
 from .models import Opportunity
-from .forms import OpportunityForm
+from .forms import OpportunityForm, AdvancedOpportunitySearchForm
+from customers.models import Customer
+
 
 logger = logging.getLogger(__name__)
 
@@ -27,54 +30,95 @@ class OpportunityListView(VendedorRequiredMixin, ListView):
     model = Opportunity
     template_name = 'opportunities/opportunity_list.html'
     context_object_name = 'opportunities'
-    paginate_by = 10
+    paginate_by = 15
     
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = Opportunity.objects.all()
         
         # Vendedores solo ven sus oportunidades
         if self.request.user.profile.role == 'vendedor':
             queryset = queryset.filter(assigned_to=self.request.user)
         
-        # Filtros opcionales
-        status = self.request.GET.get('status')
-        if status:
-            queryset = queryset.filter(status=status)
+        # BÚSQUEDA AVANZADA
+        search_query = self.request.GET.get('search_query', '').strip()
+        status_filter = self.request.GET.getlist('status')
+        priority_filter = self.request.GET.getlist('priority')
+        customer_filter = self.request.GET.get('customer', '')
+        assigned_to_filter = self.request.GET.get('assigned_to', '')
+        amount_from = self.request.GET.get('amount_from', '')
+        amount_to = self.request.GET.get('amount_to', '')
+        date_from = self.request.GET.get('date_from', '')
+        date_to = self.request.GET.get('date_to', '')
         
-        priority = self.request.GET.get('priority')
-        if priority:
-            queryset = queryset.filter(priority=priority)
+        # Búsqueda por texto
+        if search_query:
+            queryset = queryset.filter(
+                Q(title__icontains=search_query) |
+                Q(customer__name__icontains=search_query) |
+                Q(id__icontains=search_query) |
+                Q(description__icontains=search_query)
+            )
         
-        search = self.request.GET.get('search')
-        if search:
-            queryset = queryset.filter(title__icontains=search) | queryset.filter(customer__name__icontains=search)
+        # Filtro de estado
+        if status_filter:
+            queryset = queryset.filter(status__in=status_filter)
         
-        return queryset.order_by('-created_at')
+        # Filtro de prioridad
+        if priority_filter:
+            queryset = queryset.filter(priority__in=priority_filter)
+        
+        # Filtro de cliente
+        if customer_filter:
+            queryset = queryset.filter(customer_id=customer_filter)
+        
+        # Filtro de vendedor (solo gerentes/admins)
+        if assigned_to_filter and self.request.user.profile.role != 'vendedor':
+            queryset = queryset.filter(assigned_to_id=assigned_to_filter)
+        
+        # Filtro de monto
+        if amount_from:
+            try:
+                queryset = queryset.filter(amount__gte=float(amount_from))
+            except ValueError:
+                pass
+        
+        if amount_to:
+            try:
+                queryset = queryset.filter(amount__lte=float(amount_to))
+            except ValueError:
+                pass
+        
+        # Filtro de fecha
+        if date_from:
+            queryset = queryset.filter(expected_close_date__gte=date_from)
+        
+        if date_to:
+            queryset = queryset.filter(expected_close_date__lte=date_to)
+        
+        # Ordenamiento
+        order_by = self.request.GET.get('order_by', '-created_at')
+        if order_by:
+            queryset = queryset.order_by(order_by)
+        
+        return queryset.select_related('customer', 'assigned_to')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['form'] = AdvancedOpportunitySearchForm(self.request.GET or None)
         
-        # Contar oportunidades vencidas y próximas a vencer
-        if self.request.user.profile.role == 'vendedor':
-            context['overdue_count'] = Opportunity.objects.filter(
-                assigned_to=self.request.user,
-                status__in=['abierta', 'calificada', 'propuesta', 'negociacion'],
-                expected_close_date__lt=timezone.now().date()
-            ).count()
-            
-            context['due_soon_count'] = Opportunity.objects.filter(
-                assigned_to=self.request.user,
-                status__in=['abierta', 'calificada', 'propuesta', 'negociacion'],
-                expected_close_date__gte=timezone.now().date(),
-                expected_close_date__lte=timezone.now().date() + timezone.timedelta(days=7)
-            ).count()
-            
-            context['total_value'] = sum(
-                opp.amount for opp in Opportunity.objects.filter(
-                    assigned_to=self.request.user,
-                    status__in=['abierta', 'calificada', 'propuesta', 'negociacion']
-                )
-            )
+        # Estadísticas
+        user = self.request.user
+        if user.profile.role == 'vendedor':
+            user_opps = Opportunity.objects.filter(assigned_to=user)
+        else:
+            user_opps = Opportunity.objects.all()
+        
+        context['total_opportunities'] = user_opps.count()
+        context['total_pipeline'] = user_opps.filter(
+            status__in=['abierta', 'calificada', 'propuesta', 'negociacion']
+        ).aggregate(Sum('amount'))['amount__sum'] or 0
+        context['won_opportunities'] = user_opps.filter(status='ganada').count()
+        context['lost_opportunities'] = user_opps.filter(status='perdida').count()
         
         return context
 
@@ -85,7 +129,6 @@ class OpportunityDetailView(VendedorRequiredMixin, DetailView):
     
     def dispatch(self, request, *args, **kwargs):
         obj = self.get_object()
-        # Vendedores solo pueden ver sus propias oportunidades
         if request.user.profile.role == 'vendedor' and obj.assigned_to != request.user:
             raise PermissionDenied("No tienes permiso para ver esta oportunidad.")
         return super().dispatch(request, *args, **kwargs)

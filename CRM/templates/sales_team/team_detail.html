@@ -1,153 +1,288 @@
 {% extends "base.html" %}
 {% block title %}{{ member.user.get_full_name }} - CRM Pro{% endblock %}
 
+{% block extra_css %}
+<style>
+  .stat-card {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1rem;
+  }
+  
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-label {
+    font-size: 0.9rem;
+    color: #6c757d;
+  }
+  
+  .info-card {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+  }
+  
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+  
+  .info-row:last-child {
+    border-bottom: none;
+  }
+  
+  .info-label {
+    font-weight: 600;
+    color: #6c757d;
+  }
+  
+  .info-value {
+    color: #212529;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+<div class="d-flex justify-content-between align-items-center mt-4 mb-4">
   <div>
-    <h2 class="mb-0"><i class="bi bi-person me-2"></i>{{ member.user.get_full_name }}</h2>
-    <small class="text-muted">@{{ member.user.username }}</small>
+    <h2 class="mb-1">
+      <i class="bi bi-person-circle me-2"></i>{{ member.user.get_full_name|default:member.user.username }}
+    </h2>
+    <small class="text-muted">
+      <i class="bi bi-at me-1"></i>{{ member.user.username }}
+      {% if member.department %}
+        | <i class="bi bi-building me-1"></i>{{ member.department }}
+      {% endif %}
+    </small>
   </div>
-  <a href="{% url 'sales_team_list' %}" class="btn btn-outline-secondary">Volver</a>
+  <a href="{% url 'sales_team_list' %}" class="btn btn-outline-secondary">
+    <i class="bi bi-arrow-left me-1"></i>Volver
+  </a>
 </div>
 
-<!-- Métricas -->
+<!-- Métricas Principales -->
 <div class="row mb-4">
   <div class="col-md-3">
-    <div class="card text-center">
-      <div class="card-body">
-        <h3>{{ metrics.open_opportunities }}</h3>
-        <p class="text-muted">Abiertas</p>
-      </div>
+    <div class="stat-card">
+      <div class="stat-value text-info">{{ metrics.open_opportunities }}</div>
+      <div class="stat-label">Oportunidades Abiertas</div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center">
-      <div class="card-body">
-        <h3 class="text-success">{{ metrics.won_opportunities }}</h3>
-        <p class="text-muted">Ganadas</p>
-      </div>
+    <div class="stat-card">
+      <div class="stat-value text-success">{{ metrics.won_opportunities }}</div>
+      <div class="stat-label">Oportunidades Ganadas</div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center">
-      <div class="card-body">
-        <h3 class="text-danger">{{ metrics.lost_opportunities }}</h3>
-        <p class="text-muted">Perdidas</p>
-      </div>
+    <div class="stat-card">
+      <div class="stat-value text-danger">{{ metrics.lost_opportunities }}</div>
+      <div class="stat-label">Oportunidades Perdidas</div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center">
-      <div class="card-body">
-        <h3 class="text-primary">{{ metrics.win_rate }}%</h3>
-        <p class="text-muted">Tasa de Cierre</p>
-      </div>
+    <div class="stat-card">
+      <div class="stat-value text-warning">{{ metrics.win_rate|floatformat:1 }}%</div>
+      <div class="stat-label">Tasa de Cierre</div>
     </div>
   </div>
 </div>
 
-<!-- Información general -->
-<div class="row">
+<!-- Información General -->
+<div class="row mb-4">
   <div class="col-md-6">
-    <div class="card mb-3">
-      <div class="card-header">
-        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información</h5>
+    <div class="info-card">
+      <h5 class="mb-3"><i class="bi bi-info-circle me-2"></i>Información General</h5>
+      <div class="info-row">
+        <span class="info-label">Email:</span>
+        <span class="info-value">{{ member.user.email }}</span>
       </div>
-      <div class="card-body">
-        <p><strong>Email:</strong> {{ member.user.email }}</p>
-        <p><strong>Teléfono:</strong> {{ member.phone or 'No especificado' }}</p>
-        <p><strong>Departamento:</strong> {{ member.department or 'No especificado' }}</p>
-        <p><strong>Contratado:</strong> {{ member.hire_date|date:"d/m/Y" or 'No especificado' }}</p>
+      {% if member.phone %}
+      <div class="info-row">
+        <span class="info-label">Teléfono:</span>
+        <span class="info-value">{{ member.phone }}</span>
+      </div>
+      {% endif %}
+      <div class="info-row">
+        <span class="info-label">Estado:</span>
+        <span class="info-value">
+          {% if member.is_active_seller %}
+            <span class="badge bg-success">Activo</span>
+          {% else %}
+            <span class="badge bg-danger">Inactivo</span>
+          {% endif %}
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Clientes Asignados:</span>
+        <span class="info-value"><strong>{{ metrics.customers_count }}</strong></span>
       </div>
     </div>
   </div>
   
   <div class="col-md-6">
-    <div class="card mb-3">
-      <div class="card-header">
-        <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Rendimiento</h5>
+    <div class="info-card">
+      <h5 class="mb-3"><i class="bi bi-graph-up me-2"></i>Rendimiento Financiero</h5>
+      <div class="info-row">
+        <span class="info-label">Pipeline Activo:</span>
+        <span class="info-value text-info"><strong>${{ metrics.pipeline_value|floatformat:0 }}</strong></span>
       </div>
-      <div class="card-body">
-        <p><strong>Pipeline Total:</strong> ${{ metrics.pipeline_value|floatformat:0 }}</p>
-        <p><strong>Valor Ganado:</strong> ${{ metrics.won_value|floatformat:0 }}</p>
-        <p><strong>Promedio por Deal:</strong> ${{ metrics.average_deal_size|floatformat:0 }}</p>
-        <p><strong>Clientes Asignados:</strong> {{ metrics.customers_count }}</p>
+      <div class="info-row">
+        <span class="info-label">Valor Ganado:</span>
+        <span class="info-value text-success"><strong>${{ metrics.won_value|floatformat:0 }}</strong></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Promedio por Deal:</span>
+        <span class="info-value"><strong>${{ metrics.average_deal_size|floatformat:0 }}</strong></span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Total de Oportunidades:</span>
+        <span class="info-value"><strong>{{ metrics.total_opportunities }}</strong></span>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Oportunidades abiertas -->
-<div class="card mb-3">
-  <div class="card-header">
-    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Oportunidades Abiertas ({{ open_opportunities|length }})</h5>
-  </div>
-  <div class="card-body">
-    {% if open_opportunities %}
-    <table class="table table-sm">
+<!-- Oportunidades Abiertas -->
+<div class="info-card">
+  <h5 class="mb-3">
+    <i class="bi bi-graph-up me-2"></i>Oportunidades Abiertas
+    <span class="badge bg-primary">{{ metrics.open_opportunities }}</span>
+  </h5>
+  {% if open_opportunities %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
       <thead>
         <tr>
           <th>Título</th>
           <th>Cliente</th>
-          <th>Monto</th>
-          <th>Estado</th>
-          <th>Vencimiento</th>
+          <th style="width: 100px;">Monto</th>
+          <th style="width: 80px;">Estado</th>
+          <th style="width: 100px;">Vencimiento</th>
+          <th style="width: 70px;">Acción</th>
         </tr>
       </thead>
       <tbody>
         {% for opp in open_opportunities %}
         <tr>
-          <td><a href="{% url 'opportunity_detail' opp.pk %}">{{ opp.title }}</a></td>
-          <td>{{ opp.customer.name }}</td>
-          <td>${{ opp.amount|floatformat:0 }}</td>
-          <td><span class="badge bg-primary">{{ opp.get_status_display }}</span></td>
-          <td>{{ opp.expected_close_date|date:"d/m/Y" }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <p class="text-muted">No hay oportunidades abiertas</p>
-    {% endif %}
-  </div>
-</div>
-
-<!-- Seguimientos pendientes -->
-<div class="card">
-  <div class="card-header">
-    <h5 class="mb-0"><i class="bi bi-chat-dots me-2"></i>Últimos Seguimientos ({{ followups|length }})</h5>
-  </div>
-  <div class="card-body">
-    {% if followups %}
-    <table class="table table-sm">
-      <thead>
-        <tr>
-          <th>Tipo</th>
-          <th>Cliente</th>
-          <th>Asunto</th>
-          <th>Fecha</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for followup in followups %}
-        <tr>
-          <td><span class="badge bg-info">{{ followup.get_type_display }}</span></td>
-          <td>{{ followup.customer.name }}</td>
-          <td><a href="{% url 'followup_detail' followup.pk %}">{{ followup.subject }}</a></td>
-          <td>{{ followup.date|date:"d/m/Y H:i" }}</td>
           <td>
-            <span class="badge {% if followup.status == 'pendiente' %}bg-warning{% elif followup.status == 'completado' %}bg-success{% else %}bg-danger{% endif %}">
-              {{ followup.get_status_display }}
-            </span>
+            <a href="{% url 'opportunity_detail' opp.pk %}" class="text-decoration-none">
+              <strong>{{ opp.title }}</strong>
+            </a>
+          </td>
+          <td>{{ opp.customer.name }}</td>
+          <td><strong>${{ opp.amount|floatformat:0 }}</strong></td>
+          <td>
+            {% if opp.status == 'abierta' %}
+              <span class="badge bg-warning text-dark">Abierta</span>
+            {% elif opp.status == 'calificada' %}
+              <span class="badge bg-info">Calificada</span>
+            {% elif opp.status == 'propuesta' %}
+              <span class="badge bg-primary">Propuesta</span>
+            {% else %}
+              <span class="badge bg-secondary">{{ opp.get_status_display }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {{ opp.expected_close_date|date:"d/m/Y" }}
+            {% if opp.is_overdue %}<br><small class="text-danger"><strong>VENCIDA</strong></small>{% endif %}
+          </td>
+          <td>
+            <a href="{% url 'opportunity_detail' opp.pk %}" class="btn btn-sm btn-outline-primary" title="Ver">
+              <i class="bi bi-eye"></i>
+            </a>
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-    {% else %}
-    <p class="text-muted">No hay seguimientos registrados</p>
-    {% endif %}
   </div>
+  {% else %}
+  <p class="text-muted text-center py-3">
+    <i class="bi bi-inbox" style="font-size: 1.5rem;"></i>
+    <br>No hay oportunidades abiertas
+  </p>
+  {% endif %}
 </div>
+
+<!-- Seguimientos Recientes -->
+<div class="info-card mt-4">
+  <h5 class="mb-3">
+    <i class="bi bi-chat-dots me-2"></i>Últimos Seguimientos
+    <span class="badge bg-secondary">{{ followups|length }}</span>
+  </h5>
+  {% if followups %}
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th style="width: 70px;">Tipo</th>
+          <th>Cliente</th>
+          <th>Asunto</th>
+          <th style="width: 120px;">Fecha</th>
+          <th style="width: 80px;">Estado</th>
+          <th style="width: 70px;">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for followup in followups %}
+        <tr>
+          <td>
+            {% if followup.type == 'llamada' %}
+              <i class="bi bi-telephone text-primary"></i>
+            {% elif followup.type == 'email' %}
+              <i class="bi bi-envelope text-info"></i>
+            {% elif followup.type == 'reunion' %}
+              <i class="bi bi-calendar-event text-success"></i>
+            {% else %}
+              <i class="bi bi-sticky text-warning"></i>
+            {% endif %}
+            <small>{{ followup.get_type_display }}</small>
+          </td>
+          <td>{{ followup.customer.name }}</td>
+          <td>
+            <a href="{% url 'followup_detail' followup.pk %}" class="text-decoration-none">
+              {{ followup.subject }}
+            </a>
+          </td>
+          <td><small>{{ followup.date|date:"d/m/Y H:i" }}</small></td>
+          <td>
+            {% if followup.status == 'pendiente' %}
+              <span class="badge bg-warning text-dark">Pendiente</span>
+            {% elif followup.status == 'completado' %}
+              <span class="badge bg-success">Completado</span>
+            {% else %}
+              <span class="badge bg-danger">Vencido</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'followup_detail' followup.pk %}" class="btn btn-sm btn-outline-primary" title="Ver">
+              <i class="bi bi-eye"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted text-center py-3">
+    <i class="bi bi-inbox" style="font-size: 1.5rem;"></i>
+    <br>No hay seguimientos registrados
+  </p>
+  {% endif %}
+</div>
+
 {% endblock %}

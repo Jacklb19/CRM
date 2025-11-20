@@ -4,7 +4,9 @@ from django.urls import reverse_lazy
 from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from .models import Followup
-from .forms import FollowupForm
+from .forms import FollowupForm, AdvancedFollowupSearchForm  
+from django.db.models import Q
+
 
 logger = logging.getLogger(__name__)
 
@@ -144,3 +146,80 @@ class FollowupDeleteView(VendedorRequiredMixin, DeleteView):
         if request.user.profile.role == 'vendedor' and obj.user != request.user:
             raise PermissionDenied("No tienes permiso para eliminar este seguimiento.")
         return super().dispatch(request, *args, **kwargs)
+
+class FollowupListView(VendedorRequiredMixin, ListView):
+    model = Followup
+    template_name = 'followups/followup_list.html'
+    context_object_name = 'followups'
+    paginate_by = 15
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        
+        # Vendedores solo ven sus seguimientos
+        if self.request.user.profile.role == 'vendedor':
+            queryset = queryset.filter(user=self.request.user)
+        
+        # BÚSQUEDA AVANZADA
+        search_query = self.request.GET.get('search_query', '').strip()
+        type_filter = self.request.GET.getlist('type')
+        status_filter = self.request.GET.getlist('status')
+        customer_filter = self.request.GET.get('customer', '')
+        assigned_to_filter = self.request.GET.get('assigned_to', '')
+        date_from = self.request.GET.get('date_from', '')
+        date_to = self.request.GET.get('date_to', '')
+        
+        # Búsqueda por texto
+        if search_query:
+            queryset = queryset.filter(
+                Q(subject__icontains=search_query) |
+                Q(notes__icontains=search_query) |
+                Q(customer__name__icontains=search_query)
+            )
+        
+        # Filtro de tipo
+        if type_filter:
+            queryset = queryset.filter(type__in=type_filter)
+        
+        # Filtro de estado
+        if status_filter:
+            queryset = queryset.filter(status__in=status_filter)
+        
+        # Filtro de cliente
+        if customer_filter:
+            queryset = queryset.filter(customer_id=customer_filter)
+        
+        # Filtro de usuario (solo para gerentes/admins)
+        if assigned_to_filter and self.request.user.profile.role != 'vendedor':
+            queryset = queryset.filter(user_id=assigned_to_filter)
+        
+        # Filtro de fecha
+        if date_from:
+            queryset = queryset.filter(date__gte=date_from)
+        
+        if date_to:
+            queryset = queryset.filter(date__lte=date_to)
+        
+        # Ordenamiento
+        order_by = self.request.GET.get('order_by', '-date')
+        if order_by:
+            queryset = queryset.order_by(order_by)
+        
+        return queryset.select_related('customer', 'user', 'opportunity')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = AdvancedFollowupSearchForm(self.request.GET or None)
+        
+        # Estadísticas
+        user = self.request.user
+        if user.profile.role == 'vendedor':
+            user_followups = Followup.objects.filter(user=user)
+        else:
+            user_followups = Followup.objects.all()
+        
+        context['total_followups'] = user_followups.count()
+        context['pending_followups'] = user_followups.filter(status='pendiente').count()
+        context['completed_followups'] = user_followups.filter(status='completado').count()
+        
+        return context

@@ -370,7 +370,7 @@
     </table>
 
 
-  {% elif report_type == 'opportunities' %}
+{% elif report_type == 'opportunities' %}
     <div class="row mb-4">
       <div class="col-md-3">
         <div class="metric">
@@ -455,24 +455,63 @@
         {% for stage, value in report_data.pipeline_stages.items %}
         <tr>
           <td><strong>{{ stage|title }}</strong></td>
-           <td>${{ value|floatformat:0 }}</td>
-
-          <td>
-            <div class="progress" style="height: 25px;">
-              <div class="progress-bar" role="progressbar" style="width: {% widthratio value report_data.total_pipeline 100 %}%"></div>
-            </div>
+          <td>${{ value|floatformat:0 }}</td>
+          <td style="width: 40%;">
+            {% if report_data.total_pipeline > 0 %}
+              {% widthratio value report_data.total_pipeline 100 as percentage %}
+              <div class="progress" style="height: 25px;">
+                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ percentage }}%;" aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">
+                  <span style="color: white; font-weight: bold;">{{ percentage }}%</span>
+                </div>
+              </div>
+            {% else %}
+              <span class="text-muted">Sin datos</span>
+            {% endif %}
           </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
 
-  {% endif %}
-</div>
+    <h6 class="mb-3 mt-4">Pipeline por Vendedor</h6>
+    {% if report_data.by_seller %}
+    <table class="table table-hover table-sm">
+      <thead>
+        <tr>
+          <th>Vendedor</th>
+          <th>Valor</th>
+          <th>Cantidad de Oportunidades</th>
+          <th>% del Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for seller in report_data.by_seller %}
+        <tr>
+          <td><strong>{{ seller.assigned_to__username }}</strong></td>
+          <td>${{ seller.value|floatformat:0 }}</td>
+          <td>{{ seller.count }}</td>
+          <td>
+            {% if report_data.total_pipeline > 0 %}
+              {% widthratio seller.value report_data.total_pipeline 100 as seller_percentage %}
+              <span class="badge bg-primary">{{ seller_percentage }}%</span>
+            {% else %}
+              <span class="text-muted">N/A</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-warning">No hay vendedores con pipeline activo</div>
+    {% endif %}
+
+{% endif %}
+
 {% else %}
 <div class="alert alert-info">
   <i class="bi bi-info-circle me-2"></i>Selecciona un tipo de reporte y haz clic en "Generar" para ver los datos.
 </div>
 {% endif %}
 
-{% endblock %}
+{% endblock %}  

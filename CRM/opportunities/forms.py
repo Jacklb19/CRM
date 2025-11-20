@@ -100,3 +100,108 @@ class OpportunityForm(forms.ModelForm):
             )
         
         return cleaned_data
+
+class AdvancedOpportunitySearchForm(forms.Form):
+    """Formulario avanzado de búsqueda de oportunidades"""
+    
+    search_query = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Buscar por título, cliente, ID...',
+        }),
+        label='Búsqueda'
+    )
+    
+    status = forms.MultipleChoiceField(
+        required=False,
+        choices=[
+            ('abierta', 'Abierta'),
+            ('calificada', 'Calificada'),
+            ('propuesta', 'Propuesta'),
+            ('negociacion', 'Negociación'),
+            ('ganada', 'Ganada'),
+            ('perdida', 'Perdida'),
+        ],
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        label='Estados'
+    )
+    
+    priority = forms.MultipleChoiceField(
+        required=False,
+        choices=[
+            ('baja', 'Baja'),
+            ('media', 'Media'),
+            ('alta', 'Alta'),
+        ],
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        label='Prioridades'
+    )
+    
+    customer = forms.ModelChoiceField(
+        required=False,
+        queryset=Customer.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='Cliente',
+        empty_label='Todos los clientes'
+    )
+    
+    assigned_to = forms.ModelChoiceField(
+        required=False,
+        queryset=User.objects.filter(profile__role='vendedor'),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='Asignado a',
+        empty_label='Todos los vendedores'
+    )
+    
+    amount_from = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Monto desde...'
+        }),
+        label='Monto desde',
+        min_value=0
+    )
+    
+    amount_to = forms.DecimalField(
+        required=False,
+        widget=forms.NumberInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Monto hasta...'
+        }),
+        label='Monto hasta',
+        min_value=0
+    )
+    
+    date_from = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'class': 'form-control'
+        }),
+        label='Fecha cierre desde'
+    )
+    
+    date_to = forms.DateField(
+        required=False,
+        widget=forms.DateInput(attrs={
+            'type': 'date',
+            'class': 'form-control'
+        }),
+        label='Fecha cierre hasta'
+    )
+    
+    order_by = forms.ChoiceField(
+        required=False,
+        choices=[
+            ('-created_at', 'Más recientes'),
+            ('created_at', 'Más antiguos'),
+            ('-amount', 'Mayor monto'),
+            ('amount', 'Menor monto'),
+            ('expected_close_date', 'Próximas a vencer'),
+            ('-expected_close_date', 'Más tiempo'),
+        ],
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        label='Ordenar por'
+    )

@@ -1,6 +1,37 @@
 {% extends "base.html" %}
 {% block title %}Equipo de Ventas - CRM Pro{% endblock %}
 
+{% block extra_css %}
+<style>
+  .search-box {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .stats-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1rem;
+  }
+  
+  .stats-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #667eea;
+  }
+  
+  .stats-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mt-4 mb-3">
   <h2 class="mb-0">
@@ -8,112 +39,167 @@
   </h2>
 </div>
 
-<!-- Métricas globales -->
+<!-- Estadísticas Rápidas -->
 <div class="row mb-4">
   <div class="col-md-3">
-    <div class="card text-center">
-      <div class="card-body">
-        <h3 class="text-primary">{{ total_sellers }}</h3>
-        <p class="text-muted">Vendedores Activos</p>
-      </div>
+    <div class="stats-card">
+      <div class="stats-value">{{ total_sellers }}</div>
+      <div class="stats-label">Vendedores Activos</div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center">
-      <div class="card-body">
-        <h3 class="text-info">{{ total_opportunities }}</h3>
-        <p class="text-muted">Oportunidades Totales</p>
-      </div>
+    <div class="stats-card">
+      <div class="stats-value text-info">${{ total_pipeline|floatformat:0 }}</div>
+      <div class="stats-label">Pipeline Total</div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center">
-      <div class="card-body">
-        <h3 class="text-warning">${{ total_pipeline|floatformat:0 }}</h3>
-        <p class="text-muted">Pipeline Activo</p>
-      </div>
+    <div class="stats-card">
+      <div class="stats-value text-success">${{ total_won|floatformat:0 }}</div>
+      <div class="stats-label">Valor Ganado</div>
     </div>
   </div>
   <div class="col-md-3">
-    <div class="card text-center">
-      <div class="card-body">
-        <h3 class="text-success">${{ total_won|floatformat:0 }}</h3>
-        <p class="text-muted">Valor Ganado</p>
-      </div>
+    <div class="stats-card">
+      <div class="stats-value text-warning">{{ total_opportunities }}</div>
+      <div class="stats-label">Total Oportunidades</div>
     </div>
   </div>
 </div>
 
-<!-- Filtros -->
-<div class="card mb-3">
-  <div class="card-body">
-    <form method="get" class="row g-3">
-      <div class="col-md-6">
-        <input type="text" name="search" class="form-control" placeholder="Buscar vendedor..." value="{{ request.GET.search }}">
-      </div>
-      <div class="col-md-3">
-        <select name="sort_by" class="form-control">
-          <option value="">Ordenar por...</option>
-          <option value="pipeline" {% if request.GET.sort_by == 'pipeline' %}selected{% endif %}>Pipeline</option>
-          <option value="won_value" {% if request.GET.sort_by == 'won_value' %}selected{% endif %}>Valor Ganado</option>
-          <option value="win_rate" {% if request.GET.sort_by == 'win_rate' %}selected{% endif %}>Tasa de Cierre</option>
-        </select>
-      </div>
-      <div class="col-md-3">
-        <button type="submit" class="btn btn-outline-primary w-100">Filtrar</button>
-      </div>
-    </form>
-  </div>
+<!-- Búsqueda Mejorada -->
+<div class="search-box">
+  <form method="get" id="search-form" class="row g-2">
+    <div class="col-md-6">
+      <input type="text" name="search" class="form-control" placeholder="Buscar por nombre, email, departamento..." value="{{ request.GET.search }}">
+      <small class="text-muted">Busca mientras escribes...</small>
+    </div>
+    <div class="col-md-4">
+    <div class="col-md-4">
+      <select name="order_by" class="form-control">
+        <option value="-user__date_joined" {% if request.GET.order_by == '-user__date_joined' %}selected{% endif %}>Más recientes</option>
+        <option value="user__date_joined" {% if request.GET.order_by == 'user__date_joined' %}selected{% endif %}>Más antiguos</option>
+        <option value="user__first_name" {% if request.GET.order_by == 'user__first_name' %}selected{% endif %}>Nombre A-Z</option>
+        <option value="-user__first_name" {% if request.GET.order_by == '-user__first_name' %}selected{% endif %}>Nombre Z-A</option>
+        <option value="won_value" {% if request.GET.order_by == 'won_value' %}selected{% endif %}>Mayor valor ganado</option>
+        <option value="opportunities" {% if request.GET.order_by == 'opportunities' %}selected{% endif %}>Más oportunidades</option>
+        <option value="customers" {% if request.GET.order_by == 'customers' %}selected{% endif %}>Más clientes</option>
+        <option value="pipeline" {% if request.GET.order_by == 'pipeline' %}selected{% endif %}>Mayor pipeline</option>
+      </select>
+    </div>
+    </div>
+    <div class="col-md-2">
+      <a href="{% url 'sales_team_list' %}" class="btn btn-outline-secondary w-100">
+        <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+      </a>
+    </div>
+  </form>
 </div>
 
-<!-- Tabla de vendedores -->
+<!-- Tabla de Vendedores -->
 <div class="card">
-  <div class="card-body">
-    <table class="table table-hover align-middle">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
       <thead>
         <tr>
-          <th>Vendedor</th>
-          <th>Clientes</th>
-          <th>Oportunidades</th>
-          <th>Pipeline</th>
-          <th>Ganadas</th>
-          <th>Valor Ganado</th>
-          <th>Tasa Cierre</th>
-          <th>Promedio Deal</th>
-          <th>Acciones</th>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th class="text-center">Clientes</th>
+          <th class="text-center">Oportunidades</th>
+          <th class="text-center">Ganadas</th>
+          <th class="text-center">Pipeline</th>
+          <th class="text-center">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        {% for member in team_members %}
+        {% for data in team_data %}
         <tr>
           <td>
-            <strong>{{ member.user.get_full_name }}</strong>
-            <br><small class="text-muted">@{{ member.user.username }}</small>
+            <strong>{{ data.member.user.get_full_name|default:data.member.user.username }}</strong>
           </td>
-          <td><span class="badge bg-info">{{ member.get_total_customers }}</span></td>
-          <td>{{ member.get_total_opportunities }}</td>
-          <td>${{ member.get_total_pipeline_value|floatformat:0 }}</td>
-          <td><span class="badge bg-success">{{ member.get_won_opportunities }}</span></td>
-          <td>${{ member.get_won_value|floatformat:0 }}</td>
-          <td>
-            <span class="badge {% if member.get_win_rate >= 50 %}bg-success{% elif member.get_win_rate >= 30 %}bg-warning{% else %}bg-danger{% endif %}">
-              {{ member.get_win_rate }}%
-            </span>
+          <td>{{ data.member.user.email }}</td>
+          <td class="text-center">
+            <span class="badge bg-info">{{ data.customers_count }}</span>
           </td>
-          <td>${{ member.get_average_deal_size|floatformat:0 }}</td>
-          <td>
-            <a href="{% url 'sales_team_detail' member.pk %}" class="btn btn-sm btn-outline-primary">
-              <i class="bi bi-eye"></i> Ver
+          <td class="text-center">
+            {{ data.opportunities_count }}
+          </td>
+          <td class="text-center">
+            <span class="badge bg-success">{{ data.won_count }}</span>
+          </td>
+          <td class="text-center">
+            <strong class="text-primary">${{ data.pipeline|floatformat:0 }}</strong>
+          </td>
+          <td class="text-center">
+            <a href="{% url 'sales_team_detail' data.member.pk %}" class="btn btn-sm btn-outline-primary" title="Ver detalle">
+              <i class="bi bi-eye"></i>
             </a>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="9" class="text-center text-muted">No hay vendedores activos</td>
+          <td colspan="8" class="text-center py-4">
+            <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+            <p class="text-muted mt-2">No hay vendedores que coincidan con tu búsqueda</p>
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
+
+<!-- Paginación -->
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="mt-4">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.order_by %}&order_by={{ request.GET.order_by }}{% endif %}">Primera</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.order_by %}&order_by={{ request.GET.order_by }}{% endif %}">Anterior</a>
+    </li>
+    {% endif %}
+    
+    <li class="page-item active">
+      <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.order_by %}&order_by={{ request.GET.order_by }}{% endif %}">Siguiente</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.order_by %}&order_by={{ request.GET.order_by }}{% endif %}">Última</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+<script>
+// Búsqueda en tiempo real
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('search-form');
+    const searchInput = form.querySelector('input[name="search"]');
+    const orderSelect = form.querySelector('select[name="order_by"]');
+    
+    let debounceTimer;
+    
+    // Buscar mientras escribes
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            form.submit();
+        }, 800);
+    });
+    
+    // Cambiar orden inmediatamente
+    orderSelect.addEventListener('change', function() {
+        form.submit();
+    });
+});
+</script>
+
 {% endblock %}
