@@ -15,3 +15,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'CRM.settings')
 
 # Render necesita esta aplicación WSGI para levantar el servidor con Gunicorn
 application = get_wsgi_application()
+
+
+#para commit
