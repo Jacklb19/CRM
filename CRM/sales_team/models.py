@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class TeamMember(models.Model):
@@ -77,3 +79,52 @@ class TeamMember(models.Model):
     def get_total_customers(self):
         """Total de clientes asignados"""
         return self.user.customers.count()
+
+
+# ============= SIGNALS =============
+
+@receiver(post_save, sender=User)
+def create_team_member_for_seller(sender, instance, created, **kwargs):
+    """
+    Crear automáticamente TeamMember cuando se crea un usuario
+    con rol de vendedor o gerente
+    """
+    # Solo proceder si el usuario tiene perfil
+    if not hasattr(instance, 'profile'):
+        return
+    
+    role = instance.profile.role
+    
+    # Si es vendedor o gerente, crear TeamMember si no existe
+    if role in ['vendedor', 'gerente']:
+        TeamMember.objects.get_or_create(
+            user=instance,
+            defaults={
+                'is_active_seller': True,
+                'hire_date': timezone.now().date()
+            }
+        )
+
+
+@receiver(post_save, sender=User)
+def update_team_member_status(sender, instance, created, **kwargs):
+    """
+    Actualizar is_active_seller si el usuario cambia de rol
+    """
+    if created:
+        return  # Ya lo maneja create_team_member_for_seller
+    
+    if not hasattr(instance, 'profile'):
+        return
+    
+    role = instance.profile.role
+    
+    # Si tiene TeamMember, actualizar su estado según el rol
+    if hasattr(instance, 'team_member'):
+        if role in ['vendedor', 'gerente']:
+            instance.team_member.is_active_seller = True
+            instance.team_member.save()
+        else:
+            # Si cambió a administrador, desactivar como vendedor
+            instance.team_member.is_active_seller = False
+            instance.team_member.save()
