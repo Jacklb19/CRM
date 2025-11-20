@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}{{ member.user.get_full_name }} - CRM Pro{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+  <div>
+    <h2 class="mb-0"><i class="bi bi-person me-2"></i>{{ member.user.get_full_name }}</h2>
+    <small class="text-muted">@{{ member.user.username }}</small>
+  </div>
+  <a href="{% url 'sales_team_list' %}" class="btn btn-outline-secondary">Volver</a>
+</div>
+
+<!-- Métricas -->
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h3>{{ metrics.open_opportunities }}</h3>
+        <p class="text-muted">Abiertas</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h3 class="text-success">{{ metrics.won_opportunities }}</h3>
+        <p class="text-muted">Ganadas</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h3 class="text-danger">{{ metrics.lost_opportunities }}</h3>
+        <p class="text-muted">Perdidas</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h3 class="text-primary">{{ metrics.win_rate }}%</h3>
+        <p class="text-muted">Tasa de Cierre</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Información general -->
+<div class="row">
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Información</h5>
+      </div>
+      <div class="card-body">
+        <p><strong>Email:</strong> {{ member.user.email }}</p>
+        <p><strong>Teléfono:</strong> {{ member.phone or 'No especificado' }}</p>
+        <p><strong>Departamento:</strong> {{ member.department or 'No especificado' }}</p>
+        <p><strong>Contratado:</strong> {{ member.hire_date|date:"d/m/Y" or 'No especificado' }}</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-6">
+    <div class="card mb-3">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Rendimiento</h5>
+      </div>
+      <div class="card-body">
+        <p><strong>Pipeline Total:</strong> ${{ metrics.pipeline_value|floatformat:0 }}</p>
+        <p><strong>Valor Ganado:</strong> ${{ metrics.won_value|floatformat:0 }}</p>
+        <p><strong>Promedio por Deal:</strong> ${{ metrics.average_deal_size|floatformat:0 }}</p>
+        <p><strong>Clientes Asignados:</strong> {{ metrics.customers_count }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Oportunidades abiertas -->
+<div class="card mb-3">
+  <div class="card-header">
+    <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Oportunidades Abiertas ({{ open_opportunities|length }})</h5>
+  </div>
+  <div class="card-body">
+    {% if open_opportunities %}
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Cliente</th>
+          <th>Monto</th>
+          <th>Estado</th>
+          <th>Vencimiento</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for opp in open_opportunities %}
+        <tr>
+          <td><a href="{% url 'opportunity_detail' opp.pk %}">{{ opp.title }}</a></td>
+          <td>{{ opp.customer.name }}</td>
+          <td>${{ opp.amount|floatformat:0 }}</td>
+          <td><span class="badge bg-primary">{{ opp.get_status_display }}</span></td>
+          <td>{{ opp.expected_close_date|date:"d/m/Y" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">No hay oportunidades abiertas</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Seguimientos pendientes -->
+<div class="card">
+  <div class="card-header">
+    <h5 class="mb-0"><i class="bi bi-chat-dots me-2"></i>Últimos Seguimientos ({{ followups|length }})</h5>
+  </div>
+  <div class="card-body">
+    {% if followups %}
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Cliente</th>
+          <th>Asunto</th>
+          <th>Fecha</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for followup in followups %}
+        <tr>
+          <td><span class="badge bg-info">{{ followup.get_type_display }}</span></td>
+          <td>{{ followup.customer.name }}</td>
+          <td><a href="{% url 'followup_detail' followup.pk %}">{{ followup.subject }}</a></td>
+          <td>{{ followup.date|date:"d/m/Y H:i" }}</td>
+          <td>
+            <span class="badge {% if followup.status == 'pendiente' %}bg-warning{% elif followup.status == 'completado' %}bg-success{% else %}bg-danger{% endif %}">
+              {{ followup.get_status_display }}
+            </span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">No hay seguimientos registrados</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

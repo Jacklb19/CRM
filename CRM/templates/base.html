@@ -58,6 +58,11 @@
         transform: translateY(-2px);
       }
 
+      .nav-link.active {
+        color: white !important;
+        border-bottom: 2px solid white;
+      }
+
       .dropdown-menu {
         border: none;
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
@@ -116,7 +121,7 @@
   <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark">
-      <div class="container">
+      <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'dashboard' %}">
           <i class="bi bi-bar-chart-fill me-2"></i>CRM Pro
         </a>
@@ -125,53 +130,73 @@
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
         >
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav ms-auto">
             {% if user.is_authenticated %}
-            <!-- Dashboard (todos los usuarios autenticados) -->
+            <!-- Dashboard -->
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'dashboard' %}">
+              <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
                 <i class="bi bi-house-door me-1"></i>Dashboard
               </a>
             </li>
 
-            <!-- Clientes (vendedor y administrador) -->
+            <!-- Clientes -->
             {% if user.profile.role in 'vendedor,administrador,gerente' %}
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'customer_list' %}">
+              <a class="nav-link {% if 'customer' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'customer_list' %}">
                 <i class="bi bi-people me-1"></i>Clientes
               </a>
             </li>
-            {% endif %} 
+            {% endif %}
+
+            <!-- Oportunidades -->
             {% if user.profile.role in 'vendedor,gerente,administrador' %}
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'opportunity_list' %}">
+              <a class="nav-link {% if 'opportunity' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'opportunity_list' %}">
                 <i class="bi bi-graph-up me-1"></i>Oportunidades
               </a>
             </li>
+
+            <!-- Seguimientos -->
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'followup_list' %}">
+              <a class="nav-link {% if 'followup' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'followup_list' %}">
                 <i class="bi bi-chat-dots me-1"></i>Seguimientos
               </a>
             </li>
-            {% endif %} {% if user.profile.role == 'administrador' %}
+            {% endif %}
+
+            <!-- Equipo de Ventas (Gerente y Admin) -->
+            {% if user.profile.role in 'gerente,administrador' %}
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'user_list' %}">
-                <i class="bi bi-gear me-1"></i>Gestión de Usuarios
+              <a class="nav-link {% if 'sales_team' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'sales_team_list' %}">
+                <i class="bi bi-people-fill me-1"></i>Equipo Ventas
               </a>
             </li>
             {% endif %}
-            {% if user.profile.role in 'administrador,gerente' %}
-<li class="nav-item">
-  <a class="nav-link" href="{% url 'report' %}">
-    <i class="bi bi-file-earmark-text me-1"></i>Reportes
-  </a>
-</li>
-{% endif %}
 
+            <!-- Reportes -->
+            {% if user.profile.role in 'administrador,gerente' %}
+            <li class="nav-item">
+              <a class="nav-link {% if 'report' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'report' %}">
+                <i class="bi bi-file-earmark-text me-1"></i>Reportes
+              </a>
+            </li>
+            {% endif %}
+
+            <!-- Gestión de Usuarios (Admin) -->
+            {% if user.profile.role == 'administrador' %}
+            <li class="nav-item">
+              <a class="nav-link {% if 'user' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'user_list' %}">
+                <i class="bi bi-gear me-1"></i>Usuarios
+              </a>
+            </li>
+            {% endif %}
 
             <!-- Menú de usuario -->
             <li class="nav-item dropdown">
@@ -180,6 +205,7 @@
                 href="#"
                 role="button"
                 data-bs-toggle="dropdown"
+                aria-expanded="false"
               >
                 <i class="bi bi-person-circle me-1"></i>{{ user.username }}
               </a>
@@ -195,23 +221,26 @@
                   </a>
                 </li>
                 <li><hr class="dropdown-divider" /></li>
-                <form
-                  method="post"
-                  action="{% url 'logout' %}"
-                  style="display: inline; margin: 0"
-                >
-                  {% csrf_token %}
-                  <button
-                    type="submit"
-                    class="btn btn-primary btn-sm w-100 d-flex align-items-center justify-content-center"
+                <li>
+                  <form
+                    method="post"
+                    action="{% url 'logout' %}"
+                    style="margin: 0"
                   >
-                    <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
-                  </button>
-                </form>
+                    {% csrf_token %}
+                    <button
+                      type="submit"
+                      class="dropdown-item text-danger"
+                    >
+                      <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                    </button>
+                  </form>
+                </li>
               </ul>
             </li>
+
             {% else %}
-            <!-- Si no está autenticado, solo mostrar login -->
+            <!-- Si no está autenticado -->
             <li class="nav-item">
               <a class="nav-link" href="{% url 'login' %}">
                 <i class="bi bi-box-arrow-in-right me-1"></i>Iniciar Sesión
@@ -247,7 +276,7 @@
 
     <!-- Main Content -->
     <main class="main-content">
-      <div class="container">{% block content %} {% endblock %}</div>
+      <div class="container-fluid">{% block content %} {% endblock %}</div>
     </main>
 
     <!-- Footer -->

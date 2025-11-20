@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Equipo de Ventas - CRM Pro{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+  <h2 class="mb-0">
+    <i class="bi bi-people me-2"></i>Equipo de Ventas
+  </h2>
+</div>
+
+<!-- Métricas globales -->
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h3 class="text-primary">{{ total_sellers }}</h3>
+        <p class="text-muted">Vendedores Activos</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h3 class="text-info">{{ total_opportunities }}</h3>
+        <p class="text-muted">Oportunidades Totales</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h3 class="text-warning">${{ total_pipeline|floatformat:0 }}</h3>
+        <p class="text-muted">Pipeline Activo</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-center">
+      <div class="card-body">
+        <h3 class="text-success">${{ total_won|floatformat:0 }}</h3>
+        <p class="text-muted">Valor Ganado</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-3">
+  <div class="card-body">
+    <form method="get" class="row g-3">
+      <div class="col-md-6">
+        <input type="text" name="search" class="form-control" placeholder="Buscar vendedor..." value="{{ request.GET.search }}">
+      </div>
+      <div class="col-md-3">
+        <select name="sort_by" class="form-control">
+          <option value="">Ordenar por...</option>
+          <option value="pipeline" {% if request.GET.sort_by == 'pipeline' %}selected{% endif %}>Pipeline</option>
+          <option value="won_value" {% if request.GET.sort_by == 'won_value' %}selected{% endif %}>Valor Ganado</option>
+          <option value="win_rate" {% if request.GET.sort_by == 'win_rate' %}selected{% endif %}>Tasa de Cierre</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-outline-primary w-100">Filtrar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Tabla de vendedores -->
+<div class="card">
+  <div class="card-body">
+    <table class="table table-hover align-middle">
+      <thead>
+        <tr>
+          <th>Vendedor</th>
+          <th>Clientes</th>
+          <th>Oportunidades</th>
+          <th>Pipeline</th>
+          <th>Ganadas</th>
+          <th>Valor Ganado</th>
+          <th>Tasa Cierre</th>
+          <th>Promedio Deal</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for member in team_members %}
+        <tr>
+          <td>
+            <strong>{{ member.user.get_full_name }}</strong>
+            <br><small class="text-muted">@{{ member.user.username }}</small>
+          </td>
+          <td><span class="badge bg-info">{{ member.get_total_customers }}</span></td>
+          <td>{{ member.get_total_opportunities }}</td>
+          <td>${{ member.get_total_pipeline_value|floatformat:0 }}</td>
+          <td><span class="badge bg-success">{{ member.get_won_opportunities }}</span></td>
+          <td>${{ member.get_won_value|floatformat:0 }}</td>
+          <td>
+            <span class="badge {% if member.get_win_rate >= 50 %}bg-success{% elif member.get_win_rate >= 30 %}bg-warning{% else %}bg-danger{% endif %}">
+              {{ member.get_win_rate }}%
+            </span>
+          </td>
+          <td>${{ member.get_average_deal_size|floatformat:0 }}</td>
+          <td>
+            <a href="{% url 'sales_team_detail' member.pk %}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-eye"></i> Ver
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" class="text-center text-muted">No hay vendedores activos</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

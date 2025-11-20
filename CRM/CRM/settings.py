@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'followups',
     'dashboard',
     'reports',
+    'sales_team'
 ]
 
 MIDDLEWARE = [

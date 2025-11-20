@@ -27,5 +27,6 @@ urlpatterns = [
     path('opportunities/', include('opportunities.urls')), 
     path('followups/', include('followups.urls')), 
     path('reports/', include('reports.urls')),
+    path('team/,', include('sales_team.urls'))
 
 ]
