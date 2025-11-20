@@ -1,43 +1,333 @@
 {% extends "base.html" %}
-{% block title %}Formulario de Cliente{% endblock %}
+{% block title %}{% if object %}Editar{% else %}Nuevo{% endif %} Cliente - CRM Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+  .form-container {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+  
+  .form-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem 0.75rem 0 0;
+  }
+  
+  .form-header h3 {
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  
+  .form-body {
+    padding: 2rem;
+  }
+  
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .form-label {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+  
+  .form-control, .form-select {
+    width: 100%;
+    border: 1.5px solid #e9ecef;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+  }
+  
+  .form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: none;
+  }
+  
+  .form-control.is-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+  }
+  
+  .error-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .error-message i {
+    font-size: 0.9rem;
+  }
+  
+  .non-field-errors {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    color: #721c24;
+  }
+  
+  .non-field-errors li {
+    margin-bottom: 0.25rem;
+  }
+  
+  .form-footer {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+    margin-top: 2rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+  
+  .btn-outline-secondary {
+    border: 1.5px solid #6c757d;
+    color: #6c757d;
+  }
+  
+  .btn-outline-secondary:hover {
+    background-color: #e9ecef;
+  }
+  
+  .checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+  }
+  
+  .form-check-input {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0;
+    cursor: pointer;
+  }
+  
+  .form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+  }
+  
+  .form-check-label {
+    margin: 0;
+    cursor: pointer;
+    font-weight: 500;
+    color: #212529;
+  }
+  
+  .required-field {
+    color: #dc3545;
+    margin-left: 0.25rem;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="card mt-4">
-  <div class="card-header bg-white">
-    <h4 class="mb-0"><i class="bi bi-person-plus me-2"></i>{% if object %}Editar{% else %}Nuevo{% endif %} Cliente</h4>
-  </div>
-  <div class="card-body">
-    <form method="post">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
-      <div class="mb-3">
-        <label for="id_name" class="form-label">Nombre</label>
-        {{ form.name }}
-        {% if form.name.errors %}
-          <div class="text-danger small mt-1">{{ form.name.errors }}</div>
+<div class="mt-4 mb-4">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'customer_list' %}"><i class="bi bi-people me-1"></i>Clientes</a></li>
+      <li class="breadcrumb-item active">{% if object %}Editar{% else %}Nuevo{% endif %}</li>
+    </ol>
+  </nav>
+</div>
+
+<div class="row">
+  <div class="col-lg-8 mx-auto">
+    <div class="form-container">
+      <div class="form-header">
+        <h3>
+          {% if object %}
+            <i class="bi bi-pencil-square"></i>Editar Cliente
+          {% else %}
+            <i class="bi bi-person-plus"></i>Nuevo Cliente
+          {% endif %}
+        </h3>
+      </div>
+      
+      <div class="form-body">
+        {% if form.non_field_errors %}
+          <div class="non-field-errors">
+            <strong><i class="bi bi-exclamation-triangle me-2"></i>Errores:</strong>
+            <ul class="mb-0">
+              {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          </div>
         {% endif %}
+        
+        <form method="post" novalidate>
+          {% csrf_token %}
+          
+          <!-- Nombre -->
+          <div class="form-group">
+            <label for="id_name" class="form-label">
+              Nombre
+              <span class="required-field">*</span>
+            </label>
+            {% if form.name.errors %}
+              {{ form.name }}
+              <script>document.getElementById('id_name').classList.add('form-control', 'is-invalid');</script>
+              {% for error in form.name.errors %}
+                <div class="error-message">
+                  <i class="bi bi-exclamation-circle"></i>{{ error }}
+                </div>
+              {% endfor %}
+            {% else %}
+              {{ form.name }}
+              <script>document.getElementById('id_name').classList.add('form-control');</script>
+            {% endif %}
+            <small class="text-muted d-block mt-1">Nombre completo del cliente (mín. 3 caracteres)</small>
+          </div>
+          
+          <!-- Email -->
+          <div class="form-group">
+            <label for="id_email" class="form-label">
+              Email
+              <span class="required-field">*</span>
+            </label>
+            {% if form.email.errors %}
+              {{ form.email }}
+              <script>document.getElementById('id_email').classList.add('form-control', 'is-invalid');</script>
+              {% for error in form.email.errors %}
+                <div class="error-message">
+                  <i class="bi bi-exclamation-circle"></i>{{ error }}
+                </div>
+              {% endfor %}
+            {% else %}
+              {{ form.email }}
+              <script>document.getElementById('id_email').classList.add('form-control');</script>
+            {% endif %}
+            <small class="text-muted d-block mt-1">Correo electrónico único (ej: cliente@empresa.com)</small>
+          </div>
+          
+          <!-- Teléfono -->
+          <div class="form-group">
+            <label for="id_phone" class="form-label">
+              Teléfono
+            </label>
+            {% if form.phone.errors %}
+              {{ form.phone }}
+              <script>document.getElementById('id_phone').classList.add('form-control', 'is-invalid');</script>
+              {% for error in form.phone.errors %}
+                <div class="error-message">
+                  <i class="bi bi-exclamation-circle"></i>{{ error }}
+                </div>
+              {% endfor %}
+            {% else %}
+              {{ form.phone }}
+              <script>document.getElementById('id_phone').classList.add('form-control');</script>
+            {% endif %}
+            <small class="text-muted d-block mt-1">Formato: +57 300 123 4567</small>
+          </div>
+          
+          <!-- Empresa -->
+          <div class="form-group">
+            <label for="id_company" class="form-label">
+              Empresa
+            </label>
+            {% if form.company.errors %}
+              {{ form.company }}
+              <script>document.getElementById('id_company').classList.add('form-control', 'is-invalid');</script>
+              {% for error in form.company.errors %}
+                <div class="error-message">
+                  <i class="bi bi-exclamation-circle"></i>{{ error }}
+                </div>
+              {% endfor %}
+            {% else %}
+              {{ form.company }}
+              <script>document.getElementById('id_company').classList.add('form-control');</script>
+            {% endif %}
+          </div>
+          
+          <!-- Estado -->
+          <div class="form-group">
+            <label class="form-label">Estado del Cliente</label>
+            <div class="checkbox-wrapper">
+              {{ form.is_active }}
+              <label for="id_is_active" class="form-check-label">
+                Marcar como cliente activo
+              </label>
+            </div>
+            <small class="text-muted d-block mt-1">Los clientes activos pueden recibir nuevas oportunidades</small>
+          </div>
+          
+          <!-- Botones -->
+          <div class="form-footer">
+            <a href="{% url 'customer_list' %}" class="btn btn-outline-secondary">
+              <i class="bi bi-x-circle me-1"></i>Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-circle me-1"></i>
+              {% if object %}Guardar Cambios{% else %}Crear Cliente{% endif %}
+            </button>
+          </div>
+        </form>
       </div>
-      <div class="mb-3">
-        <label for="id_email" class="form-label">Email</label>
-        {{ form.email }}
-        {% if form.email.errors %}
-          <div class="text-danger small mt-1">{{ form.email.errors }}</div>
-        {% endif %}
-      </div>
-      <div class="mb-3">
-        <label for="id_phone" class="form-label">Teléfono</label>
-        {{ form.phone }}
-      </div>
-      <div class="mb-3">
-        <label for="id_company" class="form-label">Empresa</label>
-        {{ form.company }}
-      </div>
-      <div class="mb-3">
-        <label for="id_is_active" class="form-label">Activo</label>
-        {{ form.is_active }}
-      </div>
-      <button type="submit" class="btn btn-primary me-2">{% if object %}Guardar Cambios{% else %}Crear Cliente{% endif %}</button>
-      <a href="{% url 'customer_list' %}" class="btn btn-outline-secondary">Cancelar</a>
-    </form>
+    </div>
   </div>
 </div>
+
+<script>
+  // Aplicar clases CSS a los inputs del formulario
+  document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('input[type="text"], input[type="email"], textarea, select');
+    inputs.forEach(input => {
+      if (!input.classList.contains('form-control') && input.name !== 'is_active') {
+        input.classList.add('form-control');
+      }
+    });
+    
+    // Validación en tiempo real
+    inputs.forEach(input => {
+      input.addEventListener('change', function() {
+        this.classList.remove('is-invalid');
+      });
+    });
+  });
+</script>
+
 {% endblock %}

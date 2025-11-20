@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Detalle Oportunidad - CRM Pro{% endblock %}
+
+{% block content %}
+<div class="mt-4 mb-3">
+  <h2><i class="bi bi-graph-up me-2"></i>{{ object.title }}</h2>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <p><strong>Cliente:</strong> {{ object.customer.name }}</p>
+    <p><strong>Asignado a:</strong> {{ object.assigned_to.username|default:"Sin asignar" }}</p>
+    <p><strong>Monto estimado:</strong> ${{ object.amount }}</p>
+    <p><strong>Estado:</strong> {{ object.get_status_display }}</p>
+    <p><strong>Fecha estimada de cierre:</strong> {{ object.expected_close_date|date:"d/m/Y" }}</p>
+    <p><strong>Descripción:</strong><br>{{ object.description|linebreaks }}</p>
+
+    <a href="{% url 'opportunity_update' object.pk %}" class="btn btn-primary me-2">Editar</a>
+    <a href="{% url 'opportunity_delete' object.pk %}" class="btn btn-danger">Eliminar</a>
+    <a href="{% url 'opportunity_list' %}" class="btn btn-outline-secondary ms-2">Volver a lista</a>
+  </div>
+</div>
+{% endblock %}

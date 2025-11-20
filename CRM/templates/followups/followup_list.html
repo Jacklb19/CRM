@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+{% block title %}Seguimientos - CRM Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+  .search-filters {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .filter-section {
+    margin-bottom: 1rem;
+  }
+  
+  .filter-section h6 {
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .stats-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+  
+  .stats-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #667eea;
+  }
+  
+  .stats-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+  
+  .checkbox-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .checkbox-container .form-check {
+    margin: 0;
+  }
+  
+  .checkbox-container label {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+  <h2 class="mb-0">
+    <i class="bi bi-chat-dots me-2"></i>Seguimientos
+  </h2>
+  <a href="{% url 'followup_create' %}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-2"></i>Nuevo Seguimiento
+  </a>
+</div>
+
+{% if overdue_count > 0 or due_soon_count > 0 %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong><i class="bi bi-exclamation-triangle me-2"></i>Atención</strong>
+  {% if overdue_count > 0 %}
+    Tienes <strong>{{ overdue_count }} seguimiento(s) vencido(s)</strong>.
+  {% endif %}
+  {% if due_soon_count > 0 %}
+    {% if overdue_count > 0 %} Y {% endif %}<strong>{{ due_soon_count }} seguimiento(s) vence en las próximas 24 horas</strong>.
+  {% endif %}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endif %}
+
+<!-- Estadísticas Rápidas -->
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="stats-card">
+      <div class="stats-value">{{ total_followups }}</div>
+      <div class="stats-label">Total de Seguimientos</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stats-card">
+      <div class="stats-value text-warning">{{ pending_followups }}</div>
+      <div class="stats-label">Pendientes</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="stats-card">
+      <div class="stats-value text-success">{{ completed_followups }}</div>
+      <div class="stats-label">Completados</div>
+    </div>
+  </div>
+</div>
+
+<!-- Búsqueda Avanzada -->
+<div class="search-filters">
+  <h5 class="mb-3"><i class="bi bi-search me-2"></i>Filtros Avanzados</h5>
+  <form method="get" id="search-form">
+    <div class="row g-3">
+      <!-- Búsqueda General -->
+      <div class="col-md-6">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-search me-1"></i>Búsqueda</label>
+          {{ form.search_query }}
+          <small class="text-muted d-block mt-1">Busca en asunto, notas o cliente</small>
+        </div>
+      </div>
+      
+      <!-- Cliente -->
+      <div class="col-md-6">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-person me-1"></i>Cliente</label>
+          {{ form.customer }}
+        </div>
+      </div>
+      
+      <!-- Tipo -->
+      <div class="col-md-4">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-tag me-1"></i>Tipos</label>
+          <div class="checkbox-container">
+            {% for choice_value, choice_label in form.type.field.choices %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="type" value="{{ choice_value }}" id="id_type_{{ forloop.counter }}" {% if choice_value in form.type.value %}checked{% endif %}>
+                <label class="form-check-label" for="id_type_{{ forloop.counter }}">
+                  {{ choice_label }}
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Estado -->
+      <div class="col-md-4">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-check-circle me-1"></i>Estados</label>
+          <div class="checkbox-container">
+            {% for choice_value, choice_label in form.status.field.choices %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="status" value="{{ choice_value }}" id="id_status_{{ forloop.counter }}" {% if choice_value in form.status.value %}checked{% endif %}>
+                <label class="form-check-label" for="id_status_{{ forloop.counter }}">
+                  {{ choice_label }}
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Usuario -->
+      <div class="col-md-4">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-person-badge me-1"></i>Usuario</label>
+          {{ form.assigned_to }}
+        </div>
+      </div>
+      
+      <!-- Fecha Desde -->
+      <div class="col-md-3">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-calendar me-1"></i>Desde</label>
+          {{ form.date_from }}
+        </div>
+      </div>
+      
+      <!-- Fecha Hasta -->
+      <div class="col-md-3">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-calendar me-1"></i>Hasta</label>
+          {{ form.date_to }}
+        </div>
+      </div>
+      
+      <!-- Ordenamiento -->
+      <div class="col-md-6">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-sort-down me-1"></i>Ordenar por</label>
+          {{ form.order_by }}
+        </div>
+      </div>
+      
+      <!-- Botones -->
+      <div class="col-md-6 d-flex gap-2 align-items-end">
+        <button type="submit" class="btn btn-primary flex-grow-1">
+          <i class="bi bi-search me-1"></i>Buscar
+        </button>
+        <a href="{% url 'followup_list' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+        </a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Tabla de Resultados -->
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th style="width: 80px;">Tipo</th>
+          <th>Asunto</th>
+          <th>Cliente</th>
+          <th>Usuario</th>
+          <th style="width: 120px;">Fecha</th>
+          <th style="width: 80px;">Estado</th>
+          <th style="width: 100px;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for followup in followups %}
+        <tr {% if followup.is_overdue %}class="table-danger"{% elif followup.is_due_soon %}class="table-warning"{% endif %}>
+          <td>
+            {% if followup.type == 'llamada' %}
+              <i class="bi bi-telephone text-primary"></i>
+            {% elif followup.type == 'email' %}
+              <i class="bi bi-envelope text-info"></i>
+            {% elif followup.type == 'reunion' %}
+              <i class="bi bi-calendar-event text-success"></i>
+            {% else %}
+              <i class="bi bi-sticky text-warning"></i>
+            {% endif %}
+            <small>{{ followup.get_type_display }}</small>
+          </td>
+          <td>
+            <a href="{% url 'followup_detail' followup.pk %}" class="text-decoration-none">
+              <strong>{{ followup.subject }}</strong>
+            </a>
+          </td>
+          <td>{{ followup.customer.name }}</td>
+          <td><small class="text-muted">{{ followup.user.username }}</small></td>
+          <td>
+            {{ followup.date|date:"d/m/Y H:i" }}
+            {% if followup.is_overdue %}
+              <br><small class="text-danger"><strong>VENCIDO</strong></small>
+            {% elif followup.is_due_soon %}
+              <br><small class="text-warning"><strong>Próximo</strong></small>
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge {% if followup.status == 'pendiente' %}bg-warning text-dark{% elif followup.status == 'completado' %}bg-success{% else %}bg-danger{% endif %}">
+              {{ followup.get_status_display }}
+            </span>
+          </td>
+          <td>
+            <div class="btn-group btn-group-sm" role="group">
+              <a href="{% url 'followup_update' followup.pk %}" class="btn btn-outline-primary" title="Editar">
+                <i class="bi bi-pencil-square"></i>
+              </a>
+              <a href="{% url 'followup_delete' followup.pk %}" class="btn btn-outline-danger" title="Eliminar">
+                <i class="bi bi-trash"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center py-4">
+            <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+            <p class="text-muted mt-2">No hay seguimientos que coincidan con tu búsqueda</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Paginación -->
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="mt-4">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page=1{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Primera</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Anterior</a>
+    </li>
+    {% endif %}
+    
+    <li class="page-item active">
+      <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Siguiente</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Última</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+<script>
+// Búsqueda en tiempo real
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('search-form');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    let debounceTimer;
+    
+    inputs.forEach(input => {
+        input.addEventListener('change', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                form.submit();
+            }, 300);
+        });
+        
+        if (input.type === 'text') {
+            input.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    form.submit();
+                }, 800);
+            });
+        }
+    });
+});
+</script>
+
+{% endblock %}

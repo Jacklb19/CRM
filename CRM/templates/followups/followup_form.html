@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Editar{% else %}Nuevo{% endif %} Seguimiento - CRM Pro{% endblock %}
+
+{% block content %}
+<div class="mt-4 mb-3">
+  <h2>
+    <i class="bi bi-chat-dots me-2"></i>{% if object %}Editar{% else %}Nuevo{% endif %} Seguimiento
+  </h2>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            {% for error in form.non_field_errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+
+      <div class="mb-3">
+        <label for="{{ form.customer.id_for_label }}" class="form-label">
+          Cliente <span class="text-danger">*</span>
+        </label>
+        {{ form.customer }}
+        {% if form.customer.errors %}
+          <div class="text-danger small mt-1">{{ form.customer.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.opportunity.id_for_label }}" class="form-label">
+          Oportunidad relacionada (opcional)
+        </label>
+        {{ form.opportunity }}
+        {% if form.opportunity.errors %}
+          <div class="text-danger small mt-1">{{ form.opportunity.errors }}</div>
+        {% endif %}
+        <small class="form-text text-muted d-block mt-2">
+          Selecciona una oportunidad si este seguimiento está relacionado con una venta específica.
+          <strong>Nota:</strong> La oportunidad debe pertenecer al cliente seleccionado.
+        </small>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="{{ form.type.id_for_label }}" class="form-label">
+            Tipo de seguimiento <span class="text-danger">*</span>
+          </label>
+          {{ form.type }}
+          {% if form.type.errors %}
+            <div class="text-danger small mt-1">{{ form.type.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label for="{{ form.date.id_for_label }}" class="form-label">
+            Fecha y hora <span class="text-danger">*</span>
+          </label>
+          {{ form.date }}
+          {% if form.date.errors %}
+            <div class="text-danger small mt-1">{{ form.date.errors }}</div>
+          {% endif %}
+          <small class="form-text text-muted d-block mt-2">
+            La fecha no puede ser en el pasado.
+          </small>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.subject.id_for_label }}" class="form-label">
+          Asunto <span class="text-danger">*</span>
+        </label>
+        {{ form.subject }}
+        {% if form.subject.errors %}
+          <div class="text-danger small mt-1">{{ form.subject.errors }}</div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        <label for="{{ form.notes.id_for_label }}" class="form-label">
+          Notas del seguimiento <span class="text-danger">*</span>
+        </label>
+        {{ form.notes }}
+        {% if form.notes.errors %}
+          <div class="text-danger small mt-1">{{ form.notes.errors }}</div>
+        {% endif %}
+        <small class="form-text text-muted d-block mt-2">
+          Describe los detalles de la interacción, acuerdos alcanzados, próximos pasos, etc.
+        </small>
+      </div>
+
+      {% if form.status %}
+      <div class="mb-3">
+        <label for="{{ form.status.id_for_label }}" class="form-label">
+          Estado <span class="text-danger">*</span>
+        </label>
+        {{ form.status }}
+        {% if form.status.errors %}
+          <div class="text-danger small mt-1">{{ form.status.errors }}</div>
+        {% endif %}
+        <small class="form-text text-muted d-block mt-2">
+          Cambia el estado solo al editar un seguimiento existente.
+        </small>
+      </div>
+      {% endif %}
+
+      <hr>
+
+      <button type="submit" class="btn btn-primary me-2">
+        <i class="bi bi-check-circle me-2"></i>Guardar
+      </button>
+      <a href="{% url 'followup_list' %}" class="btn btn-outline-secondary">
+        Cancelar
+      </a>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+{% block title %}Oportunidades - CRM Pro{% endblock %}
+
+{% block extra_css %}
+<style>
+  .search-filters {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .filter-section {
+    margin-bottom: 1rem;
+  }
+  
+  .filter-section h6 {
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .stats-card {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+  
+  .stats-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #667eea;
+  }
+  
+  .stats-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+  }
+  
+  .status-badge {
+    padding: 0.35rem 0.65rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+  
+  /* Estilos para checkboxes */
+  .checkbox-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .checkbox-container .form-check {
+    margin: 0;
+  }
+  
+  .checkbox-container label {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+  <h2 class="mb-0">
+    <i class="bi bi-graph-up me-2"></i>Oportunidades de Venta
+  </h2>
+  <a href="{% url 'opportunity_create' %}" class="btn btn-primary">
+    <i class="bi bi-plus-circle me-2"></i>Nueva Oportunidad
+  </a>
+</div>
+
+<!-- Estadísticas Rápidas -->
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="stats-card">
+      <div class="stats-value">{{ total_opportunities }}</div>
+      <div class="stats-label">Total de Oportunidades</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stats-card">
+      <div class="stats-value text-success">${{ total_pipeline|floatformat:0 }}</div>
+      <div class="stats-label">Pipeline Activo</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stats-card">
+      <div class="stats-value text-info">{{ won_opportunities }}</div>
+      <div class="stats-label">Oportunidades Ganadas</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="stats-card">
+      <div class="stats-value text-danger">{{ lost_opportunities }}</div>
+      <div class="stats-label">Oportunidades Perdidas</div>
+    </div>
+  </div>
+</div>
+
+<!-- Búsqueda Avanzada -->
+<div class="search-filters">
+  <h5 class="mb-3"><i class="bi bi-search me-2"></i>Filtros Avanzados</h5>
+  <form method="get" id="search-form">
+    <div class="row g-3">
+      <!-- Búsqueda General -->
+      <div class="col-md-6">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-search me-1"></i>Búsqueda</label>
+          {{ form.search_query }}
+          <small class="text-muted d-block mt-1">Busca en título, cliente, ID o descripción</small>
+        </div>
+      </div>
+      
+      <!-- Cliente -->
+      <div class="col-md-6">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-person me-1"></i>Cliente</label>
+          {{ form.customer }}
+        </div>
+      </div>
+      
+      <!-- Estado -->
+      <div class="col-md-4">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-list-check me-1"></i>Estados</label>
+          <div class="checkbox-container">
+            {% for choice_value, choice_label in form.status.field.choices %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="status" value="{{ choice_value }}" id="id_status_{{ forloop.counter }}" {% if choice_value in form.status.value %}checked{% endif %}>
+                <label class="form-check-label" for="id_status_{{ forloop.counter }}">
+                  {{ choice_label }}
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Prioridad -->
+      <div class="col-md-4">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-exclamation-circle me-1"></i>Prioridades</label>
+          <div class="checkbox-container">
+            {% for choice_value, choice_label in form.priority.field.choices %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="priority" value="{{ choice_value }}" id="id_priority_{{ forloop.counter }}" {% if choice_value in form.priority.value %}checked{% endif %}>
+                <label class="form-check-label" for="id_priority_{{ forloop.counter }}">
+                  {{ choice_label }}
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      
+      <!-- Vendedor -->
+      <div class="col-md-4">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-person-badge me-1"></i>Asignado a</label>
+          {{ form.assigned_to }}
+        </div>
+      </div>
+      
+      <!-- Monto Desde -->
+      <div class="col-md-3">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-cash-coin me-1"></i>Monto Desde</label>
+          {{ form.amount_from }}
+        </div>
+      </div>
+      
+      <!-- Monto Hasta -->
+      <div class="col-md-3">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-cash-coin me-1"></i>Monto Hasta</label>
+          {{ form.amount_to }}
+        </div>
+      </div>
+      
+      <!-- Fecha Desde -->
+      <div class="col-md-3">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-calendar me-1"></i>Cierra Desde</label>
+          {{ form.date_from }}
+        </div>
+      </div>
+      
+      <!-- Fecha Hasta -->
+      <div class="col-md-3">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-calendar me-1"></i>Cierra Hasta</label>
+          {{ form.date_to }}
+        </div>
+      </div>
+      
+      <!-- Ordenamiento -->
+      <div class="col-md-6">
+        <div class="filter-section">
+          <label class="form-label"><i class="bi bi-sort-down me-1"></i>Ordenar por</label>
+          {{ form.order_by }}
+        </div>
+      </div>
+      
+      <!-- Botones -->
+      <div class="col-md-6 d-flex gap-2 align-items-end">
+        <button type="submit" class="btn btn-primary flex-grow-1">
+          <i class="bi bi-search me-1"></i>Buscar
+        </button>
+        <a href="{% url 'opportunity_list' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+        </a>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Tabla de Resultados -->
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead>
+        <tr>
+          <th style="width: 50px;">#</th>
+          <th>Título</th>
+          <th>Cliente</th>
+          <th>Vendedor</th>
+          <th style="width: 100px;">Monto</th>
+          <th style="width: 80px;">Estado</th>
+          <th style="width: 80px;">Prioridad</th>
+          <th>Cierre</th>
+          <th style="width: 100px;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for opp in opportunities %}
+        <tr>
+          <td><small class="text-muted">#{{ opp.id }}</small></td>
+          <td>
+            <a href="{% url 'opportunity_detail' opp.pk %}" class="text-decoration-none">
+              <strong>{{ opp.title }}</strong>
+            </a>
+          </td>
+          <td>{{ opp.customer.name }}</td>
+          <td><small class="text-muted">{{ opp.assigned_to.username }}</small></td>
+          <td><strong>${{ opp.amount|floatformat:0 }}</strong></td>
+          <td>
+            {% if opp.status == 'abierta' %}
+              <span class="badge bg-warning text-dark">Abierta</span>
+            {% elif opp.status == 'calificada' %}
+              <span class="badge bg-info">Calificada</span>
+            {% elif opp.status == 'propuesta' %}
+              <span class="badge bg-primary">Propuesta</span>
+            {% elif opp.status == 'negociacion' %}
+              <span class="badge bg-secondary">Negociación</span>
+            {% elif opp.status == 'ganada' %}
+              <span class="badge bg-success">Ganada</span>
+            {% elif opp.status == 'perdida' %}
+              <span class="badge bg-danger">Perdida</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if opp.priority == 'alta' %}
+              <span class="badge bg-danger">Alta</span>
+            {% elif opp.priority == 'media' %}
+              <span class="badge bg-warning text-dark">Media</span>
+            {% else %}
+              <span class="badge bg-success">Baja</span>
+            {% endif %}
+          </td>
+          <td>
+            {{ opp.expected_close_date|date:"d/m/Y" }}
+            {% if opp.is_overdue %}
+              <small class="text-danger"><strong>(VENCIDA)</strong></small>
+            {% elif opp.is_due_soon %}
+              <small class="text-warning"><strong>(PRÓXIMA)</strong></small>
+            {% endif %}
+          </td>
+          <td>
+            <div class="btn-group btn-group-sm" role="group">
+              <a href="{% url 'opportunity_update' opp.pk %}" class="btn btn-outline-primary" title="Editar">
+                <i class="bi bi-pencil-square"></i>
+              </a>
+              <a href="{% url 'opportunity_delete' opp.pk %}" class="btn btn-outline-danger" title="Eliminar">
+                <i class="bi bi-trash"></i>
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" class="text-center py-4">
+            <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
+            <p class="text-muted mt-2">No hay oportunidades que coincidan con tu búsqueda</p>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Paginación -->
+{% if is_paginated %}
+<nav aria-label="Page navigation" class="mt-4">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+    <li class="page-item">
+      <a class="page-link" href="?page=1{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Primera</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Anterior</a>
+    </li>
+    {% endif %}
+    
+    <li class="page-item active">
+      <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    </li>
+    
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Siguiente</a>
+    </li>
+    <li class="page-item">
+      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Última</a>
+    </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+<script>
+// Búsqueda en tiempo real - Se ejecuta cuando cambias cualquier filtro
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('search-form');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    // Crear un debounce para no saturar el servidor
+    let debounceTimer;
+    
+    inputs.forEach(input => {
+        input.addEventListener('change', function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                form.submit(); // Envía automáticamente
+            }, 300); // Espera 300ms antes de enviar
+        });
+        
+        // Para inputs de texto, también en tiempo real mientras escribes
+        if (input.type === 'text') {
+            input.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    form.submit();
+                }, 800); // 800ms para no ser tan agresivo
+            });
+        }
+    });
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Detalle Seguimiento - CRM Pro{% endblock %}
+
+{% block content %}
+<div class="mt-4 mb-3">
+  <h2>
+    <i class="bi bi-chat-dots me-2"></i>{{ object.subject }}
+  </h2>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <p><strong>Tipo:</strong> {{ object.get_type_display }}</p>
+        <p><strong>Cliente:</strong> <a href="{% url 'customer_detail' object.customer.pk %}">{{ object.customer.name }}</a></p>
+        <p><strong>Usuario responsable:</strong> {{ object.user.username }}</p>
+      </div>
+      <div class="col-md-6">
+        <p>
+          <strong>Estado:</strong>
+          <span class="badge {% if object.status == 'pendiente' %}bg-warning{% elif object.status == 'completado' %}bg-success{% else %}bg-danger{% endif %}">
+            {{ object.get_status_display }}
+          </span>
+        </p>
+        <p><strong>Fecha programada:</strong> {{ object.date|date:"d/m/Y H:i" }}</p>
+        {% if object.opportunity %}
+          <p><strong>Oportunidad:</strong> <a href="{% url 'opportunity_detail' object.opportunity.pk %}">{{ object.opportunity.title }}</a></p>
+        {% endif %}
+      </div>
+    </div>
+
+    <hr>
+
+    <h4>Notas</h4>
+    <p>{{ object.notes|linebreaks }}</p>
+
+    <hr>
+
+    <p class="text-muted small">
+      <strong>Creado:</strong> {{ object.created_at|date:"d/m/Y H:i" }} | 
+      <strong>Actualizado:</strong> {{ object.updated_at|date:"d/m/Y H:i" }}
+    </p>
+
+    <a href="{% url 'followup_update' object.pk %}" class="btn btn-primary me-2">Editar</a>
+    <a href="{% url 'followup_delete' object.pk %}" class="btn btn-danger">Eliminar</a>
+    <a href="{% url 'followup_list' %}" class="btn btn-outline-secondary">Volver</a>
+  </div>
+</div>
+{% endblock %}
