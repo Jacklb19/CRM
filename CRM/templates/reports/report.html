@@ -1,39 +1,478 @@
 {% extends "base.html" %}
 {% block title %}Reportes - CRM Pro{% endblock %}
 
-{% block content %}
-<h2>Generar Reporte</h2>
+{% block extra_css %}
+<style>
+  .report-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1.5rem;
+  }
 
-<form method="get" class="mb-4">
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Generar</button>
-</form>
+  .metric {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .metric:last-child {
+    border-bottom: none;
+  }
+
+  .metric-label {
+    font-weight: 600;
+    color: #6c757d;
+  }
+
+  .metric-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #667eea;
+  }
+
+  .table-container {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  }
+
+  .export-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+  <h2><i class="bi bi-file-earmark-text me-2"></i>Generador de Reportes</h2>
+</div>
+
+<div class="report-card">
+  <h5 class="mb-3"><i class="bi bi-funnel me-2"></i>Filtros y Opciones</h5>
+  <form method="get" class="row g-3">
+    <div class="col-md-3">
+      <label for="{{ form.report_type.id_for_label }}" class="form-label">Tipo de Reporte</label>
+      {{ form.report_type }}
+    </div>
+
+    <div class="col-md-2">
+      <label for="{{ form.start_date.id_for_label }}" class="form-label">Desde</label>
+      {{ form.start_date }}
+    </div>
+
+    <div class="col-md-2">
+      <label for="{{ form.end_date.id_for_label }}" class="form-label">Hasta</label>
+      {{ form.end_date }}
+    </div>
+
+    <div class="col-md-2">
+      <label for="{{ form.assigned_to.id_for_label }}" class="form-label">Vendedor</label>
+      {{ form.assigned_to }}
+    </div>
+
+    <div class="col-md-2">
+      <label for="{{ form.customer.id_for_label }}" class="form-label">Cliente</label>
+      {{ form.customer }}
+    </div>
+
+    <div class="col-md-1 d-flex align-items-end">
+      <button type="submit" class="btn btn-primary w-100">
+        <i class="bi bi-search me-1"></i>Generar
+      </button>
+    </div>
+  </form>
+</div>
 
 {% if report_data %}
-    <h3>Resultados</h3>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Título</th>
-                <th>Cliente</th>
-                <th>Vendedor</th>
-                <th>Estado</th>
-                <th>Fecha creación</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for opp in report_data %}
-            <tr>
-                <td>{{ opp.title }}</td>
-                <td>{{ opp.customer.name }}</td>
-                <td>{{ opp.assigned_to.username }}</td>
-                <td>{{ opp.get_status_display }}</td>
-                <td>{{ opp.created_at|date:"d/m/Y" }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="5">No se encontraron registros.</td></tr>
-            {% endfor %}
-        </tbody>
+<div class="report-card">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>{{ report_title }}</h4>
+    <div class="export-buttons">
+      <form method="get" style="display: inline;">
+        {% for key, value in request.GET.items %}
+          {% if key != 'export_format' %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+          {% endif %}
+        {% endfor %}
+        <input type="hidden" name="export_format" value="excel">
+        <button type="submit" class="btn btn-success btn-sm">
+          <i class="bi bi-file-earmark-excel me-1"></i>Excel
+        </button>
+      </form>
+      <form method="get" style="display: inline;">
+        {% for key, value in request.GET.items %}
+          {% if key != 'export_format' %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+          {% endif %}
+        {% endfor %}
+        <input type="hidden" name="export_format" value="pdf">
+        <button type="submit" class="btn btn-danger btn-sm">
+          <i class="bi bi-file-earmark-pdf me-1"></i>PDF
+        </button>
+      </form>
+    </div>
+  </div>
+
+  {% if report_type == 'sales' %}
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Valor Total:</span>
+          <span class="metric-value">${{ report_data.summary.total_value|floatformat:0 }}</span>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Total Deals:</span>
+          <span class="metric-value">{{ report_data.summary.total_deals }}</span>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Deal Promedio:</span>
+          <span class="metric-value">${{ report_data.summary.average_deal|floatformat:0 }}</span>
+        </div>
+      </div>
+    </div>
+    
+    <h6 class="mb-3">Ventas por Vendedor</h6>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Vendedor</th>
+          <th>Cantidad</th>
+          <th>Total</th>
+          <th>Promedio</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for seller in report_data.by_seller %}
+        <tr>
+          <td>{{ seller.assigned_to__username }}</td>
+          <td>{{ seller.count }}</td>
+          <td>${{ seller.total|floatformat:0 }}</td>
+          <td>${{ seller.avg|floatformat:0 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
+
+      {% elif report_type == 'customers' %}
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Total:</span>
+          <span class="metric-value">{{ report_data.summary.total }}</span>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Activos:</span>
+          <span class="metric-value text-success">{{ report_data.summary.active }}</span>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Inactivos:</span>
+          <span class="metric-value text-warning">{{ report_data.summary.inactive }}</span>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Sin actividad:</span>
+          <span class="metric-value text-danger">{{ report_data.summary.dormant }}</span>
+        </div>
+      </div>
+    </div>
+
+    <h6 class="mb-3">🔝 Clientes Principales (Más Oportunidades)</h6>
+    {% if report_data.top_customers %}
+    <table class="table table-hover table-sm">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Vendedor</th>
+          <th>Oportunidades</th>
+          <th>Valor Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for customer in report_data.top_customers %}
+        <tr>
+          <td><strong>{{ customer.name }}</strong></td>
+          <td>{{ customer.assigned_to__username }}</td>
+          <td><span class="badge bg-info">{{ customer.opp_count }}</span></td>
+          <td>${{ customer.opp_value|floatformat:0 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-info">No hay clientes con oportunidades</div>
+    {% endif %}
+
+    <h6 class="mb-3 mt-4">⚠️ Clientes Sin Actividad (Dormidos)</h6>
+    {% if report_data.dormant_customers %}
+    <table class="table table-hover table-sm">
+      <thead>
+        <tr>
+          <th>Cliente</th>
+          <th>Email</th>
+          <th>Teléfono</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for customer in report_data.dormant_customers %}
+        <tr>
+          <td><strong>{{ customer.name }}</strong></td>
+          <td>{{ customer.email }}</td>
+          <td>{{ customer.phone }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>¡Excelente! Todos tus clientes tienen actividad</div>
+    {% endif %}
+
+  {% elif report_type == 'sellers' %}
+    <table class="table table-hover table-sm">
+      <thead>
+        <tr>
+          <th>Vendedor</th>
+          <th>Clientes</th>
+          <th>Opor.</th>
+          <th>Ganadas</th>
+          <th>Perdidas</th>
+          <th>Pipeline</th>
+          <th>Valor Ganado</th>
+          <th>Win Rate</th>
+          <th>Deal Prom.</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for seller in report_data.sellers %}
+        <tr>
+          <td><strong>{{ seller.name }}</strong></td>
+          <td><span class="badge bg-info">{{ seller.customers }}</span></td>
+          <td>{{ seller.total_opportunities }}</td>
+          <td><span class="badge bg-success">{{ seller.won_opportunities }}</span></td>
+          <td><span class="badge bg-danger">{{ seller.lost_opportunities }}</span></td>
+          <td>${{ seller.pipeline_value|floatformat:0 }}</td>
+          <td>${{ seller.won_value|floatformat:0 }}</td>
+          <td>
+            <span class="badge {% if seller.win_rate >= 50 %}bg-success{% elif seller.win_rate >= 30 %}bg-warning{% else %}bg-danger{% endif %}">
+              {{ seller.win_rate|floatformat:1 }}%
+            </span>
+          </td>
+          <td>${{ seller.avg_deal_size|floatformat:0 }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+      {% elif report_type == 'followups' %}
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Total:</span>
+          <span class="metric-value">{{ report_data.summary.total }}</span>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Pendientes:</span>
+          <span class="metric-value text-warning">{{ report_data.summary.pending }}</span>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Completados:</span>
+          <span class="metric-value text-success">{{ report_data.summary.completed }}</span>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Vencidos:</span>
+          <span class="metric-value text-danger">{{ report_data.summary.overdue }}</span>
+        </div>
+      </div>
+    </div>
+
+    <h6 class="mb-3">📞 Seguimientos por Tipo</h6>
+    <table class="table table-hover table-sm">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Cantidad</th>
+          <th>Porcentaje</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in report_data.by_type %}
+        <tr>
+          <td>
+            {% if item.type == 'llamada' %}
+              <i class="bi bi-telephone me-2"></i>Llamada
+            {% elif item.type == 'email' %}
+              <i class="bi bi-envelope me-2"></i>Email
+            {% elif item.type == 'reunion' %}
+              <i class="bi bi-calendar-event me-2"></i>Reunión
+            {% else %}
+              <i class="bi bi-sticky me-2"></i>Nota
+            {% endif %}
+          </td>
+          <td><span class="badge bg-primary">{{ item.count }}</span></td>
+          <td>
+            {% widthratio item.count report_data.summary.total 100 as percentage %}
+            <div class="progress" style="height: 20px;">
+              <div class="progress-bar" role="progressbar" style="width: {{ percentage }}%">{{ percentage }}%</div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h6 class="mb-3 mt-4">👤 Actividad por Vendedor</h6>
+    <table class="table table-hover table-sm">
+      <thead>
+        <tr>
+          <th>Vendedor</th>
+          <th>Total Seguimientos</th>
+          <th>Completados</th>
+          <th>Tasa Completación</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for seller in report_data.by_seller %}
+        <tr>
+          <td><strong>{{ seller.user__username }}</strong></td>
+          <td>{{ seller.count }}</td>
+          <td><span class="badge bg-success">{{ seller.completed_count }}</span></td>
+          <td>
+            {% if seller.count > 0 %}
+              {% widthratio seller.completed_count seller.count 100 as rate %}
+              <span class="badge {% if rate >= 80 %}bg-success{% elif rate >= 50 %}bg-warning{% else %}bg-danger{% endif %}">{{ rate }}%</span>
+            {% else %}
+              <span class="badge bg-secondary">N/A</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+
+  {% elif report_type == 'opportunities' %}
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Total:</span>
+          <span class="metric-value">{{ report_data.summary.total }}</span>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Valor Total:</span>
+          <span class="metric-value">${{ report_data.summary.total_value|floatformat:0 }}</span>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Valor Promedio:</span>
+          <span class="metric-value">${{ report_data.summary.avg_value|floatformat:0 }}</span>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Vencen Pronto:</span>
+          <span class="metric-value text-warning">{{ report_data.summary.due_soon }}</span>
+        </div>
+      </div>
+    </div>
+
+    <table class="table table-hover table-sm">
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Cliente</th>
+          <th>Vendedor</th>
+          <th>Monto</th>
+          <th>Estado</th>
+          <th>Prioridad</th>
+          <th>Vencimiento</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for opp in report_data.opportunities %}
+        <tr>
+          <td>{{ opp.title }}</td>
+          <td>{{ opp.customer__name }}</td>
+          <td>{{ opp.assigned_to__username }}</td>
+          <td>${{ opp.amount|floatformat:0 }}</td>
+          <td><span class="badge bg-primary">{{ opp.status }}</span></td>
+          <td>
+            {% if opp.priority == 'alta' %}
+              <span class="badge bg-danger">Alta</span>
+            {% elif opp.priority == 'media' %}
+              <span class="badge bg-warning">Media</span>
+            {% else %}
+              <span class="badge bg-success">Baja</span>
+            {% endif %}
+          </td>
+          <td>{{ opp.expected_close_date|date:"d/m/Y" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  {% elif report_type == 'pipeline' %}
+    <div class="row mb-4">
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Pipeline Total:</span>
+          <span class="metric-value">${{ report_data.total_pipeline|floatformat:0 }}</span>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="metric">
+          <span class="metric-label">Pronóstico Ponderado:</span>
+          <span class="metric-value text-info">${{ report_data.weighted_forecast|floatformat:0 }}</span>
+        </div>
+      </div>
+    </div>
+
+    <h6 class="mb-3">Pipeline por Etapa</h6>
+    <table class="table">
+      <tbody>
+        {% for stage, value in report_data.pipeline_stages.items %}
+        <tr>
+          <td><strong>{{ stage|title }}</strong></td>
+           <td>${{ value|floatformat:0 }}</td>
+
+          <td>
+            <div class="progress" style="height: 25px;">
+              <div class="progress-bar" role="progressbar" style="width: {% widthratio value report_data.total_pipeline 100 %}%"></div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  {% endif %}
+</div>
+{% else %}
+<div class="alert alert-info">
+  <i class="bi bi-info-circle me-2"></i>Selecciona un tipo de reporte y haz clic en "Generar" para ver los datos.
+</div>
 {% endif %}
+
 {% endblock %}
