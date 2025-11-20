@@ -1,4 +1,3 @@
-# followups/models.py
 from django.db import models
 from django.contrib.auth.models import User
 from customers.models import Customer
@@ -29,25 +28,24 @@ class FollowUp(models.Model):
         null=True
     )
 
-    # 🔗 Cliente relacionado (opcional)
+    # Cliente relacionado (opcional pero recomendado)
     related_customer = models.ForeignKey(
         Customer,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         related_name="followups",
         null=True,
         blank=True,
     )
 
-    # 🔗 Oportunidad relacionada (opcional)
+    # Oportunidad relacionada (opcional)
     related_opportunity = models.ForeignKey(
-        "opportunities.Opportunity",           # ← REFERENCIA EN STRING
-        on_delete=models.CASCADE,
+        "opportunities.Opportunity",
+        on_delete=models.SET_NULL,
         related_name="followups",
         null=True,
         blank=True,
     )
 
-    # 🔗 Quién creó el seguimiento
     created_by = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -56,6 +54,7 @@ class FollowUp(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-created_at"]

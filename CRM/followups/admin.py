@@ -1,8 +1,10 @@
 from django.contrib import admin
 from .models import FollowUp
 
+
 @admin.register(FollowUp)
 class FollowUpAdmin(admin.ModelAdmin):
+
     list_display = (
         "followup_type",
         "related_customer",
@@ -25,4 +27,33 @@ class FollowUpAdmin(admin.ModelAdmin):
         "created_by__username",
     )
 
+    readonly_fields = (
+        "created_at",
+        "created_by",
+    )
+
     ordering = ("-created_at",)
+
+    list_per_page = 20
+
+    fieldsets = (
+        ("Información del Seguimiento", {
+            "fields": (
+                "followup_type",
+                "notes",
+                "next_contact_date",
+            )
+        }),
+        ("Relaciones", {
+            "fields": (
+                "related_customer",
+                "related_opportunity",
+            )
+        }),
+        ("Datos del Sistema", {
+            "fields": (
+                "created_by",
+                "created_at",
+            )
+        }),
+    )

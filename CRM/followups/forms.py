@@ -3,6 +3,7 @@ from .models import FollowUp
 from customers.models import Customer
 from opportunities.models import Opportunity
 
+
 class FollowUpForm(forms.ModelForm):
 
     class Meta:
@@ -41,30 +42,29 @@ class FollowUpForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop("user", None)  
+        user = kwargs.pop("user", None)
         super().__init__(*args, **kwargs)
 
-        # 🎯 Filtro inteligente según rol del usuario
+        # 🎯 Filtrado por rol correcto
         if user:
-
             role = user.profile.role
 
-            # ADMIN → todo
-            if role == "admin":
+            # ADMIN o GERENTE → pueden ver todo
+            if role in ["administrador", "gerente"]:
                 self.fields["related_customer"].queryset = Customer.objects.all()
                 self.fields["related_opportunity"].queryset = Opportunity.objects.all()
 
-            # VENDEDOR → solo sus clientes y oportunidades
+            # VENDEDOR → solo lo suyo
             elif role == "vendedor":
                 self.fields["related_customer"].queryset = Customer.objects.filter(owner=user)
                 self.fields["related_opportunity"].queryset = Opportunity.objects.filter(owner=user)
 
-            # CLIENTE → no puede crear seguimientos
+            # OTROS → no tienen acceso
             else:
                 self.fields["related_customer"].queryset = Customer.objects.none()
                 self.fields["related_opportunity"].queryset = Opportunity.objects.none()
 
-        # 🎨 Mejores opciones para followup_type
+        # 🎨 Íconos para los tipos de seguimiento
         self.fields["followup_type"].choices = [
             ("llamada", "📞 Llamada telefónica"),
             ("correo", "✉️ Correo electrónico"),
@@ -72,3 +72,17 @@ class FollowUpForm(forms.ModelForm):
             ("recordatorio", "⏰ Recordatorio"),
             ("otro", "📝 Otro"),
         ]
+
+    # 🛡 Validación para evitar seguimientos “huérfanos”
+    def clean(self):
+        cleaned_data = super().clean()
+        customer = cleaned_data.get("related_customer")
+        opportunity = cleaned_data.get("related_opportunity")
+
+        # ❌ No permitir ambos vacíos
+        if not customer and not opportunity:
+            raise forms.ValidationError(
+                "Debes elegir un cliente o una oportunidad."
+            )
+
+        return cleaned_data

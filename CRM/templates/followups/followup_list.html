@@ -3,88 +3,103 @@
 {% block content %}
 <div class="container mt-4">
 
-    <!-- Título + botón -->
+    <!-- Encabezado -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3">Seguimientos</h1>
+        <h1 class="h3 fw-bold">
+            <i class="bi bi-chat-dots-fill me-2"></i> Seguimientos
+        </h1>
 
-        <a href="{% url 'followups:create' %}" class="btn btn-success">
+        <a href="{% url 'followups:create' %}" class="btn btn-success shadow-sm px-3">
             <i class="bi bi-plus-circle me-1"></i> Nuevo Seguimiento
         </a>
     </div>
 
     {% if followups %}
-    <table class="table table-hover table-bordered shadow-sm align-middle">
-        <thead class="table-light">
-            <tr>
-                <th>Cliente</th>
-                <th>Oportunidad</th>
-                <th>Tipo</th>
-                <th>Notas</th>
-                <th>Próxima Fecha</th>
-                <th class="text-center">Acciones</th>
-            </tr>
-        </thead>
+    <div class="table-responsive shadow-sm">
+        <table class="table table-hover table-bordered align-middle mb-0">
 
-        <tbody>
-        {% for f in followups %}
-            <tr>
-                <!-- CLIENTE -->
-                <td>
-                    {% if f.related_customer %}
-                        {{ f.related_customer }}
-                    {% else %}
-                        <span class="text-muted">N/A</span>
-                    {% endif %}
-                </td>
+            <thead class="table-light">
+                <tr>
+                    <th class="fw-semibold">Cliente</th>
+                    <th class="fw-semibold">Oportunidad</th>
+                    <th class="fw-semibold">Tipo</th>
+                    <th class="fw-semibold">Notas</th>
+                    <th class="fw-semibold">Próxima Fecha</th>
+                    <th class="text-center fw-semibold">Acciones</th>
+                </tr>
+            </thead>
 
-                <!-- OPORTUNIDAD -->
-                <td>
-                    {% if f.related_opportunity %}
-                        <a href="{% url 'opportunities:detail' f.related_opportunity.id %}"
-                           class="text-primary fw-semibold text-decoration-none">
-                            {{ f.related_opportunity.title }}
+            <tbody>
+            {% for f in followups %}
+                <tr>
+
+                    <!-- CLIENTE -->
+                    <td>
+                        {% if f.related_customer %}
+                            <span class="fw-semibold">{{ f.related_customer }}</span>
+                        {% else %}
+                            <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- OPORTUNIDAD -->
+                    <td>
+                        {% if f.related_opportunity %}
+                            <a href="{% url 'opportunities:detail' f.related_opportunity.id %}"
+                               class="fw-semibold text-primary text-decoration-none">
+                                {{ f.related_opportunity.title }}
+                            </a>
+                        {% else %}
+                            <span class="text-muted">N/A</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- TIPO -->
+                    <td>
+                        <span class="badge bg-primary px-3 py-2 rounded-pill">
+                            {{ f.get_followup_type_display }}
+                        </span>
+                    </td>
+
+                    <!-- NOTAS -->
+                    <td class="text-muted">
+                        {{ f.notes|default:"(Sin notas)"|truncatechars:40 }}
+                    </td>
+
+                    <!-- FECHA PRÓXIMA -->
+                    <td>
+                        {% if f.next_contact_date %}
+                            {{ f.next_contact_date|date:"d/m/Y" }}
+                        {% else %}
+                            <span class="text-muted">Sin fecha</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- ACCIONES -->
+                    <td class="text-center">
+                        <a href="{% url 'followups:edit' f.id %}"
+                           class="btn btn-sm btn-warning text-white px-3 me-1">
+                            <i class="bi bi-pencil-square"></i>
                         </a>
-                    {% else %}
-                        <span class="text-muted">N/A</span>
-                    {% endif %}
-                </td>
 
-                <!-- TIPO -->
-                <td>
-                    <span class="badge bg-primary">
-                        {{ f.get_followup_type_display }}
-                    </span>
-                </td>
+                        <a href="{% url 'followups:delete' f.id %}"
+                           class="btn btn-sm btn-danger px-3">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
 
-                <!-- NOTAS -->
-                <td class="text-muted">
-                    {{ f.notes|truncatechars:40 }}
-                </td>
+                </tr>
+            {% endfor %}
+            </tbody>
 
-                <!-- FECHA PRÓXIMA -->
-                <td>
-                    {% if f.next_contact_date %}
-                        {{ f.next_contact_date|date:"d/m/Y" }}
-                    {% else %}
-                        <span class="text-muted">Sin fecha</span>
-                    {% endif %}
-                </td>
-
-                <!-- ACCIONES -->
-                <td class="text-center">
-                    <a href="{% url 'followups:edit' f.id %}"
-                       class="btn btn-sm btn-warning text-white">Editar</a>
-
-                    <a href="{% url 'followups:delete' f.id %}"
-                       class="btn btn-sm btn-danger">Eliminar</a>
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        </table>
+    </div>
 
     {% else %}
-        <p class="text-muted">No hay seguimientos registrados.</p>
+        <div class="alert alert-info shadow-sm">
+            No hay seguimientos registrados aún.
+        </div>
     {% endif %}
+
 </div>
 {% endblock %}

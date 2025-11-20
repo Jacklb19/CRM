@@ -1,43 +1,77 @@
 {% extends "base.html" %}
-{% block title %}Formulario de Cliente{% endblock %}
+{% block title %}{% if object %}Editar Cliente{% else %}Nuevo Cliente{% endif %}{% endblock %}
+
 {% block content %}
-<div class="card mt-4">
-  <div class="card-header bg-white">
-    <h4 class="mb-0"><i class="bi bi-person-plus me-2"></i>{% if object %}Editar{% else %}Nuevo{% endif %} Cliente</h4>
-  </div>
-  <div class="card-body">
-    <form method="post">
-      {% csrf_token %}
-      {{ form.non_field_errors }}
-      <div class="mb-3">
-        <label for="id_name" class="form-label">Nombre</label>
-        {{ form.name }}
-        {% if form.name.errors %}
-          <div class="text-danger small mt-1">{{ form.name.errors }}</div>
-        {% endif %}
-      </div>
-      <div class="mb-3">
-        <label for="id_email" class="form-label">Email</label>
-        {{ form.email }}
-        {% if form.email.errors %}
-          <div class="text-danger small mt-1">{{ form.email.errors }}</div>
-        {% endif %}
-      </div>
-      <div class="mb-3">
-        <label for="id_phone" class="form-label">Teléfono</label>
-        {{ form.phone }}
-      </div>
-      <div class="mb-3">
-        <label for="id_company" class="form-label">Empresa</label>
-        {{ form.company }}
-      </div>
-      <div class="mb-3">
-        <label for="id_is_active" class="form-label">Activo</label>
-        {{ form.is_active }}
-      </div>
-      <button type="submit" class="btn btn-primary me-2">{% if object %}Guardar Cambios{% else %}Crear Cliente{% endif %}</button>
-      <a href="{% url 'customer_list' %}" class="btn btn-outline-secondary">Cancelar</a>
-    </form>
-  </div>
+<div class="container mt-4">
+
+    <div class="card shadow-sm p-4" style="border-radius: 1rem;">
+
+        <!-- Título -->
+        <h2 class="mb-3">
+            {% if object %}
+                <i class="bi bi-pencil-square me-2"></i> Editar Cliente
+            {% else %}
+                <i class="bi bi-person-plus-fill me-2"></i> Nuevo Cliente
+            {% endif %}
+        </h2>
+
+        <form method="post" class="row g-4">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <!-- Nombre -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Nombre</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="text-danger small">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Email -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="text-danger small">{{ form.email.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- Teléfono -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Teléfono</label>
+                {{ form.phone }}
+            </div>
+
+            <!-- Empresa -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Empresa</label>
+                {{ form.company }}
+            </div>
+
+            <!-- Estado activo -->
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Activo</label><br>
+                {{ form.is_active }}
+            </div>
+
+            <!-- Botones -->
+            <div class="col-12 d-flex justify-content-end mt-4">
+
+                <a href="{% url 'customer_list' %}"
+                   class="btn btn-secondary px-4 py-2 me-3">
+                    <i class="bi bi-arrow-left me-1"></i> Cancelar
+                </a>
+
+                <button type="submit" class="btn btn-primary px-4 py-2">
+                    <i class="bi bi-check-circle me-1"></i>
+                    {% if object %}Guardar Cambios{% else %}Crear Cliente{% endif %}
+                </button>
+
+            </div>
+
+        </form>
+    </div>
+
 </div>
 {% endblock %}

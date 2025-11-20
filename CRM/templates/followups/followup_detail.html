@@ -1,49 +1,105 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container mt-4" style="max-width: 900px;">
 
-    <div class="card shadow-sm p-4">
+    <div class="card shadow-lg border-0" style="border-radius: 18px; overflow: hidden;">
 
-        <h2 class="mb-3">
-            <i class="bi bi-chat-square-text me-2"></i> Detalle del Seguimiento
-        </h2>
+        <!-- HEADER -->
+        <div class="p-4 text-white"
+             style="background: linear-gradient(135deg, #4C8CF5, #6A4EF5);">
+            
+            <h2 class="fw-bold mb-0">
+                <i class="bi bi-chat-square-text me-2"></i>
+                Detalle del Seguimiento
+            </h2>
 
-        <p><strong>Cliente:</strong> {{ followup.customer }}</p>
+            <p class="mb-0" style="opacity: .9;">
+                Información completa del seguimiento registrado.
+            </p>
+        </div>
 
-        <p><strong>Oportunidad:</strong>
-            {% if followup.opportunity %}
-                <a href="{% url 'opportunities:detail' followup.opportunity.id %}"
-                   class="text-primary text-decoration-none">
-                   {{ followup.opportunity.title }}
+        <!-- BODY -->
+        <div class="p-4 bg-white">
+
+            <!-- CLIENTE -->
+            <p class="fs-5 mb-2">
+                <strong>Cliente:</strong>
+                {% if followup.related_customer %}
+                    {{ followup.related_customer }}
+                {% else %}
+                    <span class="text-muted">N/A</span>
+                {% endif %}
+            </p>
+
+            <!-- OPORTUNIDAD -->
+            <p class="fs-5 mb-2">
+                <strong>Oportunidad:</strong>
+                {% if followup.related_opportunity %}
+                    <a href="{% url 'opportunities:detail' followup.related_opportunity.id %}"
+                       class="fw-semibold text-primary text-decoration-none">
+                       {{ followup.related_opportunity.title }}
+                    </a>
+                {% else %}
+                    <span class="text-muted">N/A</span>
+                {% endif %}
+            </p>
+
+            <!-- TIPO -->
+            <p class="fs-5 mb-2">
+                <strong>Tipo:</strong>
+                <span class="badge bg-primary">
+                    {{ followup.get_followup_type_display }}
+                </span>
+            </p>
+
+            <!-- FECHA REGISTRO -->
+            <p class="fs-5 mb-2">
+                <strong>Fecha registrada:</strong>
+                {{ followup.created_at|date:"d/m/Y H:i" }}
+            </p>
+
+            <!-- PRÓXIMA FECHA -->
+            <p class="fs-5 mb-2">
+                <strong>Próxima fecha de contacto:</strong>
+                {% if followup.next_contact_date %}
+                    {{ followup.next_contact_date|date:"d/m/Y" }}
+                {% else %}
+                    <span class="text-muted">Sin fecha programada</span>
+                {% endif %}
+            </p>
+
+            <!-- NOTAS -->
+            <p class="fs-5">
+                <strong>Notas:</strong><br>
+                <span class="text-muted">
+                    {{ followup.notes|default:"Sin notas registradas" }}
+                </span>
+            </p>
+
+            <!-- BOTONES -->
+            <div class="mt-4 d-flex gap-3">
+
+                <a href="{% url 'followups:edit' followup.id %}"
+                   class="btn btn-warning text-white px-4 py-2 fw-semibold"
+                   style="border-radius: 10px;">
+                    <i class="bi bi-pencil-square me-1"></i> Editar
                 </a>
-            {% else %}
-                N/A
-            {% endif %}
-        </p>
 
-        <p>
-            <strong>Tipo:</strong>
-            <span class="badge bg-primary">
-                {{ followup.get_followup_type_display }}
-            </span>
-        </p>
+                <a href="{% url 'followups:delete' followup.id %}"
+                   class="btn btn-danger px-4 py-2 fw-semibold"
+                   style="border-radius: 10px;">
+                    <i class="bi bi-trash me-1"></i> Eliminar
+                </a>
 
-        <p><strong>Fecha:</strong> {{ followup.date|date:"d/m/Y" }}</p>
+                <a href="{% url 'followups:list' %}"
+                   class="btn btn-secondary px-4 py-2 fw-semibold"
+                   style="border-radius: 10px;">
+                    <i class="bi bi-arrow-left me-1"></i> Volver
+                </a>
 
-        <p><strong>Nota:</strong><br>
-            {{ followup.note }}
-        </p>
+            </div>
 
-        <div class="mt-4">
-            <a href="{% url 'followups:update' followup.id %}"
-               class="btn btn-warning text-white">Editar</a>
-
-            <a href="{% url 'followups:delete' followup.id %}"
-               class="btn btn-danger">Eliminar</a>
-
-            <a href="{% url 'followups:list' %}"
-               class="btn btn-secondary">Volver</a>
         </div>
     </div>
 </div>

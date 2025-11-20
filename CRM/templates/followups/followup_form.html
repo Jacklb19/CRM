@@ -1,26 +1,82 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card shadow-sm p-4">
+<div class="container mt-4" style="max-width: 850px;">
 
-        <h2 class="mb-3">
-            {% if form.instance.pk %}
-                <i class="bi bi-pencil-square me-2"></i> Editar Seguimiento
-            {% else %}
-                <i class="bi bi-plus-circle me-2"></i> Nuevo Seguimiento
-            {% endif %}
-        </h2>
+    <div class="card shadow-lg border-0" style="border-radius: 16px; overflow: hidden;">
 
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
+        <!-- ENCABEZADO -->
+        <div class="p-4 text-white"
+             style="background: linear-gradient(135deg, #6A4EF5, #4C8CF5);">
 
-            <button class="btn btn-success mt-3">Guardar</button>
+            <h2 class="fw-bold mb-1">
+                {% if form.instance.pk %}
+                    <i class="bi bi-pencil-square me-2"></i> Editar Seguimiento
+                {% else %}
+                    <i class="bi bi-plus-circle me-2"></i> Nuevo Seguimiento
+                {% endif %}
+            </h2>
 
-            <a href="{% url 'followups:list' %}"
-               class="btn btn-secondary mt-3">Cancelar</a>
-        </form>
+            <p class="mb-0" style="opacity: .9;">
+                Registra o actualiza una actividad relacionada con clientes u oportunidades.
+            </p>
+        </div>
+
+        <!-- FORMULARIO -->
+        <div class="p-4 bg-white">
+            <form method="post" class="row g-4">
+                {% csrf_token %}
+
+                <!-- Tipo de seguimiento -->
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Tipo de seguimiento</label>
+                    {{ form.followup_type }}
+                </div>
+
+                <!-- Próxima fecha -->
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Próxima Fecha</label>
+                    {{ form.next_contact_date }}
+                </div>
+
+                <!-- Cliente -->
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Cliente relacionado</label>
+                    {{ form.related_customer }}
+                </div>
+
+                <!-- Oportunidad -->
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Oportunidad relacionada</label>
+                    {{ form.related_opportunity }}
+                </div>
+
+                <!-- Notas -->
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Notas</label>
+                    {{ form.notes }}
+                </div>
+
+                <!-- BOTONES -->
+                <div class="d-flex justify-content-end mt-4 gap-3">
+
+                    <a href="{% url 'followups:list' %}"
+                       class="btn px-4 py-2 fw-semibold"
+                       style="background: #F1F3F5; color: #4C4F58; border-radius: 10px;">
+                        <i class="bi bi-arrow-left me-1"></i> Cancelar
+                    </a>
+
+                    <button type="submit"
+                        class="btn text-white px-4 py-2 fw-semibold"
+                        style="background: linear-gradient(135deg, #6A4EF5, #4C8CF5); border-radius: 10px;">
+                        <i class="bi bi-check-circle me-1"></i> Guardar
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
     </div>
+
 </div>
 {% endblock %}

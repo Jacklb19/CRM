@@ -1,6 +1,6 @@
-# opportunities/models.py
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 from customers.models import Customer
 
 
@@ -20,7 +20,7 @@ class Opportunity(models.Model):
         related_name="opportunities",
     )
 
-    # Vendedor/propietario de la oportunidad
+    # Usuario interno (vendedor/gerente/admin) que gestiona la oportunidad
     owner = models.ForeignKey(
         User,
         on_delete=models.SET_NULL,
@@ -43,6 +43,7 @@ class Opportunity(models.Model):
 
     probability = models.PositiveIntegerField(
         default=0,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
         help_text="Probabilidad de cierre (0–100%)"
     )
 
@@ -57,6 +58,7 @@ class Opportunity(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)   # ⭐ recomendado
 
     class Meta:
         ordering = ["-created_at"]

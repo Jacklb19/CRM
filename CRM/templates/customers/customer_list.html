@@ -2,36 +2,97 @@
 {% block title %}Clientes{% endblock %}
 
 {% block content %}
-<h2>Clientes</h2>
-<form method="get" class="mb-4">
-    <input type="text" name="search" class="form-control" placeholder="Buscar cliente...">
-</form>
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Teléfono</th>
-            <th>Empresa</th>
-            <th>Activo</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-    {% for customer in customers %}
-        <tr>
-            <td><a href="{% url 'customer_detail' customer.pk %}">{{ customer.name }}</a></td>
-            <td>{{ customer.email }}</td>
-            <td>{{ customer.phone }}</td>
-            <td>{{ customer.company }}</td>
-            <td>{% if customer.is_active %}<span class="badge bg-success">Activo</span>{% else %}<span class="badge bg-danger">Inactivo</span>{% endif %}</td>
-            <td>
-                <a href="{% url 'customer_update' customer.pk %}" class="btn btn-sm btn-primary">Editar</a>
-                <a href="{% url 'customer_delete' customer.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-<a href="{% url 'customer_create' %}" class="btn btn-success">Nuevo Cliente</a>
+<div class="container mt-4">
+
+    <!-- Título + Botón -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">Clientes</h1>
+
+        <a href="{% url 'customer_create' %}" class="btn btn-success">
+            <i class="bi bi-person-plus me-1"></i> Nuevo Cliente
+        </a>
+    </div>
+
+    <!-- Buscador -->
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <span class="input-group-text">
+                <i class="bi bi-search"></i>
+            </span>
+            <input 
+                type="text" 
+                name="search" 
+                class="form-control"
+                placeholder="Buscar por nombre, email o empresa..."
+                value="{{ request.GET.search }}"
+            >
+            <button class="btn btn-primary" type="submit">Buscar</button>
+        </div>
+    </form>
+
+    {% if customers %}
+    <table class="table table-hover table-bordered shadow-sm align-middle">
+        <thead class="table-light">
+            <tr>
+                <th class="fw-semibold">Nombre</th>
+                <th class="fw-semibold">Email</th>
+                <th class="fw-semibold">Teléfono</th>
+                <th class="fw-semibold">Empresa</th>
+                <th class="text-center fw-semibold">Estado</th>
+                <th class="text-center fw-semibold">Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for customer in customers %}
+            <tr class="bg-light">
+
+                <!-- Nombre -->
+                <td>
+                    <a href="{% url 'customer_detail' customer.pk %}"
+                       class="fw-semibold text-primary text-decoration-none">
+                        {{ customer.name }}
+                    </a>
+                </td>
+
+                <!-- Email -->
+                <td>{{ customer.email }}</td>
+
+                <!-- Teléfono -->
+                <td>{{ customer.phone|default:"—" }}</td>
+
+                <!-- Empresa -->
+                <td>{{ customer.company|default:"—" }}</td>
+
+                <!-- Estado -->
+                <td class="text-center">
+                    {% if customer.is_active %}
+                        <span class="badge bg-success">Activo</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactivo</span>
+                    {% endif %}
+                </td>
+
+                <!-- Acciones -->
+                <td class="text-center">
+                    <a href="{% url 'customer_update' customer.pk %}"
+                       class="btn btn-sm btn-warning text-white">
+                        Editar
+                    </a>
+
+                    <a href="{% url 'customer_delete' customer.pk %}"
+                       class="btn btn-sm btn-danger">
+                        Eliminar
+                    </a>
+                </td>
+
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+        <p class="text-muted">No hay clientes registrados todavía.</p>
+    {% endif %}
+</div>
 {% endblock %}

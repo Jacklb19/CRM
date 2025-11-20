@@ -1,21 +1,23 @@
 {% extends "base.html" %}
 
+{% block title %}Eliminar Oportunidad{% endblock %}
+
 {% block content %}
 <div class="container mt-5" style="max-width: 650px;">
 
     <div class="card shadow-lg border-0" style="border-radius: 18px; overflow: hidden;">
 
-        <!-- HEADER ROJO -->
+        <!-- HEADER -->
         <div class="p-4 text-white"
              style="background: linear-gradient(135deg, #ff4d4d, #c61e1e);">
-
+            
             <h3 class="fw-bold mb-1">
                 <i class="bi bi-exclamation-octagon-fill me-2"></i>
-                Eliminar Seguimiento
+                Eliminar Oportunidad
             </h3>
 
             <p class="mb-0" style="opacity: .9;">
-                Esta acción es permanente y no se puede deshacer.
+                Esta acción no se puede deshacer.
             </p>
         </div>
 
@@ -23,36 +25,38 @@
         <div class="p-4 bg-white">
 
             <p class="fs-5 text-dark">
-                ¿Estás seguro de que deseas eliminar este seguimiento?
+                ¿Estás seguro de que deseas eliminar la oportunidad: 
+                <span class="fw-bold text-danger">"{{ object.title }}"</span>?
             </p>
 
             <p class="text-muted mb-4">
-                Fecha del registro: <strong>{{ object.created_at|date:"d/m/Y" }}</strong><br>
-                Autor: <strong>{{ object.created_by }}</strong>
+                Cliente: <strong>{{ object.customer }}</strong><br>
+                Vendedor asignado: <strong>{{ object.owner }}</strong><br>
+                Monto: <strong>${{ object.amount }}</strong>
             </p>
 
+            <!-- FORM DE CONFIRMACIÓN -->
             <form method="post">
                 {% csrf_token %}
 
                 <div class="d-flex justify-content-end gap-3">
 
-                    <!-- CANCELAR -->
-                    <a href="{% url 'followups:list' %}"
-                       class="btn px-4 py-2 fw-semibold"
-                       style="background: #F1F3F5; color: #4C4F58; border-radius: 10px;">
+                    <!-- Cancelar -->
+                    <a href="{% url 'opportunities:list' %}" 
+                       class="btn btn-light px-4 fw-semibold"
+                       style="border-radius: 10px;">
                         <i class="bi bi-arrow-left me-1"></i> Cancelar
                     </a>
 
-                    <!-- ELIMINAR -->
+                    <!-- Eliminar -->
                     <button type="submit"
-                        class="btn btn-danger px-4 py-2 fw-semibold"
+                        class="btn btn-danger px-4 fw-semibold"
                         style="border-radius: 10px;">
                         <i class="bi bi-trash me-1"></i> Eliminar
                     </button>
+
                 </div>
-
             </form>
-
         </div>
 
     </div>
