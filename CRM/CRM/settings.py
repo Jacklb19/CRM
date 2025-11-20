@@ -88,6 +88,7 @@ WSGI_APPLICATION = 'CRM.wsgi.application'
 # ==============================================================================
 # DATABASE CONFIGURATION
 # ==============================================================================
+import dj_database_url
 
 # Usar PostgreSQL en producción, SQLite en desarrollo
 if DEBUG:
@@ -98,17 +99,28 @@ if DEBUG:
         }
     }
 else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', 'crm_db'),
-            'USER': os.getenv('DB_USER', 'postgres'),
-            'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': os.getenv('DB_HOST', 'localhost'),
-            'PORT': os.getenv('DB_PORT', '5432'),
+    # Leer DATABASE_URL si está disponible (Render)
+    database_url = os.getenv('DATABASE_URL')
+    if database_url:
+        DATABASES = {
+            'default': dj_database_url.config(
+                default=database_url,
+                conn_max_age=600,
+                conn_health_checks=True,
+            )
         }
-    }
-
+    else:
+        # Fallback a configuración manual
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.getenv('DB_NAME', 'crm_db'),
+                'USER': os.getenv('DB_USER', 'postgres'),
+                'PASSWORD': os.getenv('DB_PASSWORD'),
+                'HOST': os.getenv('DB_HOST', 'localhost'),
+                'PORT': os.getenv('DB_PORT', '5432'),
+            }
+        }
 # ==============================================================================
 # PASSWORD VALIDATION
 # ==============================================================================
