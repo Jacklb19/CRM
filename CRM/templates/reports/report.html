@@ -1,517 +1,1253 @@
 {% extends "base.html" %}
-{% block title %}Reportes - CRM Pro{% endblock %}
+{% block title %}Reportes y Análisis - CRM Pro{% endblock %}
 
 {% block extra_css %}
 <style>
-  .report-card {
-    background: white;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  .reports-container {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
     margin-bottom: 1.5rem;
   }
 
-  .metric {
+  .breadcrumb-item a {
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb-item a:hover {
+    color: #1e40af;
+  }
+
+  .breadcrumb-item.active {
+    color: #64748b;
+  }
+
+  /* Page Header */
+  .page-header {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .page-title h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+  }
+
+  .page-title i {
+    font-size: 2rem;
+    color: #f59e0b;
+  }
+
+  .page-subtitle {
+    color: #64748b;
+    font-size: 0.9375rem;
+    margin: 0;
+  }
+
+  /* Filter Card */
+  .filter-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .filter-header {
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-bottom: 2px solid #fbbf24;
+  }
+
+  .filter-header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    color: #92400e;
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  .filter-header-title i {
+    font-size: 1.125rem;
+  }
+
+  .filter-body {
+    padding: 1.5rem;
+  }
+
+  .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.25rem;
+    align-items: end;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .form-control,
+  .form-select {
+    padding: 0.625rem 0.875rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    background-color: white;
+    color: #1e293b;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    outline: none;
+    border-color: #f59e0b;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .stat-card-content {
     display: flex;
     justify-content: space-between;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #e9ecef;
+    align-items: flex-start;
   }
 
-  .metric:last-child {
-    border-bottom: none;
+  .stat-info {
+    flex: 1;
   }
 
-  .metric-label {
+  .stat-label {
+    font-size: 0.8125rem;
     font-weight: 600;
-    color: #6c757d;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
   }
 
-  .metric-value {
-    font-size: 1.2rem;
+  .stat-value {
+    font-size: 2rem;
     font-weight: 700;
-    color: #667eea;
+    color: #1e293b;
+    line-height: 1;
   }
 
-  .table-container {
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+
+  .stat-icon.primary {
+    background: #fef3c7;
+    color: #f59e0b;
+  }
+
+  .stat-icon.success {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  .stat-icon.warning {
+    background: #fef3c7;
+    color: #f59e0b;
+  }
+
+  .stat-icon.danger {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  .stat-icon.info {
+    background: #dbeafe;
+    color: #0891b2;
+  }
+
+  /* Report Card */
+  .report-card {
     background: white;
-    border-radius: 1rem;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+  }
+
+  .report-header {
     padding: 1.5rem;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .report-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .report-title i {
+    color: #f59e0b;
   }
 
   .export-buttons {
     display: flex;
     gap: 0.5rem;
+  }
+
+  .report-body {
+    padding: 1.5rem;
+  }
+
+  /* Section Title */
+  .section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #f1f5f9;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+  }
+
+  .btn i {
+    font-size: 1.125rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    color: white;
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+  }
+
+  .btn-success:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    color: white;
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+  }
+
+  .btn-danger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    color: white;
+  }
+
+  .btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  /* Table */
+  .table-wrapper {
+    overflow-x: auto;
     margin-top: 1rem;
+  }
+
+  .table {
+    width: 100%;
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+
+  .table thead {
+    background: #f8fafc;
+    border-bottom: 2px solid #e9ecef;
+  }
+
+  .table thead th {
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s ease;
+  }
+
+  .table tbody tr:hover {
+    background: #f8fafc;
+  }
+
+  .table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .table tbody td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    color: #475569;
+  }
+
+  /* Progress Bar */
+  .progress {
+    height: 24px;
+    background: #e2e8f0;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    transition: width 0.3s ease;
+  }
+
+  /* Badges */
+  .badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .badge-primary {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .badge-success {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  .badge-warning {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  .badge-danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  .badge-info {
+    background-color: #e0f2fe;
+    color: #075985;
+  }
+
+  /* Alert */
+  .alert {
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .alert i {
+    font-size: 1.5rem;
+  }
+
+  .alert-info {
+    background: #e0f2fe;
+    border: 1px solid #bae6fd;
+    color: #075985;
+  }
+
+  .alert-success {
+    background: #dcfce7;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+  }
+
+  .alert-warning {
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    color: #92400e;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #94a3b8;
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    opacity: 0.3;
+    margin-bottom: 1.5rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state p {
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .filter-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .report-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .export-buttons {
+      width: 100%;
+    }
+
+    .btn {
+      flex: 1;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-  <h2><i class="bi bi-file-earmark-text me-2"></i>Generador de Reportes</h2>
-</div>
+<div class="reports-container">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard' %}">
+          <i class="bi bi-house-door me-1"></i>Dashboard
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Reportes</li>
+    </ol>
+  </nav>
 
-<div class="report-card">
-  <h5 class="mb-3"><i class="bi bi-funnel me-2"></i>Filtros y Opciones</h5>
-  <form method="get" class="row g-3">
-    <div class="col-md-3">
-      <label for="{{ form.report_type.id_for_label }}" class="form-label">Tipo de Reporte</label>
-      {{ form.report_type }}
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-title">
+      <i class="bi bi-bar-chart-line-fill"></i>
+      <h1>Generador de Reportes y Análisis</h1>
     </div>
+    <p class="page-subtitle">
+      Genera reportes personalizados sobre ventas, clientes, oportunidades y más
+    </p>
+  </div>
 
-    <div class="col-md-2">
-      <label for="{{ form.start_date.id_for_label }}" class="form-label">Desde</label>
-      {{ form.start_date }}
+  <!-- Filter Card -->
+  <div class="filter-card">
+    <div class="filter-header">
+      <h3 class="filter-header-title">
+        <i class="bi bi-sliders"></i>
+        <span>Configuración del Reporte</span>
+      </h3>
     </div>
+    <div class="filter-body">
+      <form method="get">
+        <div class="filter-grid">
+          <div class="form-group">
+            <label for="{{ form.report_type.id_for_label }}" class="form-label">
+              <i class="bi bi-file-earmark-bar-graph"></i>
+              Tipo de Reporte
+            </label>
+            {{ form.report_type }}
+          </div>
 
-    <div class="col-md-2">
-      <label for="{{ form.end_date.id_for_label }}" class="form-label">Hasta</label>
-      {{ form.end_date }}
-    </div>
+          <div class="form-group">
+            <label for="{{ form.start_date.id_for_label }}" class="form-label">
+              <i class="bi bi-calendar-event"></i>
+              Fecha Desde
+            </label>
+            {{ form.start_date }}
+          </div>
 
-    <div class="col-md-2">
-      <label for="{{ form.assigned_to.id_for_label }}" class="form-label">Vendedor</label>
-      {{ form.assigned_to }}
-    </div>
+          <div class="form-group">
+            <label for="{{ form.end_date.id_for_label }}" class="form-label">
+              <i class="bi bi-calendar-check"></i>
+              Fecha Hasta
+            </label>
+            {{ form.end_date }}
+          </div>
 
-    <div class="col-md-2">
-      <label for="{{ form.customer.id_for_label }}" class="form-label">Cliente</label>
-      {{ form.customer }}
-    </div>
+          <div class="form-group">
+            <label for="{{ form.assigned_to.id_for_label }}" class="form-label">
+              <i class="bi bi-person-badge"></i>
+              Vendedor
+            </label>
+            {{ form.assigned_to }}
+          </div>
 
-    <div class="col-md-1 d-flex align-items-end">
-      <button type="submit" class="btn btn-primary w-100">
-        <i class="bi bi-search me-1"></i>Generar
-      </button>
-    </div>
-  </form>
-</div>
+          <div class="form-group">
+            <label for="{{ form.customer.id_for_label }}" class="form-label">
+              <i class="bi bi-person"></i>
+              Cliente
+            </label>
+            {{ form.customer }}
+          </div>
 
-{% if report_data %}
-<div class="report-card">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4>{{ report_title }}</h4>
-    <div class="export-buttons">
-      <form method="get" style="display: inline;">
-        {% for key, value in request.GET.items %}
-          {% if key != 'export_format' %}
-            <input type="hidden" name="{{ key }}" value="{{ value }}">
-          {% endif %}
-        {% endfor %}
-        <input type="hidden" name="export_format" value="excel">
-        <button type="submit" class="btn btn-success btn-sm">
-          <i class="bi bi-file-earmark-excel me-1"></i>Excel
-        </button>
-      </form>
-      <form method="get" style="display: inline;">
-        {% for key, value in request.GET.items %}
-          {% if key != 'export_format' %}
-            <input type="hidden" name="{{ key }}" value="{{ value }}">
-          {% endif %}
-        {% endfor %}
-        <input type="hidden" name="export_format" value="pdf">
-        <button type="submit" class="btn btn-danger btn-sm">
-          <i class="bi bi-file-earmark-pdf me-1"></i>PDF
-        </button>
+          <div class="form-group">
+            <label class="form-label" style="opacity: 0;">.</label>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+              <i class="bi bi-play-circle"></i>
+              <span>Generar Reporte</span>
+            </button>
+          </div>
+        </div>
       </form>
     </div>
   </div>
 
-  {% if report_type == 'sales' %}
-    <div class="row mb-4">
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Valor Total:</span>
-          <span class="metric-value">${{ report_data.summary.total_value|floatformat:0 }}</span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Total Deals:</span>
-          <span class="metric-value">{{ report_data.summary.total_deals }}</span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Deal Promedio:</span>
-          <span class="metric-value">${{ report_data.summary.average_deal|floatformat:0 }}</span>
-        </div>
+  {% if report_data %}
+  <!-- Report Results -->
+  <div class="report-card">
+    <div class="report-header">
+      <h2 class="report-title">
+        <i class="bi bi-clipboard-data"></i>
+        <span>{{ report_title }}</span>
+      </h2>
+      <div class="export-buttons">
+        <form method="get" style="display: inline;">
+          {% for key, value in request.GET.items %}
+            {% if key != 'export_format' %}
+              <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+          {% endfor %}
+          <input type="hidden" name="export_format" value="excel">
+          <button type="submit" class="btn btn-success btn-sm">
+            <i class="bi bi-file-earmark-excel"></i>
+            <span>Excel</span>
+          </button>
+        </form>
+        <form method="get" style="display: inline;">
+          {% for key, value in request.GET.items %}
+            {% if key != 'export_format' %}
+              <input type="hidden" name="{{ key }}" value="{{ value }}">
+            {% endif %}
+          {% endfor %}
+          <input type="hidden" name="export_format" value="pdf">
+          <button type="submit" class="btn btn-danger btn-sm">
+            <i class="bi bi-file-earmark-pdf"></i>
+            <span>PDF</span>
+          </button>
+        </form>
       </div>
     </div>
-    
-    <h6 class="mb-3">Ventas por Vendedor</h6>
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>Vendedor</th>
-          <th>Cantidad</th>
-          <th>Total</th>
-          <th>Promedio</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for seller in report_data.by_seller %}
-        <tr>
-          <td>{{ seller.assigned_to__username }}</td>
-          <td>{{ seller.count }}</td>
-          <td>${{ seller.total|floatformat:0 }}</td>
-          <td>${{ seller.avg|floatformat:0 }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+
+    <div class="report-body">
+      {% if report_type == 'sales' %}
+        <!-- Sales Report -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Valor Total</div>
+                <div class="stat-value">${{ report_data.summary.total_value|floatformat:0 }}</div>
+              </div>
+              <div class="stat-icon primary">
+                <i class="bi bi-currency-dollar"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Total Deals</div>
+                <div class="stat-value">{{ report_data.summary.total_deals }}</div>
+              </div>
+              <div class="stat-icon info">
+                <i class="bi bi-graph-up"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Deal Promedio</div>
+                <div class="stat-value">${{ report_data.summary.average_deal|floatformat:0 }}</div>
+              </div>
+              <div class="stat-icon success">
+                <i class="bi bi-award"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-title">
+          <i class="bi bi-people"></i>
+          <span>Ventas por Vendedor</span>
+        </h3>
+        <div class="table-wrapper">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Vendedor</th>
+                <th>Cantidad</th>
+                <th>Total</th>
+                <th>Promedio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for seller in report_data.by_seller %}
+              <tr>
+                <td><strong>{{ seller.assigned_to__username }}</strong></td>
+                <td><span class="badge badge-info">{{ seller.count }}</span></td>
+                <td><strong>${{ seller.total|floatformat:0 }}</strong></td>
+                <td>${{ seller.avg|floatformat:0 }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="4">
+                  <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <span>No hay datos de ventas en el período seleccionado</span>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
 
       {% elif report_type == 'customers' %}
-    <div class="row mb-4">
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Total:</span>
-          <span class="metric-value">{{ report_data.summary.total }}</span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Activos:</span>
-          <span class="metric-value text-success">{{ report_data.summary.active }}</span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Inactivos:</span>
-          <span class="metric-value text-warning">{{ report_data.summary.inactive }}</span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Sin actividad:</span>
-          <span class="metric-value text-danger">{{ report_data.summary.dormant }}</span>
-        </div>
-      </div>
-    </div>
+        <!-- Customers Report -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Total Clientes</div>
+                <div class="stat-value">{{ report_data.summary.total }}</div>
+              </div>
+              <div class="stat-icon primary">
+                <i class="bi bi-people"></i>
+              </div>
+            </div>
+          </div>
 
-    <h6 class="mb-3">🔝 Clientes Principales (Más Oportunidades)</h6>
-    {% if report_data.top_customers %}
-    <table class="table table-hover table-sm">
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Vendedor</th>
-          <th>Oportunidades</th>
-          <th>Valor Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for customer in report_data.top_customers %}
-        <tr>
-          <td><strong>{{ customer.name }}</strong></td>
-          <td>{{ customer.assigned_to__username }}</td>
-          <td><span class="badge bg-info">{{ customer.opp_count }}</span></td>
-          <td>${{ customer.opp_value|floatformat:0 }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <div class="alert alert-info">No hay clientes con oportunidades</div>
-    {% endif %}
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Activos</div>
+                <div class="stat-value">{{ report_data.summary.active }}</div>
+              </div>
+              <div class="stat-icon success">
+                <i class="bi bi-check-circle"></i>
+              </div>
+            </div>
+          </div>
 
-    <h6 class="mb-3 mt-4">⚠️ Clientes Sin Actividad (Dormidos)</h6>
-    {% if report_data.dormant_customers %}
-    <table class="table table-hover table-sm">
-      <thead>
-        <tr>
-          <th>Cliente</th>
-          <th>Email</th>
-          <th>Teléfono</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for customer in report_data.dormant_customers %}
-        <tr>
-          <td><strong>{{ customer.name }}</strong></td>
-          <td>{{ customer.email }}</td>
-          <td>{{ customer.phone }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>¡Excelente! Todos tus clientes tienen actividad</div>
-    {% endif %}
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Inactivos</div>
+                <div class="stat-value">{{ report_data.summary.inactive }}</div>
+              </div>
+              <div class="stat-icon warning">
+                <i class="bi bi-exclamation-triangle"></i>
+              </div>
+            </div>
+          </div>
 
-  {% elif report_type == 'sellers' %}
-    <table class="table table-hover table-sm">
-      <thead>
-        <tr>
-          <th>Vendedor</th>
-          <th>Clientes</th>
-          <th>Opor.</th>
-          <th>Ganadas</th>
-          <th>Perdidas</th>
-          <th>Pipeline</th>
-          <th>Valor Ganado</th>
-          <th>Win Rate</th>
-          <th>Deal Prom.</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for seller in report_data.sellers %}
-        <tr>
-          <td><strong>{{ seller.name }}</strong></td>
-          <td><span class="badge bg-info">{{ seller.customers }}</span></td>
-          <td>{{ seller.total_opportunities }}</td>
-          <td><span class="badge bg-success">{{ seller.won_opportunities }}</span></td>
-          <td><span class="badge bg-danger">{{ seller.lost_opportunities }}</span></td>
-          <td>${{ seller.pipeline_value|floatformat:0 }}</td>
-          <td>${{ seller.won_value|floatformat:0 }}</td>
-          <td>
-            <span class="badge {% if seller.win_rate >= 50 %}bg-success{% elif seller.win_rate >= 30 %}bg-warning{% else %}bg-danger{% endif %}">
-              {{ seller.win_rate|floatformat:1 }}%
-            </span>
-          </td>
-          <td>${{ seller.avg_deal_size|floatformat:0 }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Sin Actividad</div>
+                <div class="stat-value">{{ report_data.summary.dormant }}</div>
+              </div>
+              <div class="stat-icon danger">
+                <i class="bi bi-x-circle"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-title">
+          <i class="bi bi-trophy"></i>
+          <span>Clientes Principales (Más Oportunidades)</span>
+        </h3>
+        {% if report_data.top_customers %}
+        <div class="table-wrapper">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Vendedor</th>
+                <th>Oportunidades</th>
+                <th>Valor Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for customer in report_data.top_customers %}
+              <tr>
+                <td><strong>{{ customer.name }}</strong></td>
+                <td>{{ customer.assigned_to__username }}</td>
+                <td><span class="badge badge-info">{{ customer.opp_count }}</span></td>
+                <td><strong>${{ customer.opp_value|floatformat:0 }}</strong></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+          <i class="bi bi-info-circle"></i>
+          <span>No hay clientes con oportunidades</span>
+        </div>
+        {% endif %}
+
+        <h3 class="section-title" style="margin-top: 2rem;">
+          <i class="bi bi-exclamation-triangle"></i>
+          <span>Clientes Sin Actividad (Dormidos)</span>
+        </h3>
+        {% if report_data.dormant_customers %}
+        <div class="table-wrapper">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for customer in report_data.dormant_customers %}
+              <tr>
+                <td><strong>{{ customer.name }}</strong></td>
+                <td>{{ customer.email }}</td>
+                <td>{{ customer.phone|default:"—" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="alert alert-success">
+          <i class="bi bi-check-circle"></i>
+          <span>¡Excelente! Todos tus clientes tienen actividad</span>
+        </div>
+        {% endif %}
+
+      {% elif report_type == 'sellers' %}
+        <!-- Sellers Report -->
+        <h3 class="section-title">
+          <i class="bi bi-people-fill"></i>
+          <span>Desempeño por Vendedor</span>
+        </h3>
+        <div class="table-wrapper">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Vendedor</th>
+                <th>Clientes</th>
+                <th>Opor.</th>
+                <th>Ganadas</th>
+                <th>Perdidas</th>
+                <th>Pipeline</th>
+                <th>Valor Ganado</th>
+                <th>Win Rate</th>
+                <th>Deal Prom.</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for seller in report_data.sellers %}
+              <tr>
+                <td><strong>{{ seller.name }}</strong></td>
+                <td><span class="badge badge-info">{{ seller.customers }}</span></td>
+                <td>{{ seller.total_opportunities }}</td>
+                <td><span class="badge badge-success">{{ seller.won_opportunities }}</span></td>
+                <td><span class="badge badge-danger">{{ seller.lost_opportunities }}</span></td>
+                <td><strong>${{ seller.pipeline_value|floatformat:0 }}</strong></td>
+                <td><strong>${{ seller.won_value|floatformat:0 }}</strong></td>
+                <td>
+                  <span class="badge {% if seller.win_rate >= 50 %}badge-success{% elif seller.win_rate >= 30 %}badge-warning{% else %}badge-danger{% endif %}">
+                    {{ seller.win_rate|floatformat:1 }}%
+                  </span>
+                </td>
+                <td>${{ seller.avg_deal_size|floatformat:0 }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="9">
+                  <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <span>No hay datos de vendedores</span>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
 
       {% elif report_type == 'followups' %}
-    <div class="row mb-4">
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Total:</span>
-          <span class="metric-value">{{ report_data.summary.total }}</span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Pendientes:</span>
-          <span class="metric-value text-warning">{{ report_data.summary.pending }}</span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Completados:</span>
-          <span class="metric-value text-success">{{ report_data.summary.completed }}</span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Vencidos:</span>
-          <span class="metric-value text-danger">{{ report_data.summary.overdue }}</span>
-        </div>
-      </div>
-    </div>
-
-    <h6 class="mb-3">📞 Seguimientos por Tipo</h6>
-    <table class="table table-hover table-sm">
-      <thead>
-        <tr>
-          <th>Tipo</th>
-          <th>Cantidad</th>
-          <th>Porcentaje</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in report_data.by_type %}
-        <tr>
-          <td>
-            {% if item.type == 'llamada' %}
-              <i class="bi bi-telephone me-2"></i>Llamada
-            {% elif item.type == 'email' %}
-              <i class="bi bi-envelope me-2"></i>Email
-            {% elif item.type == 'reunion' %}
-              <i class="bi bi-calendar-event me-2"></i>Reunión
-            {% else %}
-              <i class="bi bi-sticky me-2"></i>Nota
-            {% endif %}
-          </td>
-          <td><span class="badge bg-primary">{{ item.count }}</span></td>
-          <td>
-            {% widthratio item.count report_data.summary.total 100 as percentage %}
-            <div class="progress" style="height: 20px;">
-              <div class="progress-bar" role="progressbar" style="width: {{ percentage }}%">{{ percentage }}%</div>
-            </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-    <h6 class="mb-3 mt-4">👤 Actividad por Vendedor</h6>
-    <table class="table table-hover table-sm">
-      <thead>
-        <tr>
-          <th>Vendedor</th>
-          <th>Total Seguimientos</th>
-          <th>Completados</th>
-          <th>Tasa Completación</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for seller in report_data.by_seller %}
-        <tr>
-          <td><strong>{{ seller.user__username }}</strong></td>
-          <td>{{ seller.count }}</td>
-          <td><span class="badge bg-success">{{ seller.completed_count }}</span></td>
-          <td>
-            {% if seller.count > 0 %}
-              {% widthratio seller.completed_count seller.count 100 as rate %}
-              <span class="badge {% if rate >= 80 %}bg-success{% elif rate >= 50 %}bg-warning{% else %}bg-danger{% endif %}">{{ rate }}%</span>
-            {% else %}
-              <span class="badge bg-secondary">N/A</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-
-{% elif report_type == 'opportunities' %}
-    <div class="row mb-4">
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Total:</span>
-          <span class="metric-value">{{ report_data.summary.total }}</span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Valor Total:</span>
-          <span class="metric-value">${{ report_data.summary.total_value|floatformat:0 }}</span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Valor Promedio:</span>
-          <span class="metric-value">${{ report_data.summary.avg_value|floatformat:0 }}</span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Vencen Pronto:</span>
-          <span class="metric-value text-warning">{{ report_data.summary.due_soon }}</span>
-        </div>
-      </div>
-    </div>
-
-    <table class="table table-hover table-sm">
-      <thead>
-        <tr>
-          <th>Título</th>
-          <th>Cliente</th>
-          <th>Vendedor</th>
-          <th>Monto</th>
-          <th>Estado</th>
-          <th>Prioridad</th>
-          <th>Vencimiento</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for opp in report_data.opportunities %}
-        <tr>
-          <td>{{ opp.title }}</td>
-          <td>{{ opp.customer__name }}</td>
-          <td>{{ opp.assigned_to__username }}</td>
-          <td>${{ opp.amount|floatformat:0 }}</td>
-          <td><span class="badge bg-primary">{{ opp.status }}</span></td>
-          <td>
-            {% if opp.priority == 'alta' %}
-              <span class="badge bg-danger">Alta</span>
-            {% elif opp.priority == 'media' %}
-              <span class="badge bg-warning">Media</span>
-            {% else %}
-              <span class="badge bg-success">Baja</span>
-            {% endif %}
-          </td>
-          <td>{{ opp.expected_close_date|date:"d/m/Y" }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-  {% elif report_type == 'pipeline' %}
-    <div class="row mb-4">
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Pipeline Total:</span>
-          <span class="metric-value">${{ report_data.total_pipeline|floatformat:0 }}</span>
-        </div>
-      </div>
-      <div class="col-md-3">
-        <div class="metric">
-          <span class="metric-label">Pronóstico Ponderado:</span>
-          <span class="metric-value text-info">${{ report_data.weighted_forecast|floatformat:0 }}</span>
-        </div>
-      </div>
-    </div>
-
-    <h6 class="mb-3">Pipeline por Etapa</h6>
-    <table class="table">
-      <tbody>
-        {% for stage, value in report_data.pipeline_stages.items %}
-        <tr>
-          <td><strong>{{ stage|title }}</strong></td>
-          <td>${{ value|floatformat:0 }}</td>
-          <td style="width: 40%;">
-            {% if report_data.total_pipeline > 0 %}
-              {% widthratio value report_data.total_pipeline 100 as percentage %}
-              <div class="progress" style="height: 25px;">
-                <div class="progress-bar bg-primary" role="progressbar" style="width: {{ percentage }}%;" aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100">
-                  <span style="color: white; font-weight: bold;">{{ percentage }}%</span>
-                </div>
+        <!-- Followups Report -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Total</div>
+                <div class="stat-value">{{ report_data.summary.total }}</div>
               </div>
-            {% else %}
-              <span class="text-muted">Sin datos</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+              <div class="stat-icon primary">
+                <i class="bi bi-chat-dots"></i>
+              </div>
+            </div>
+          </div>
 
-    <h6 class="mb-3 mt-4">Pipeline por Vendedor</h6>
-    {% if report_data.by_seller %}
-    <table class="table table-hover table-sm">
-      <thead>
-        <tr>
-          <th>Vendedor</th>
-          <th>Valor</th>
-          <th>Cantidad de Oportunidades</th>
-          <th>% del Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for seller in report_data.by_seller %}
-        <tr>
-          <td><strong>{{ seller.assigned_to__username }}</strong></td>
-          <td>${{ seller.value|floatformat:0 }}</td>
-          <td>{{ seller.count }}</td>
-          <td>
-            {% if report_data.total_pipeline > 0 %}
-              {% widthratio seller.value report_data.total_pipeline 100 as seller_percentage %}
-              <span class="badge bg-primary">{{ seller_percentage }}%</span>
-            {% else %}
-              <span class="text-muted">N/A</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    {% else %}
-    <div class="alert alert-warning">No hay vendedores con pipeline activo</div>
-    {% endif %}
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Pendientes</div>
+                <div class="stat-value">{{ report_data.summary.pending }}</div>
+              </div>
+              <div class="stat-icon warning">
+                <i class="bi bi-clock"></i>
+              </div>
+            </div>
+          </div>
 
-{% endif %}
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Completados</div>
+                <div class="stat-value">{{ report_data.summary.completed }}</div>
+              </div>
+              <div class="stat-icon success">
+                <i class="bi bi-check-circle"></i>
+              </div>
+            </div>
+          </div>
 
-{% else %}
-<div class="alert alert-info">
-  <i class="bi bi-info-circle me-2"></i>Selecciona un tipo de reporte y haz clic en "Generar" para ver los datos.
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Vencidos</div>
+                <div class="stat-value">{{ report_data.summary.overdue }}</div>
+              </div>
+              <div class="stat-icon danger">
+                <i class="bi bi-exclamation-triangle"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-title">
+          <i class="bi bi-diagram-3"></i>
+          <span>Seguimientos por Tipo</span>
+        </h3>
+        <div class="table-wrapper">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Cantidad</th>
+                <th style="width: 50%;">Distribución</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in report_data.by_type %}
+              <tr>
+                <td>
+                  {% if item.type == 'llamada' %}
+                    <i class="bi bi-telephone me-2" style="color: #06b6d4;"></i>Llamada
+                  {% elif item.type == 'email' %}
+                    <i class="bi bi-envelope me-2" style="color: #8b5cf6;"></i>Email
+                  {% elif item.type == 'reunion' %}
+                    <i class="bi bi-calendar-event me-2" style="color: #10b981;"></i>Reunión
+                  {% else %}
+                    <i class="bi bi-sticky me-2" style="color: #f59e0b;"></i>Nota
+                  {% endif %}
+                </td>
+                <td><span class="badge badge-primary">{{ item.count }}</span></td>
+                <td>
+                  {% widthratio item.count report_data.summary.total 100 as percentage %}
+                  <div class="progress">
+                    <div class="progress-bar" style="width: {{ percentage }}%;">
+                      {{ percentage }}%
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="section-title" style="margin-top: 2rem;">
+          <i class="bi bi-person-badge"></i>
+          <span>Actividad por Vendedor</span>
+        </h3>
+        <div class="table-wrapper">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Vendedor</th>
+                <th>Total Seguimientos</th>
+                <th>Completados</th>
+                <th>Tasa Completación</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for seller in report_data.by_seller %}
+              <tr>
+                <td><strong>{{ seller.user__username }}</strong></td>
+                <td><span class="badge badge-info">{{ seller.count }}</span></td>
+                <td><span class="badge badge-success">{{ seller.completed_count }}</span></td>
+                <td>
+                  {% if seller.count > 0 %}
+                    {% widthratio seller.completed_count seller.count 100 as rate %}
+                    <span class="badge {% if rate >= 80 %}badge-success{% elif rate >= 50 %}badge-warning{% else %}badge-danger{% endif %}">
+                      {{ rate }}%
+                    </span>
+                  {% else %}
+                    <span class="badge badge-secondary">N/A</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      {% elif report_type == 'opportunities' %}
+        <!-- Opportunities Report -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Total</div>
+                <div class="stat-value">{{ report_data.summary.total }}</div>
+              </div>
+              <div class="stat-icon primary">
+                <i class="bi bi-graph-up"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Valor Total</div>
+                <div class="stat-value">${{ report_data.summary.total_value|floatformat:0 }}</div>
+              </div>
+              <div class="stat-icon success">
+                <i class="bi bi-currency-dollar"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Valor Promedio</div>
+                <div class="stat-value">${{ report_data.summary.avg_value|floatformat:0 }}</div>
+              </div>
+              <div class="stat-icon info">
+                <i class="bi bi-award"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Vencen Pronto</div>
+                <div class="stat-value">{{ report_data.summary.due_soon }}</div>
+              </div>
+              <div class="stat-icon warning">
+                <i class="bi bi-clock-history"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-title">
+          <i class="bi bi-list-check"></i>
+          <span>Listado de Oportunidades</span>
+        </h3>
+        <div class="table-wrapper">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Cliente</th>
+                <th>Vendedor</th>
+                <th>Monto</th>
+                <th>Estado</th>
+                <th>Prioridad</th>
+                <th>Vencimiento</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for opp in report_data.opportunities %}
+              <tr>
+                <td><strong>{{ opp.title }}</strong></td>
+                <td>{{ opp.customer__name }}</td>
+                <td>{{ opp.assigned_to__username }}</td>
+                <td><strong>${{ opp.amount|floatformat:0 }}</strong></td>
+                <td><span class="badge badge-primary">{{ opp.status }}</span></td>
+                <td>
+                  {% if opp.priority == 'alta' %}
+                    <span class="badge badge-danger"><i class="bi bi-exclamation-triangle"></i> Alta</span>
+                  {% elif opp.priority == 'media' %}
+                    <span class="badge badge-warning">Media</span>
+                  {% else %}
+                    <span class="badge badge-success">Baja</span>
+                  {% endif %}
+                </td>
+                <td>{{ opp.expected_close_date|date:"d/m/Y" }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="7">
+                  <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i>
+                    <span>No hay oportunidades en el período seleccionado</span>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+      {% elif report_type == 'pipeline' %}
+        <!-- Pipeline Report -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Pipeline Total</div>
+                <div class="stat-value">${{ report_data.total_pipeline|floatformat:0 }}</div>
+              </div>
+              <div class="stat-icon primary">
+                <i class="bi bi-funnel"></i>
+              </div>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card-content">
+              <div class="stat-info">
+                <div class="stat-label">Pronóstico Ponderado</div>
+                <div class="stat-value">${{ report_data.weighted_forecast|floatformat:0 }}</div>
+              </div>
+              <div class="stat-icon info">
+                <i class="bi bi-graph-up-arrow"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="section-title">
+          <i class="bi bi-diagram-3"></i>
+          <span>Pipeline por Etapa</span>
+        </h3>
+        <div class="table-wrapper">
+          <table class="table">
+            <tbody>
+              {% for stage, value in report_data.pipeline_stages.items %}
+              <tr>
+                <td style="width: 20%;"><strong>{{ stage|title }}</strong></td>
+                <td style="width: 20%;"><strong>${{ value|floatformat:0 }}</strong></td>
+                <td>
+                  {% if report_data.total_pipeline > 0 %}
+                    {% widthratio value report_data.total_pipeline 100 as percentage %}
+                    <div class="progress">
+                      <div class="progress-bar" style="width: {{ percentage }}%;">
+                        {{ percentage }}%
+                      </div>
+                    </div>
+                  {% else %}
+                    <span class="text-muted">Sin datos</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="section-title" style="margin-top: 2rem;">
+          <i class="bi bi-people-fill"></i>
+          <span>Pipeline por Vendedor</span>
+        </h3>
+        {% if report_data.by_seller %}
+        <div class="table-wrapper">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Vendedor</th>
+                <th>Valor</th>
+                <th>Cantidad de Oportunidades</th>
+                <th>% del Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for seller in report_data.by_seller %}
+              <tr>
+                <td><strong>{{ seller.assigned_to__username }}</strong></td>
+                <td><strong>${{ seller.value|floatformat:0 }}</strong></td>
+                <td><span class="badge badge-info">{{ seller.count }}</span></td>
+                <td>
+                  {% if report_data.total_pipeline > 0 %}
+                    {% widthratio seller.value report_data.total_pipeline 100 as seller_percentage %}
+                    <span class="badge badge-primary">{{ seller_percentage }}%</span>
+                  {% else %}
+                    <span class="text-muted">N/A</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="alert alert-warning">
+          <i class="bi bi-exclamation-triangle"></i>
+          <span>No hay vendedores con pipeline activo</span>
+        </div>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+  {% else %}
+  <!-- Empty State -->
+  <div class="report-card">
+    <div class="empty-state">
+      <div class="empty-state-icon">
+        <i class="bi bi-file-earmark-bar-graph"></i>
+      </div>
+      <h3>Selecciona un Tipo de Reporte</h3>
+      <p>Configura los filtros arriba y haz clic en "Generar Reporte" para ver los datos</p>
+    </div>
+  </div>
+  {% endif %}
 </div>
-{% endif %}
 
-{% endblock %}  
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Aplicar clases a los campos del formulario
+  const selects = document.querySelectorAll('select');
+  const inputs = document.querySelectorAll('input[type="date"]');
+  
+  selects.forEach(select => {
+    select.classList.add('form-select');
+  });
+  
+  inputs.forEach(input => {
+    input.classList.add('form-control');
+  });
+});
+</script>
+
+{% endblock %}

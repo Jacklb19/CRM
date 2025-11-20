@@ -3,365 +3,1128 @@
 
 {% block extra_css %}
 <style>
-  .search-filters {
-    background: #f8f9fa;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
+  .list-container {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
     margin-bottom: 1.5rem;
   }
-  
-  .filter-section {
-    margin-bottom: 1rem;
+
+  .breadcrumb-item a {
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.2s;
   }
-  
-  .filter-section h6 {
-    font-weight: 600;
-    color: #667eea;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
+
+  .breadcrumb-item a:hover {
+    color: #1e40af;
   }
-  
-  .stats-card {
-    background: white;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    text-align: center;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+
+  .breadcrumb-item.active {
+    color: #64748b;
   }
-  
-  .stats-value {
-    font-size: 1.5rem;
+
+  /* Page Header */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .page-title h1 {
+    font-size: 1.875rem;
     font-weight: 700;
-    color: #667eea;
+    color: #1e293b;
+    margin: 0;
   }
-  
-  .stats-label {
-    font-size: 0.85rem;
-    color: #6c757d;
+
+  .page-title i {
+    font-size: 2rem;
+    color: #8b5cf6;
   }
-  
-  .status-badge {
-    padding: 0.35rem 0.65rem;
-    border-radius: 0.25rem;
-    font-size: 0.8rem;
-    font-weight: 500;
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
   }
-  
-  /* Estilos para checkboxes */
-  .checkbox-container {
+
+  .stat-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .stat-card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .stat-info {
+    flex: 1;
+  }
+
+  .stat-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+
+  .stat-icon.primary {
+    background: #f3e8ff;
+    color: #7c3aed;
+  }
+
+  .stat-icon.success {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  .stat-icon.info {
+    background: #dbeafe;
+    color: #0891b2;
+  }
+
+  .stat-icon.danger {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  /* Filter Card */
+  .filter-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .filter-header {
+    padding: 1.25rem 1.5rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .filter-header:hover {
+    background: #f1f5f9;
+  }
+
+  .filter-header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 1rem;
+  }
+
+  .filter-header-title i {
+    color: #8b5cf6;
+    font-size: 1.125rem;
+  }
+
+  .filter-toggle {
+    color: #64748b;
+    transition: transform 0.2s;
+  }
+
+  .filter-toggle.expanded {
+    transform: rotate(180deg);
+  }
+
+  .filter-body {
+    padding: 1.5rem;
+    display: none;
+  }
+
+  .filter-body.show {
+    display: block;
+  }
+
+  .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .form-control,
+  .form-select {
+    padding: 0.625rem 0.875rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    background-color: white;
+    color: #1e293b;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  }
+
+  .checkbox-group {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    padding: 0.5rem 0;
   }
-  
-  .checkbox-container .form-check {
+
+  .form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-check-input {
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 2px solid #cbd5e1;
+    cursor: pointer;
+  }
+
+  .form-check-input:checked {
+    background-color: #8b5cf6;
+    border-color: #8b5cf6;
+  }
+
+  .form-check-label {
+    font-size: 0.875rem;
+    color: #475569;
+    cursor: pointer;
+  }
+
+  .filter-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+    margin-top: 1rem;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .btn i {
+    font-size: 1.125rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    color: white;
+  }
+
+  .btn-secondary {
+    background: white;
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+  }
+
+  .btn-secondary:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #475569;
+  }
+
+  .btn-sm {
+    padding: 0.4375rem 0.875rem;
+    font-size: 0.875rem;
+  }
+
+  /* Table Card */
+  .table-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .table {
+    width: 100%;
     margin: 0;
+    font-size: 0.9375rem;
   }
-  
-  .checkbox-container label {
-    margin-bottom: 0;
-    font-size: 0.9rem;
+
+  .table thead {
+    background: #f8fafc;
+    border-bottom: 2px solid #e9ecef;
+  }
+
+  .table thead th {
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s ease;
+  }
+
+  .table tbody tr:hover {
+    background: #f8fafc;
+  }
+
+  .table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .table tbody td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    color: #475569;
+  }
+
+  /* ID Badge */
+  .id-badge {
+    background: #f1f5f9;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 0.8125rem;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  /* Title Link */
+  .title-link {
+    color: #8b5cf6;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+
+  .title-link:hover {
+    color: #7c3aed;
+    text-decoration: underline;
+  }
+
+  /* Amount */
+  .amount-value {
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  /* Status Badges */
+  .badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .badge.badge-lead {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .badge.badge-qualified {
+    background-color: #e0e7ff;
+    color: #4338ca;
+  }
+
+  .badge.badge-proposal {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  .badge.badge-negotiation {
+    background-color: #fed7aa;
+    color: #9a3412;
+  }
+
+  .badge.badge-won {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  .badge.badge-lost {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  /* Priority Badges */
+  .badge.badge-priority-high {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  .badge.badge-priority-medium {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  .badge.badge-priority-low {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  /* Date Alert Tags */
+  .date-alert {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.25rem;
+  }
+
+  .date-alert.overdue {
+    color: #dc2626;
+  }
+
+  .date-alert.due-soon {
+    color: #f59e0b;
+  }
+
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 0.375rem;
+  }
+
+  .btn-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    background: white;
+    text-decoration: none;
+    transition: all 0.2s;
+    padding: 0;
+  }
+
+  .btn-action:hover {
+    background: #f8fafc;
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+  }
+
+  .btn-action.danger:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+    background: #fef2f2;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #94a3b8;
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    opacity: 0.3;
+    margin-bottom: 1.5rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state p {
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+
+  /* Pagination */
+  .pagination-wrapper {
+    padding: 1.5rem;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .page-item .page-link {
+    padding: 0.5rem 0.875rem;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .page-item .page-link:hover {
+    background: #f8fafc;
+    border-color: #8b5cf6;
+    color: #8b5cf6;
+  }
+
+  .page-item.active .page-link {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border-color: #8b5cf6;
+    color: white;
+  }
+
+  .page-item.disabled .page-link {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .page-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .filter-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .table thead {
+      display: none;
+    }
+
+    .table tbody tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+    }
+
+    .table tbody td {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .table tbody td:last-child {
+      border-bottom: none;
+    }
+
+    .table tbody td:before {
+      content: attr(data-label);
+      font-weight: 600;
+      color: #64748b;
+      font-size: 0.8125rem;
+      text-transform: uppercase;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-  <h2 class="mb-0">
-    <i class="bi bi-graph-up me-2"></i>Oportunidades de Venta
-  </h2>
-  <a href="{% url 'opportunity_create' %}" class="btn btn-primary">
-    <i class="bi bi-plus-circle me-2"></i>Nueva Oportunidad
-  </a>
-</div>
-
-<!-- Estadísticas Rápidas -->
-<div class="row mb-4">
-  <div class="col-md-3">
-    <div class="stats-card">
-      <div class="stats-value">{{ total_opportunities }}</div>
-      <div class="stats-label">Total de Oportunidades</div>
-    </div>
-  </div>
-  <div class="col-md-3">
-    <div class="stats-card">
-      <div class="stats-value text-success">${{ total_pipeline|floatformat:0 }}</div>
-      <div class="stats-label">Pipeline Activo</div>
-    </div>
-  </div>
-  <div class="col-md-3">
-    <div class="stats-card">
-      <div class="stats-value text-info">{{ won_opportunities }}</div>
-      <div class="stats-label">Oportunidades Ganadas</div>
-    </div>
-  </div>
-  <div class="col-md-3">
-    <div class="stats-card">
-      <div class="stats-value text-danger">{{ lost_opportunities }}</div>
-      <div class="stats-label">Oportunidades Perdidas</div>
-    </div>
-  </div>
-</div>
-
-<!-- Búsqueda Avanzada -->
-<div class="search-filters">
-  <h5 class="mb-3"><i class="bi bi-search me-2"></i>Filtros Avanzados</h5>
-  <form method="get" id="search-form">
-    <div class="row g-3">
-      <!-- Búsqueda General -->
-      <div class="col-md-6">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-search me-1"></i>Búsqueda</label>
-          {{ form.search_query }}
-          <small class="text-muted d-block mt-1">Busca en título, cliente, ID o descripción</small>
-        </div>
-      </div>
-      
-      <!-- Cliente -->
-      <div class="col-md-6">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-person me-1"></i>Cliente</label>
-          {{ form.customer }}
-        </div>
-      </div>
-      
-      <!-- Estado -->
-      <div class="col-md-4">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-list-check me-1"></i>Estados</label>
-          <div class="checkbox-container">
-            {% for choice_value, choice_label in form.status.field.choices %}
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="status" value="{{ choice_value }}" id="id_status_{{ forloop.counter }}" {% if choice_value in form.status.value %}checked{% endif %}>
-                <label class="form-check-label" for="id_status_{{ forloop.counter }}">
-                  {{ choice_label }}
-                </label>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-      
-      <!-- Prioridad -->
-      <div class="col-md-4">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-exclamation-circle me-1"></i>Prioridades</label>
-          <div class="checkbox-container">
-            {% for choice_value, choice_label in form.priority.field.choices %}
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="priority" value="{{ choice_value }}" id="id_priority_{{ forloop.counter }}" {% if choice_value in form.priority.value %}checked{% endif %}>
-                <label class="form-check-label" for="id_priority_{{ forloop.counter }}">
-                  {{ choice_label }}
-                </label>
-              </div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-      
-      <!-- Vendedor -->
-      <div class="col-md-4">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-person-badge me-1"></i>Asignado a</label>
-          {{ form.assigned_to }}
-        </div>
-      </div>
-      
-      <!-- Monto Desde -->
-      <div class="col-md-3">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-cash-coin me-1"></i>Monto Desde</label>
-          {{ form.amount_from }}
-        </div>
-      </div>
-      
-      <!-- Monto Hasta -->
-      <div class="col-md-3">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-cash-coin me-1"></i>Monto Hasta</label>
-          {{ form.amount_to }}
-        </div>
-      </div>
-      
-      <!-- Fecha Desde -->
-      <div class="col-md-3">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-calendar me-1"></i>Cierra Desde</label>
-          {{ form.date_from }}
-        </div>
-      </div>
-      
-      <!-- Fecha Hasta -->
-      <div class="col-md-3">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-calendar me-1"></i>Cierra Hasta</label>
-          {{ form.date_to }}
-        </div>
-      </div>
-      
-      <!-- Ordenamiento -->
-      <div class="col-md-6">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-sort-down me-1"></i>Ordenar por</label>
-          {{ form.order_by }}
-        </div>
-      </div>
-      
-      <!-- Botones -->
-      <div class="col-md-6 d-flex gap-2 align-items-end">
-        <button type="submit" class="btn btn-primary flex-grow-1">
-          <i class="bi bi-search me-1"></i>Buscar
-        </button>
-        <a href="{% url 'opportunity_list' %}" class="btn btn-outline-secondary">
-          <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
+<div class="list-container">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard' %}">
+          <i class="bi bi-house-door me-1"></i>Dashboard
         </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Oportunidades</li>
+    </ol>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-title">
+      <i class="bi bi-graph-up-arrow"></i>
+      <h1>Oportunidades de Venta</h1>
+    </div>
+    <a href="{% url 'opportunity_create' %}" class="btn btn-primary">
+      <i class="bi bi-plus-circle"></i>
+      <span>Nueva Oportunidad</span>
+    </a>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card-content">
+        <div class="stat-info">
+          <div class="stat-label">Total Oportunidades</div>
+          <div class="stat-value">{{ total_opportunities }}</div>
+        </div>
+        <div class="stat-icon primary">
+          <i class="bi bi-graph-up"></i>
+        </div>
       </div>
     </div>
-  </form>
-</div>
 
-<!-- Tabla de Resultados -->
-<div class="card">
-  <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0">
-      <thead>
-        <tr>
-          <th style="width: 50px;">#</th>
-          <th>Título</th>
-          <th>Cliente</th>
-          <th>Vendedor</th>
-          <th style="width: 100px;">Monto</th>
-          <th style="width: 80px;">Estado</th>
-          <th style="width: 80px;">Prioridad</th>
-          <th>Cierre</th>
-          <th style="width: 100px;">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for opp in opportunities %}
-        <tr>
-          <td><small class="text-muted">#{{ opp.id }}</small></td>
-          <td>
-            <a href="{% url 'opportunity_detail' opp.pk %}" class="text-decoration-none">
-              <strong>{{ opp.title }}</strong>
-            </a>
-          </td>
-          <td>{{ opp.customer.name }}</td>
-          <td><small class="text-muted">{{ opp.assigned_to.username }}</small></td>
-          <td><strong>${{ opp.amount|floatformat:0 }}</strong></td>
-          <td>
-            {% if opp.status == 'abierta' %}
-              <span class="badge bg-warning text-dark">Abierta</span>
-            {% elif opp.status == 'calificada' %}
-              <span class="badge bg-info">Calificada</span>
-            {% elif opp.status == 'propuesta' %}
-              <span class="badge bg-primary">Propuesta</span>
-            {% elif opp.status == 'negociacion' %}
-              <span class="badge bg-secondary">Negociación</span>
-            {% elif opp.status == 'ganada' %}
-              <span class="badge bg-success">Ganada</span>
-            {% elif opp.status == 'perdida' %}
-              <span class="badge bg-danger">Perdida</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if opp.priority == 'alta' %}
-              <span class="badge bg-danger">Alta</span>
-            {% elif opp.priority == 'media' %}
-              <span class="badge bg-warning text-dark">Media</span>
-            {% else %}
-              <span class="badge bg-success">Baja</span>
-            {% endif %}
-          </td>
-          <td>
-            {{ opp.expected_close_date|date:"d/m/Y" }}
-            {% if opp.is_overdue %}
-              <small class="text-danger"><strong>(VENCIDA)</strong></small>
-            {% elif opp.is_due_soon %}
-              <small class="text-warning"><strong>(PRÓXIMA)</strong></small>
-            {% endif %}
-          </td>
-          <td>
-            <div class="btn-group btn-group-sm" role="group">
-              <a href="{% url 'opportunity_update' opp.pk %}" class="btn btn-outline-primary" title="Editar">
-                <i class="bi bi-pencil-square"></i>
-              </a>
-              <a href="{% url 'opportunity_delete' opp.pk %}" class="btn btn-outline-danger" title="Eliminar">
-                <i class="bi bi-trash"></i>
-              </a>
+    <div class="stat-card">
+      <div class="stat-card-content">
+        <div class="stat-info">
+          <div class="stat-label">Pipeline Activo</div>
+          <div class="stat-value">${{ total_pipeline|floatformat:0 }}</div>
+        </div>
+        <div class="stat-icon success">
+          <i class="bi bi-currency-dollar"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card-content">
+        <div class="stat-info">
+          <div class="stat-label">Ganadas</div>
+          <div class="stat-value">{{ won_opportunities }}</div>
+        </div>
+        <div class="stat-icon info">
+          <i class="bi bi-trophy"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card-content">
+        <div class="stat-info">
+          <div class="stat-label">Perdidas</div>
+          <div class="stat-value">{{ lost_opportunities }}</div>
+        </div>
+        <div class="stat-icon danger">
+          <i class="bi bi-x-circle"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Card -->
+  <div class="filter-card">
+    <div class="filter-header" onclick="toggleFilters()">
+      <div class="filter-header-title">
+        <i class="bi bi-sliders"></i>
+        <span>Filtros Avanzados</span>
+      </div>
+      <i class="bi bi-chevron-down filter-toggle" id="filterToggle"></i>
+    </div>
+    <div class="filter-body" id="filterBody">
+      <form method="get" id="filterForm">
+        <div class="filter-grid">
+          <!-- Búsqueda General -->
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">
+              <i class="bi bi-search"></i>
+              Búsqueda General
+            </label>
+            {{ form.search_query }}
+          </div>
+
+          <!-- Cliente -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-person"></i>
+              Cliente
+            </label>
+            {{ form.customer }}
+          </div>
+
+          <!-- Asignado a -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-person-badge"></i>
+              Asignado A
+            </label>
+            {{ form.assigned_to }}
+          </div>
+
+          <!-- Monto Desde -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-cash-coin"></i>
+              Monto Desde
+            </label>
+            {{ form.amount_from }}
+          </div>
+
+          <!-- Monto Hasta -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-cash-coin"></i>
+              Monto Hasta
+            </label>
+            {{ form.amount_to }}
+          </div>
+
+          <!-- Fecha Desde -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-calendar-event"></i>
+              Cierra Desde
+            </label>
+            {{ form.date_from }}
+          </div>
+
+          <!-- Fecha Hasta -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-calendar-check"></i>
+              Cierra Hasta
+            </label>
+            {{ form.date_to }}
+          </div>
+
+          <!-- Estado -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-flag"></i>
+              Estados
+            </label>
+            <div class="checkbox-group">
+              {% for choice_value, choice_label in form.status.field.choices %}
+                <div class="form-check">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    name="status" 
+                    value="{{ choice_value }}" 
+                    id="id_status_{{ forloop.counter }}" 
+                    {% if choice_value in form.status.value %}checked{% endif %}>
+                  <label class="form-check-label" for="id_status_{{ forloop.counter }}">
+                    {{ choice_label }}
+                  </label>
+                </div>
+              {% endfor %}
             </div>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="9" class="text-center py-4">
-            <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
-            <p class="text-muted mt-2">No hay oportunidades que coincidan con tu búsqueda</p>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+          </div>
+
+          <!-- Prioridad -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-exclamation-triangle"></i>
+              Prioridades
+            </label>
+            <div class="checkbox-group">
+              {% for choice_value, choice_label in form.priority.field.choices %}
+                <div class="form-check">
+                  <input 
+                    class="form-check-input" 
+                    type="checkbox" 
+                    name="priority" 
+                    value="{{ choice_value }}" 
+                    id="id_priority_{{ forloop.counter }}" 
+                    {% if choice_value in form.priority.value %}checked{% endif %}>
+                  <label class="form-check-label" for="id_priority_{{ forloop.counter }}">
+                    {{ choice_label }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+
+          <!-- Ordenamiento -->
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-sort-alpha-down"></i>
+              Ordenar Por
+            </label>
+            {{ form.order_by }}
+          </div>
+
+          <div class="filter-actions">
+            <a href="{% url 'opportunity_list' %}" class="btn btn-secondary btn-sm">
+              <i class="bi bi-arrow-counterclockwise"></i>
+              <span>Limpiar Filtros</span>
+            </a>
+            <button type="submit" class="btn btn-primary btn-sm">
+              <i class="bi bi-search"></i>
+              <span>Aplicar Filtros</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Título</th>
+            <th>Cliente</th>
+            <th>Vendedor</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <th>Prioridad</th>
+            <th>Cierre</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for opp in opportunities %}
+          <tr>
+            <td data-label="ID">
+              <span class="id-badge">#{{ opp.id }}</span>
+            </td>
+            <td data-label="Título">
+              <a href="{% url 'opportunity_detail' opp.pk %}" class="title-link">
+                {{ opp.title }}
+              </a>
+            </td>
+            <td data-label="Cliente">
+              <a href="{% url 'customer_detail' opp.customer.pk %}" style="color: #475569; text-decoration: none;">
+                {{ opp.customer.name }}
+              </a>
+            </td>
+            <td data-label="Vendedor">
+              {{ opp.assigned_to.get_full_name|default:opp.assigned_to.username }}
+            </td>
+            <td data-label="Monto">
+              <span class="amount-value">${{ opp.amount|floatformat:0 }}</span>
+            </td>
+            <td data-label="Estado">
+              {% if opp.status == 'lead' %}
+                <span class="badge badge-lead">
+                  <i class="bi bi-star"></i>Lead
+                </span>
+              {% elif opp.status == 'qualified' %}
+                <span class="badge badge-qualified">
+                  <i class="bi bi-check-circle"></i>Calificado
+                </span>
+              {% elif opp.status == 'proposal' %}
+                <span class="badge badge-proposal">
+                  <i class="bi bi-file-earmark-text"></i>Propuesta
+                </span>
+              {% elif opp.status == 'negotiation' %}
+                <span class="badge badge-negotiation">
+                  <i class="bi bi-arrow-left-right"></i>Negociación
+                </span>
+              {% elif opp.status == 'won' %}
+                <span class="badge badge-won">
+                  <i class="bi bi-trophy"></i>Ganada
+                </span>
+              {% else %}
+                <span class="badge badge-lost">
+                  <i class="bi bi-x-circle"></i>Perdida
+                </span>
+              {% endif %}
+            </td>
+            <td data-label="Prioridad">
+              {% if opp.priority == 'alta' %}
+                <span class="badge badge-priority-high">
+                  <i class="bi bi-exclamation-triangle-fill"></i>Alta
+                </span>
+              {% elif opp.priority == 'media' %}
+                <span class="badge badge-priority-medium">
+                  <i class="bi bi-dash-circle"></i>Media
+                </span>
+              {% else %}
+                <span class="badge badge-priority-low">
+                  <i class="bi bi-arrow-down-circle"></i>Baja
+                </span>
+              {% endif %}
+            </td>
+            <td data-label="Cierre">
+              <div>{{ opp.expected_close_date|date:"d/m/Y" }}</div>
+              {% if opp.is_overdue %}
+                <span class="date-alert overdue">VENCIDA</span>
+              {% elif opp.is_due_soon %}
+                <span class="date-alert due-soon">PRÓXIMA</span>
+              {% endif %}
+            </td>
+            <td data-label="Acciones">
+              <div class="action-buttons">
+                <a 
+                  href="{% url 'opportunity_detail' opp.pk %}" 
+                  class="btn-action"
+                  title="Ver Detalles"
+                  data-bs-toggle="tooltip">
+                  <i class="bi bi-eye"></i>
+                </a>
+                <a 
+                  href="{% url 'opportunity_update' opp.pk %}" 
+                  class="btn-action"
+                  title="Editar"
+                  data-bs-toggle="tooltip">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                <a 
+                  href="{% url 'opportunity_delete' opp.pk %}" 
+                  class="btn-action danger"
+                  title="Eliminar"
+                  data-bs-toggle="tooltip">
+                  <i class="bi bi-trash3"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9">
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <i class="bi bi-inbox"></i>
+                </div>
+                <h3>No se encontraron oportunidades</h3>
+                <p>No hay oportunidades que coincidan con los filtros aplicados</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination-wrapper">
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">
+              <i class="bi bi-chevron-bar-left"></i>
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">
+              <i class="bi bi-chevron-left"></i>
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">
+              <i class="bi bi-chevron-bar-left"></i>
+            </span>
+          </li>
+          <li class="page-item disabled">
+            <span class="page-link">
+              <i class="bi bi-chevron-left"></i>
+            </span>
+          </li>
+        {% endif %}
+
+        <li class="page-item active">
+          <span class="page-link">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+          </span>
+        </li>
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">
+              <i class="bi bi-chevron-bar-right"></i>
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link">
+              <i class="bi bi-chevron-right"></i>
+            </span>
+          </li>
+          <li class="page-item disabled">
+            <span class="page-link">
+              <i class="bi bi-chevron-bar-right"></i>
+            </span>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+    {% endif %}
   </div>
 </div>
-
-<!-- Paginación -->
-{% if is_paginated %}
-<nav aria-label="Page navigation" class="mt-4">
-  <ul class="pagination justify-content-center">
-    {% if page_obj.has_previous %}
-    <li class="page-item">
-      <a class="page-link" href="?page=1{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Primera</a>
-    </li>
-    <li class="page-item">
-      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Anterior</a>
-    </li>
-    {% endif %}
-    
-    <li class="page-item active">
-      <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-    </li>
-    
-    {% if page_obj.has_next %}
-    <li class="page-item">
-      <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Siguiente</a>
-    </li>
-    <li class="page-item">
-      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Última</a>
-    </li>
-    {% endif %}
-  </ul>
-</nav>
-{% endif %}
 
 <script>
-// Búsqueda en tiempo real - Se ejecuta cuando cambias cualquier filtro
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('search-form');
-    const inputs = form.querySelectorAll('input, select, textarea');
-    
-    // Crear un debounce para no saturar el servidor
-    let debounceTimer;
-    
-    inputs.forEach(input => {
-        input.addEventListener('change', function() {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                form.submit(); // Envía automáticamente
-            }, 300); // Espera 300ms antes de enviar
-        });
-        
-        // Para inputs de texto, también en tiempo real mientras escribes
-        if (input.type === 'text') {
-            input.addEventListener('input', function() {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(() => {
-                    form.submit();
-                }, 800); // 800ms para no ser tan agresivo
-            });
-        }
+  // Inicializar tooltips
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+
+  // Auto-submit en cambios de filtros
+  const form = document.getElementById('filterForm');
+  const selects = form.querySelectorAll('select:not([multiple])');
+  const dateInputs = form.querySelectorAll('input[type="date"]');
+  const numberInputs = form.querySelectorAll('input[type="number"]');
+  const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+
+  selects.forEach(select => {
+    select.addEventListener('change', () => {
+      form.submit();
     });
+  });
+
+  dateInputs.forEach(input => {
+    input.addEventListener('change', () => {
+      form.submit();
+    });
+  });
+
+  numberInputs.forEach(input => {
+    let timeout;
+    input.addEventListener('input', () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        form.submit();
+      }, 800);
+    });
+  });
+
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      form.submit();
+    });
+  });
+
+  // Búsqueda con debounce
+  const searchInput = form.querySelector('input[name="search_query"]');
+  let debounceTimer;
+
+  if (searchInput) {
+    searchInput.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        form.submit();
+      }, 800);
+    });
+  }
+
+  // Aplicar clases a los campos
+  const inputs = form.querySelectorAll('input[type="text"], input[type="number"], input[type="date"], select');
+  inputs.forEach(input => {
+    if (input.tagName === 'SELECT') {
+      input.classList.add('form-select');
+    } else {
+      input.classList.add('form-control');
+    }
+  });
 });
+
+function toggleFilters() {
+  const filterBody = document.getElementById('filterBody');
+  const filterToggle = document.getElementById('filterToggle');
+  
+  filterBody.classList.toggle('show');
+  filterToggle.classList.toggle('expanded');
+}
 </script>
 
 {% endblock %}

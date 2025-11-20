@@ -1,91 +1,882 @@
 {% extends "base.html" %}
-{% block title %}Nuevo Usuario - CRM Pro{% endblock %}
+{% block title %}Crear Nuevo Usuario - CRM Pro{% endblock %}
 
 {% block extra_css %}
 <style>
-  .auth-container {
-    max-width: 600px;
-    margin: 3rem auto;
+  .create-container {
+    max-width: 900px;
+    margin: 0 auto;
   }
-  .auth-card {
-    padding: 2.5rem;
+
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .breadcrumb-item a {
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb-item a:hover {
+    color: #1e40af;
+  }
+
+  .breadcrumb-item.active {
+    color: #64748b;
+  }
+
+  /* Page Header */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .page-title h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+  }
+
+  .page-title i {
+    font-size: 2rem;
+    color: #10b981;
+  }
+
+  /* Create Card */
+  .create-card {
     background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    position: relative;
+  }
+
+  .card-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: white;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+
+  .card-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2.5rem;
+    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-subtitle {
+    font-size: 0.9375rem;
+    opacity: 0.95;
+    margin: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-body {
+    padding: 2.5rem 2rem;
+  }
+
+  /* Info Alert */
+  .info-alert {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid #10b981;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .info-alert-icon {
+    color: #10b981;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .info-alert-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #166534;
+    line-height: 1.5;
+  }
+
+  /* Form Layout */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-grid-full {
+    grid-column: 1 / -1;
+  }
+
+  /* Form Groups */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    font-size: 0.9375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-label i {
+    color: #10b981;
+    font-size: 1rem;
+  }
+
+  .required-mark {
+    color: #ef4444;
+    margin-left: 0.25rem;
+  }
+
+  .input-wrapper {
+    position: relative;
+  }
+
+  .form-control,
+  .form-select {
+    width: 100%;
+    padding: 0.875rem 3rem 0.875rem 1rem;
+    font-size: 0.9375rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background-color: white;
+    color: #1e293b;
+  }
+
+  .form-select {
+    padding-right: 2.5rem;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  }
+
+  .form-control.is-invalid,
+  .form-select.is-invalid {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+  }
+
+  .form-control.is-valid {
+    border-color: #10b981;
+    background-color: #f0fdf4;
+  }
+
+  /* Toggle Password */
+  .toggle-password {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.25rem;
+    font-size: 1.125rem;
+    transition: color 0.2s;
+  }
+
+  .toggle-password:hover {
+    color: #10b981;
+  }
+
+  /* Help Text */
+  .form-text {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .form-text i {
+    font-size: 0.875rem;
+    color: #10b981;
+  }
+
+  /* Error Messages */
+  .invalid-feedback {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    color: #dc2626;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .invalid-feedback i {
+    font-size: 1rem;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+  }
+
+  /* Password Strength */
+  .password-strength {
+    margin-top: 0.75rem;
+    display: none;
+  }
+
+  .password-strength.show {
+    display: block;
+  }
+
+  .strength-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .strength-text {
+    font-weight: 700;
+  }
+
+  .strength-text.weak { color: #ef4444; }
+  .strength-text.medium { color: #f59e0b; }
+  .strength-text.strong { color: #10b981; }
+
+  .strength-bar {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .strength-bar-fill {
+    height: 100%;
+    transition: all 0.3s ease;
+    width: 0%;
+  }
+
+  .strength-bar-fill.weak {
+    width: 33%;
+    background: #ef4444;
+  }
+
+  .strength-bar-fill.medium {
+    width: 66%;
+    background: #f59e0b;
+  }
+
+  .strength-bar-fill.strong {
+    width: 100%;
+    background: #10b981;
+  }
+
+  /* Requirements */
+  .password-requirements {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 0.75rem;
+    display: none;
+  }
+
+  .password-requirements.show {
+    display: block;
+  }
+
+  .requirements-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #475569;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .requirement-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: #64748b;
+    padding: 0.25rem 0;
+  }
+
+  .requirement-item i {
+    font-size: 1rem;
+  }
+
+  .requirement-item.met {
+    color: #10b981;
+  }
+
+  .requirement-item.met i {
+    color: #10b981;
+  }
+
+  /* Role Info */
+  .role-info {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    display: none;
+  }
+
+  .role-info.show {
+    display: block;
+  }
+
+  .role-info-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #075985;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .role-permission {
+    font-size: 0.75rem;
+    color: #0c4a6e;
+    padding: 0.25rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.375rem;
+  }
+
+  .role-permission i {
+    color: #0891b2;
+    margin-top: 0.125rem;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+  }
+
+  .btn i {
+    font-size: 1.125rem;
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+  }
+
+  .btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+    color: white;
+  }
+
+  .btn-secondary {
+    background: white;
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+  }
+
+  .btn-secondary:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #475569;
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .create-container {
+      padding: 0 1rem;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .action-buttons {
+      flex-direction: column-reverse;
+    }
+
+    .btn {
+      width: 100%;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="auth-container">
-  <div class="card auth-card">
-    <div class="mb-4 text-center">
-      <i class="bi bi-person-plus-fill text-primary" style="font-size: 3rem;"></i>
-      <h2 class="mt-2">Crear Usuario</h2>
-      <p class="text-muted mb-0">Solo los administradores pueden crear cuentas nuevas.</p>
+<div class="create-container">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard' %}">
+          <i class="bi bi-house-door me-1"></i>Dashboard
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'user_list' %}">
+          <i class="bi bi-people me-1"></i>Usuarios
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Nuevo Usuario</li>
+    </ol>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-title">
+      <i class="bi bi-person-plus-fill"></i>
+      <h1>Crear Nuevo Usuario</h1>
+    </div>
+    <a href="{% url 'user_list' %}" class="btn btn-secondary">
+      <i class="bi bi-arrow-left"></i>
+      <span>Volver a la Lista</span>
+    </a>
+  </div>
+
+  <!-- Create Card -->
+  <div class="create-card">
+    <div class="card-header">
+      <div class="card-icon">
+        <i class="bi bi-person-plus-fill"></i>
+      </div>
+      <h2 class="card-title">Agregar Miembro del Equipo</h2>
+      <p class="card-subtitle">
+        Completa la información para crear una nueva cuenta de usuario
+      </p>
     </div>
 
-    <form method="post" novalidate>
-      {% csrf_token %}
-
-      <div class="mb-3">
-        <label for="{{ form.username.id_for_label }}" class="form-label">
-          Usuario
-        </label>
-        {{ form.username }}
-        {% if form.username.errors %}
-          <div class="text-danger small mt-1">{{ form.username.errors }}</div>
-        {% endif %}
+    <div class="card-body">
+      <!-- Info Alert -->
+      <div class="info-alert">
+        <i class="bi bi-shield-check info-alert-icon"></i>
+        <div class="info-alert-content">
+          <p>
+            <strong>Privilegio de administrador:</strong> Como administrador, puedes crear nuevas cuentas de usuario 
+            y asignarles roles específicos. El nuevo usuario recibirá acceso inmediato al sistema.
+          </p>
+        </div>
       </div>
 
-      <div class="mb-3">
-        <label for="{{ form.email.id_for_label }}" class="form-label">
-          Email
-        </label>
-        {{ form.email }}
-        {% if form.email.errors %}
-          <div class="text-danger small mt-1">{{ form.email.errors }}</div>
-        {% endif %}
-      </div>
+      <!-- Form -->
+      <form method="post" novalidate id="createForm" autocomplete="off">
+        {% csrf_token %}
 
-      <div class="mb-3">
-        <label for="{{ form.role.id_for_label }}" class="form-label">
-          Rol
-        </label>
-        {{ form.role }}
-        {% if form.role.errors %}
-          <div class="text-danger small mt-1">{{ form.role.errors }}</div>
-        {% endif %}
-      </div>
+        <div class="form-grid">
+          <!-- Username -->
+          <div class="form-group">
+            <label for="id_username" class="form-label">
+              <i class="bi bi-person-circle"></i>
+              Nombre de Usuario
+              <span class="required-mark">*</span>
+            </label>
+            <input 
+              type="text" 
+              name="username" 
+              id="id_username"
+              class="form-control"
+              autocomplete="off"
+              required>
+            {% if form.username.errors %}
+              {% for error in form.username.errors %}
+                <div class="invalid-feedback">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                  <span>{{ error }}</span>
+                </div>
+              {% endfor %}
+            {% else %}
+              <small class="form-text">
+                <i class="bi bi-info-circle"></i>
+                Solo letras, números y @/./+/-/_
+              </small>
+            {% endif %}
+          </div>
 
-      <div class="mb-3">
-        <label for="{{ form.password1.id_for_label }}" class="form-label">
-          Contraseña
-        </label>
-        {{ form.password1 }}
-        {% if form.password1.errors %}
-          <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
-        {% endif %}
-      </div>
+          <!-- Email -->
+          <div class="form-group">
+            <label for="id_email" class="form-label">
+              <i class="bi bi-envelope"></i>
+              Email Corporativo
+              <span class="required-mark">*</span>
+            </label>
+            <input 
+              type="email" 
+              name="email" 
+              id="id_email"
+              class="form-control"
+              autocomplete="email"
+              required>
+            {% if form.email.errors %}
+              {% for error in form.email.errors %}
+                <div class="invalid-feedback">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                  <span>{{ error }}</span>
+                </div>
+              {% endfor %}
+            {% else %}
+              <small class="form-text">
+                <i class="bi bi-at"></i>
+                Email para acceso y notificaciones
+              </small>
+            {% endif %}
+          </div>
+        </div>
 
-      <div class="mb-3">
-        <label for="{{ form.password2.id_for_label }}" class="form-label">
-          Confirmar contraseña
-        </label>
-        {{ form.password2 }}
-        {% if form.password2.errors %}
-          <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
-        {% endif %}
-      </div>
+        <!-- Role (Full width) -->
+        <div class="form-group">
+          <label for="id_role" class="form-label">
+            <i class="bi bi-briefcase"></i>
+            Rol en el Sistema
+            <span class="required-mark">*</span>
+          </label>
+          <select name="role" id="id_role" class="form-select" required>
+            <option value="">Selecciona un rol...</option>
+            <option value="vendedor">Vendedor</option>
+            <option value="gerente">Gerente</option>
+            <option value="admin">Administrador</option>
+          </select>
+          {% if form.role.errors %}
+            {% for error in form.role.errors %}
+              <div class="invalid-feedback">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ error }}</span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <small class="form-text">
+              <i class="bi bi-shield"></i>
+              Define los permisos y accesos del usuario
+            </small>
+          {% endif %}
 
-      <button type="submit" class="btn btn-primary w-100 mt-2">
-        <i class="bi bi-check-circle me-2"></i>Guardar Usuario
-      </button>
-    </form>
+          <div class="role-info" id="roleInfo">
+            <div class="role-info-title">
+              <i class="bi bi-info-circle"></i>
+              <span>Permisos de este rol:</span>
+            </div>
+            <div id="rolePermissions"></div>
+          </div>
+        </div>
 
-    <div class="text-center mt-3">
-      <a href="{% url 'user_list' %}" class="text-decoration-none">
-        Volver a la lista de usuarios
-      </a>
+        <div class="form-grid">
+          <!-- Password 1 -->
+          <div class="form-group">
+            <label for="id_password1" class="form-label">
+              <i class="bi bi-key"></i>
+              Contraseña
+              <span class="required-mark">*</span>
+            </label>
+            <div class="input-wrapper">
+              <input 
+                type="password" 
+                name="password1" 
+                id="id_password1"
+                class="form-control"
+                autocomplete="new-password"
+                required>
+              <button type="button" class="toggle-password" onclick="togglePassword('id_password1', this)">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+            {% if form.password1.errors %}
+              {% for error in form.password1.errors %}
+                <div class="invalid-feedback">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                  <span>{{ error }}</span>
+                </div>
+              {% endfor %}
+            {% endif %}
+
+            <div class="password-strength" id="passwordStrength">
+              <div class="strength-label">
+                <span>Fortaleza</span>
+                <span class="strength-text" id="strengthText">—</span>
+              </div>
+              <div class="strength-bar">
+                <div class="strength-bar-fill" id="strengthBarFill"></div>
+              </div>
+            </div>
+
+            <div class="password-requirements" id="passwordRequirements">
+              <div class="requirements-title">Debe contener:</div>
+              <div class="requirement-item" id="req-length">
+                <i class="bi bi-circle"></i>
+                <span>8+ caracteres</span>
+              </div>
+              <div class="requirement-item" id="req-uppercase">
+                <i class="bi bi-circle"></i>
+                <span>Mayúscula</span>
+              </div>
+              <div class="requirement-item" id="req-lowercase">
+                <i class="bi bi-circle"></i>
+                <span>Minúscula</span>
+              </div>
+              <div class="requirement-item" id="req-number">
+                <i class="bi bi-circle"></i>
+                <span>Número</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Password 2 -->
+          <div class="form-group">
+            <label for="id_password2" class="form-label">
+              <i class="bi bi-lock-fill"></i>
+              Confirmar Contraseña
+              <span class="required-mark">*</span>
+            </label>
+            <div class="input-wrapper">
+              <input 
+                type="password" 
+                name="password2" 
+                id="id_password2"
+                class="form-control"
+                autocomplete="new-password"
+                required>
+              <button type="button" class="toggle-password" onclick="togglePassword('id_password2', this)">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+            {% if form.password2.errors %}
+              {% for error in form.password2.errors %}
+                <div class="invalid-feedback">
+                  <i class="bi bi-exclamation-circle-fill"></i>
+                  <span>{{ error }}</span>
+                </div>
+              {% endfor %}
+            {% else %}
+              <small class="form-text">
+                <i class="bi bi-info-circle"></i>
+                Repite la contraseña
+              </small>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <a href="{% url 'user_list' %}" class="btn btn-secondary" style="flex: 1;">
+            <i class="bi bi-x-circle"></i>
+            <span>Cancelar</span>
+          </a>
+          <button type="submit" class="btn btn-success" style="flex: 1;">
+            <i class="bi bi-check-circle"></i>
+            <span>Crear Usuario</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
+
+<script>
+function togglePassword(inputId, button) {
+  const input = document.getElementById(inputId);
+  const icon = button.querySelector('i');
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.remove('bi-eye');
+    icon.classList.add('bi-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.remove('bi-eye-slash');
+    icon.classList.add('bi-eye');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('createForm');
+  const password1 = document.getElementById('id_password1');
+  const password2 = document.getElementById('id_password2');
+  const roleSelect = document.getElementById('id_role');
+  const strengthIndicator = document.getElementById('passwordStrength');
+  const strengthBarFill = document.getElementById('strengthBarFill');
+  const strengthText = document.getElementById('strengthText');
+  const requirementsBox = document.getElementById('passwordRequirements');
+  const roleInfo = document.getElementById('roleInfo');
+
+  const roleDescriptions = {
+    'vendedor': [
+      { icon: 'bi-people', text: 'Gestionar clientes asignados' },
+      { icon: 'bi-graph-up', text: 'Crear oportunidades' },
+      { icon: 'bi-chat-dots', text: 'Registrar seguimientos' }
+    ],
+    'gerente': [
+      { icon: 'bi-people', text: 'Ver todos los clientes' },
+      { icon: 'bi-graph-up', text: 'Ver todas las oportunidades' },
+      { icon: 'bi-bar-chart', text: 'Acceder a reportes completos' },
+      { icon: 'bi-people-fill', text: 'Ver equipo de ventas' }
+    ],
+    'admin': [
+      { icon: 'bi-shield-check', text: 'Acceso total al sistema' },
+      { icon: 'bi-person-plus', text: 'Gestionar usuarios' },
+      { icon: 'bi-gear', text: 'Configurar sistema' },
+      { icon: 'bi-database', text: 'Acceso a todos los datos' }
+    ]
+  };
+
+  roleSelect.addEventListener('change', function() {
+    const role = this.value;
+    if (role && roleDescriptions[role]) {
+      roleInfo.classList.add('show');
+      document.getElementById('rolePermissions').innerHTML = roleDescriptions[role]
+        .map(p => `<div class="role-permission"><i class="bi ${p.icon}"></i> ${p.text}</div>`)
+        .join('');
+    } else {
+      roleInfo.classList.remove('show');
+    }
+  });
+
+  password1.addEventListener('input', function() {
+    const password = this.value;
+    
+    if (!password) {
+      strengthIndicator.classList.remove('show');
+      requirementsBox.classList.remove('show');
+      return;
+    }
+
+    strengthIndicator.classList.add('show');
+    requirementsBox.classList.add('show');
+
+    const reqs = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password)
+    };
+
+    updateRequirement('req-length', reqs.length);
+    updateRequirement('req-uppercase', reqs.uppercase);
+    updateRequirement('req-lowercase', reqs.lowercase);
+    updateRequirement('req-number', reqs.number);
+
+    const count = Object.values(reqs).filter(Boolean).length;
+    let cls = '', lbl = '';
+
+    if (count <= 2) {
+      cls = 'weak';
+      lbl = 'Débil';
+    } else if (count === 3) {
+      cls = 'medium';
+      lbl = 'Media';
+    } else {
+      cls = 'strong';
+      lbl = 'Fuerte';
+    }
+
+    strengthBarFill.className = 'strength-bar-fill ' + cls;
+    strengthText.className = 'strength-text ' + cls;
+    strengthText.textContent = lbl;
+  });
+
+  password2.addEventListener('input', function() {
+    if (this.value && password1.value !== this.value) {
+      this.style.borderColor = '#ef4444';
+    } else if (this.value && password1.value === this.value) {
+      this.classList.add('is-valid');
+      this.style.borderColor = '#10b981';
+    }
+  });
+
+  form.addEventListener('submit', function() {
+    const btn = form.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> <span>Creando...</span>';
+  });
+});
+
+function updateRequirement(id, isMet) {
+  const el = document.getElementById(id);
+  const icon = el.querySelector('i');
+  
+  if (isMet) {
+    el.classList.add('met');
+    icon.classList.remove('bi-circle');
+    icon.classList.add('bi-check-circle-fill');
+  } else {
+    el.classList.remove('met');
+    icon.classList.remove('bi-check-circle-fill');
+    icon.classList.add('bi-circle');
+  }
+}
+</script>
+
 {% endblock %}

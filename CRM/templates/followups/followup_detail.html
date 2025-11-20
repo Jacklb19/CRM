@@ -1,50 +1,763 @@
 {% extends "base.html" %}
-{% block title %}Detalle Seguimiento - CRM Pro{% endblock %}
+{% block title %}{{ followup.subject }} - Detalle Seguimiento{% endblock %}
+
+{% block extra_css %}
+<style>
+  .detail-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .breadcrumb-item a {
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb-item a:hover {
+    color: #1e40af;
+  }
+
+  .breadcrumb-item.active {
+    color: #64748b;
+  }
+
+  /* Header Card */
+  .followup-header-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .followup-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+  }
+
+  .followup-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+  }
+
+  .followup-header-info {
+    flex: 1;
+  }
+
+  .followup-name {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .followup-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .meta-item i {
+    font-size: 1rem;
+  }
+
+  .followup-header-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  /* Status Badge */
+  .badge-status {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .badge-status.pendiente {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  .badge-status.completado {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  .badge-status.cancelado {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  .badge-status.en_proceso {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  /* Type Badge */
+  .badge-type {
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .badge-type.llamada {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  .badge-type.email {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .badge-type.reunion {
+    background-color: #e0e7ff;
+    color: #4338ca;
+  }
+
+  .badge-type.visita {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  .badge-type.otro {
+    background-color: #f3e8ff;
+    color: #6b21a8;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .btn i {
+    font-size: 1.125rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    color: white;
+  }
+
+  .btn-secondary {
+    background: white;
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+  }
+
+  .btn-secondary:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #475569;
+  }
+
+  .btn-danger {
+    background: white;
+    border: 1.5px solid #fca5a5;
+    color: #dc2626;
+  }
+
+  .btn-danger:hover {
+    background: #fef2f2;
+    border-color: #ef4444;
+    color: #dc2626;
+  }
+
+  /* Content Grid */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Info Cards */
+  .info-section {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 1.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #f1f5f9;
+  }
+
+  .section-title i {
+    color: #8b5cf6;
+    font-size: 1.25rem;
+  }
+
+  .info-grid {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .info-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .info-value {
+    font-size: 0.9375rem;
+    color: #1e293b;
+    font-weight: 500;
+  }
+
+  .info-value a {
+    color: #8b5cf6;
+    text-decoration: none;
+  }
+
+  .info-value a:hover {
+    color: #6d28d9;
+    text-decoration: underline;
+  }
+
+  .info-value code {
+    background: #f1f5f9;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 0.875rem;
+    color: #475569;
+  }
+
+  /* Notes Section */
+  .notes-section {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .notes-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .notes-title i {
+    color: #8b5cf6;
+  }
+
+  .notes-content {
+    line-height: 1.7;
+    color: #475569;
+    font-size: 0.9375rem;
+  }
+
+  .notes-content p {
+    margin: 0 0 0.75rem 0;
+  }
+
+  .notes-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Sidebar Stats */
+  .stats-card {
+    background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    color: white;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .stat-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .stat-item:first-child {
+    padding-top: 0;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  /* Quick Info Card */
+  .quick-info-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .quick-info-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.375rem;
+  }
+
+  .quick-info-value {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #94a3b8;
+  }
+
+  .empty-state i {
+    font-size: 3rem;
+    opacity: 0.5;
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .empty-state p {
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+
+  /* Badge */
+  .badge-custom {
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .badge-primary {
+    background-color: #e0e7ff;
+    color: #4338ca;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .followup-header-card {
+      padding: 1.5rem;
+    }
+
+    .followup-avatar {
+      width: 64px;
+      height: 64px;
+      font-size: 1.5rem;
+    }
+
+    .followup-name {
+      font-size: 1.5rem;
+    }
+
+    .followup-header-left {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .followup-header-actions {
+      width: 100%;
+    }
+
+    .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    .followup-meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="mt-4 mb-3">
-  <h2>
-    <i class="bi bi-chat-dots me-2"></i>{{ object.subject }}
-  </h2>
-</div>
+<div class="detail-container">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard' %}">
+          <i class="bi bi-house-door me-1"></i>Dashboard
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'followup_list' %}">
+          <i class="bi bi-chat-dots me-1"></i>Seguimientos
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">{{ followup.subject|truncatewords:5 }}</li>
+    </ol>
+  </nav>
 
-<div class="card">
-  <div class="card-body">
-    <div class="row mb-4">
-      <div class="col-md-6">
-        <p><strong>Tipo:</strong> {{ object.get_type_display }}</p>
-        <p><strong>Cliente:</strong> <a href="{% url 'customer_detail' object.customer.pk %}">{{ object.customer.name }}</a></p>
-        <p><strong>Usuario responsable:</strong> {{ object.user.username }}</p>
+  <!-- Header Card -->
+  <div class="followup-header-card">
+    <div class="followup-header-left">
+      <div class="followup-avatar">
+        <i class="bi bi-chat-left-text-fill"></i>
       </div>
-      <div class="col-md-6">
-        <p>
-          <strong>Estado:</strong>
-          <span class="badge {% if object.status == 'pendiente' %}bg-warning{% elif object.status == 'completado' %}bg-success{% else %}bg-danger{% endif %}">
-            {{ object.get_status_display }}
+      <div class="followup-header-info">
+        <h1 class="followup-name">
+          {{ followup.subject }}
+          <span class="badge-status {{ followup.status }}">
+            {% if followup.status == 'pendiente' %}
+              <i class="bi bi-clock-fill"></i>Pendiente
+            {% elif followup.status == 'completado' %}
+              <i class="bi bi-check-circle-fill"></i>Completado
+            {% elif followup.status == 'cancelado' %}
+              <i class="bi bi-x-circle-fill"></i>Cancelado
+            {% else %}
+              <i class="bi bi-arrow-repeat"></i>En Proceso
+            {% endif %}
           </span>
-        </p>
-        <p><strong>Fecha programada:</strong> {{ object.date|date:"d/m/Y H:i" }}</p>
-        {% if object.opportunity %}
-          <p><strong>Oportunidad:</strong> <a href="{% url 'opportunity_detail' object.opportunity.pk %}">{{ object.opportunity.title }}</a></p>
-        {% endif %}
+        </h1>
+        <div class="followup-meta">
+          <span class="meta-item">
+            <i class="bi bi-calendar3"></i>
+            <span>{{ followup.date|date:"d/m/Y" }}</span>
+          </span>
+          <span class="meta-item">
+            <i class="bi bi-hash"></i>
+            <span>ID: {{ followup.id }}</span>
+          </span>
+          <span class="meta-item">
+            <i class="bi bi-person-circle"></i>
+            <span>{{ followup.user.get_full_name|default:followup.user.username }}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="followup-header-actions">
+      <a href="{% url 'followup_update' followup.pk %}" class="btn btn-primary">
+        <i class="bi bi-pencil-square"></i>
+        <span>Editar</span>
+      </a>
+      <a href="{% url 'followup_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i>
+        <span>Volver</span>
+      </a>
+      <a href="{% url 'followup_delete' followup.pk %}" class="btn btn-danger">
+        <i class="bi bi-trash3"></i>
+        <span>Eliminar</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <!-- Main Content -->
+    <div>
+      <!-- Main Information -->
+      <div class="info-section">
+        <h2 class="section-title">
+          <i class="bi bi-info-circle"></i>
+          <span>Información Principal</span>
+        </h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-person-vcard"></i>Cliente
+            </span>
+            <span class="info-value">
+              <a href="{% url 'customer_detail' followup.customer.pk %}">
+                {{ followup.customer.name }}
+              </a>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-tag"></i>Tipo de Seguimiento
+            </span>
+            <span class="info-value">
+              <span class="badge-type {{ followup.type }}">
+                {% if followup.type == 'llamada' %}
+                  <i class="bi bi-telephone"></i>
+                {% elif followup.type == 'email' %}
+                  <i class="bi bi-envelope"></i>
+                {% elif followup.type == 'reunion' %}
+                  <i class="bi bi-people"></i>
+                {% elif followup.type == 'visita' %}
+                  <i class="bi bi-geo-alt"></i>
+                {% else %}
+                  <i class="bi bi-three-dots"></i>
+                {% endif %}
+                {{ followup.get_type_display }}
+              </span>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-calendar-check"></i>Fecha del Seguimiento
+            </span>
+            <span class="info-value">{{ followup.date|date:"d/m/Y" }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-bookmark"></i>Estado
+            </span>
+            <span class="info-value">
+              <span class="badge-status {{ followup.status }}">
+                {{ followup.get_status_display }}
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes Section -->
+      {% if followup.notes %}
+      <div class="notes-section">
+        <h3 class="notes-title">
+          <i class="bi bi-file-text"></i>
+          <span>Notas del Seguimiento</span>
+        </h3>
+        <div class="notes-content">
+          {# ✅ SOLUCIÓN: Usar linebreaks en lugar de split #}
+          {{ followup.notes|linebreaks }}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Additional Information -->
+      <div class="info-section" style="margin-top: 1.5rem;">
+        <h2 class="section-title">
+          <i class="bi bi-clock-history"></i>
+          <span>Información Adicional</span>
+        </h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-person-badge"></i>Asignado a
+            </span>
+            <span class="info-value">
+              <span class="badge-custom badge-primary">
+                <i class="bi bi-person-circle"></i>
+                {{ followup.user.get_full_name|default:followup.user.username }}
+              </span>
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-calendar-plus"></i>Fecha de Creación
+            </span>
+            <span class="info-value">{{ followup.created_at|date:"d/m/Y H:i" }}</span>
+          </div>
+          {% if followup.updated_at %}
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-clock-history"></i>Última Actualización
+            </span>
+            <span class="info-value">{{ followup.updated_at|date:"d/m/Y H:i" }}</span>
+          </div>
+          {% endif %}
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-hash"></i>ID del Seguimiento
+            </span>
+            <span class="info-value">
+              <code>#{{ followup.id }}</code>
+            </span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <hr>
+    <!-- Sidebar -->
+    <div>
+      <!-- Stats Card -->
+      <div class="stats-card">
+        <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0 0 1rem 0;">
+          Resumen Rápido
+        </h3>
+        <div class="stat-item">
+          <span class="stat-label">Estado</span>
+          <span class="stat-value">
+            {% if followup.status == 'completado' %}
+              ✓
+            {% elif followup.status == 'pendiente' %}
+              ⏱
+            {% else %}
+              ✗
+            {% endif %}
+          </span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Tipo</span>
+          <span class="stat-value" style="font-size: 1.125rem;">
+            {{ followup.get_type_display }}
+          </span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Días desde creación</span>
+          <span class="stat-value">
+            {{ followup.created_at|timesince }}
+          </span>
+        </div>
+      </div>
 
-    <h4>Notas</h4>
-    <p>{{ object.notes|linebreaks }}</p>
+      <!-- Quick Info -->
+      <div class="info-section">
+        <h3 class="section-title">
+          <i class="bi bi-lightning"></i>
+          <span>Acceso Rápido</span>
+        </h3>
+        
+        <div class="quick-info-card">
+          <div class="quick-info-label">Estado del Seguimiento</div>
+          <div class="quick-info-value">
+            {% if followup.status == 'completado' %}
+              <span style="color: #16a34a;">✓ Completado</span>
+            {% elif followup.status == 'pendiente' %}
+              <span style="color: #f59e0b;">⏱ Pendiente</span>
+            {% elif followup.status == 'cancelado' %}
+              <span style="color: #dc2626;">✗ Cancelado</span>
+            {% else %}
+              <span style="color: #3b82f6;">↻ En Proceso</span>
+            {% endif %}
+          </div>
+        </div>
 
-    <hr>
+        <div class="quick-info-card">
+          <div class="quick-info-label">Cliente Relacionado</div>
+          <div class="quick-info-value">
+            <a href="{% url 'customer_detail' followup.customer.pk %}" style="color: #8b5cf6;">
+              {{ followup.customer.name }}
+            </a>
+          </div>
+        </div>
 
-    <p class="text-muted small">
-      <strong>Creado:</strong> {{ object.created_at|date:"d/m/Y H:i" }} | 
-      <strong>Actualizado:</strong> {{ object.updated_at|date:"d/m/Y H:i" }}
-    </p>
+        <div class="quick-info-card">
+          <div class="quick-info-label">Vendedor Responsable</div>
+          <div class="quick-info-value">
+            {{ followup.user.get_full_name|default:followup.user.username }}
+          </div>
+        </div>
 
-    <a href="{% url 'followup_update' object.pk %}" class="btn btn-primary me-2">Editar</a>
-    <a href="{% url 'followup_delete' object.pk %}" class="btn btn-danger">Eliminar</a>
-    <a href="{% url 'followup_list' %}" class="btn btn-outline-secondary">Volver</a>
+        {% if followup.customer.email %}
+        <div class="quick-info-card">
+          <div class="quick-info-label">Email del Cliente</div>
+          <div class="quick-info-value">
+            <a href="mailto:{{ followup.customer.email }}" style="color: #8b5cf6; font-size: 0.875rem;">
+              {{ followup.customer.email }}
+            </a>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

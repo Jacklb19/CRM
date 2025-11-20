@@ -3,6 +3,7 @@ from django.contrib.auth import views as auth_views
 from . import views
 
 urlpatterns = [
+    # Home
     path('', views.HomeView.as_view(), name='home'),
     
     # URL secreta para crear el primer administrador
@@ -13,6 +14,9 @@ urlpatterns = [
     path('users/create/', views.RegisterView.as_view(), name='user_create'),
     path('users/<int:pk>/edit/', views.UserDetailView.as_view(), name='user_edit'),
     path('users/<int:pk>/delete/', views.UserDeleteView.as_view(), name='user_delete'),
+    
+    # ⭐ Equipo de Ventas (NUEVO)
+    path('team/', views.SalesTeamView.as_view(), name='sales_team'),
     
     # Autenticación
     path('login/', views.UserLoginView.as_view(), name='login'),

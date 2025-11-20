@@ -1,112 +1,642 @@
-{% extends "base.html" %} {% block title %}Crear Administrador - CRM Pro
-{%endblock %} {% block extra_css %}
+{% extends "base.html" %}
+{% block title %}Crear Administrador - CRM Pro{% endblock %}
+
+{% block extra_css %}
 <style>
-  .auth-container {
-    max-width: 500px;
+  body {
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+  }
+
+  .setup-container {
+    max-width: 550px;
     margin: 3rem auto;
+    padding: 0 1rem;
   }
 
-  .auth-card {
-    padding: 2.5rem;
+  /* Setup Card */
+  .setup-card {
     background: white;
+    border-radius: 16px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 10px 40px rgba(220, 38, 38, 0.1);
+    overflow: hidden;
   }
 
-  .auth-header {
+  .setup-header {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    padding: 3rem 2.5rem 2.5rem;
     text-align: center;
-    margin-bottom: 2rem;
+    position: relative;
   }
 
-  .auth-header h2 {
+  .setup-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: white;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+
+  .setup-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2.5rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .setup-title {
+    font-size: 1.75rem;
     font-weight: 700;
-    color: #212529;
-    margin-bottom: 0.5rem;
+    margin: 0 0 0.5rem 0;
   }
 
-  .auth-header p {
-    color: #6c757d;
+  .setup-subtitle {
+    font-size: 0.9375rem;
+    opacity: 0.95;
+    margin: 0;
+  }
+
+  .setup-body {
+    padding: 2.5rem;
+  }
+
+  /* Alert Box */
+  .alert-setup {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 4px solid #dc2626;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .alert-setup-icon {
+    color: #dc2626;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .alert-setup-content {
+    flex: 1;
+  }
+
+  .alert-setup-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #991b1b;
+    line-height: 1.5;
+  }
+
+  /* Form Groups */
+  .form-group {
+    margin-bottom: 1.5rem;
   }
 
   .form-label {
-    font-weight: 500;
-    color: #495057;
+    display: block;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    font-size: 0.9375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-label i {
+    color: #dc2626;
+    font-size: 1rem;
+  }
+
+  .required-mark {
+    color: #dc2626;
+    margin-left: 0.25rem;
+  }
+
+  .input-wrapper {
+    position: relative;
   }
 
   .form-control {
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    border: 1px solid #dee2e6;
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 0.9375rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background-color: white;
+    color: #1e293b;
   }
 
   .form-control:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    outline: none;
+    border-color: #dc2626;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
   }
 
-  .auth-footer {
+  .form-control.is-invalid {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+  }
+
+  /* Help Text */
+  .form-text {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .form-text i {
+    font-size: 0.875rem;
+    color: #dc2626;
+  }
+
+  /* Error Messages */
+  .invalid-feedback {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    color: #dc2626;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    animation: slideDown 0.2s ease;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .invalid-feedback i {
+    font-size: 1rem;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+  }
+
+  /* Password Strength Indicator */
+  .password-strength {
+    margin-top: 0.75rem;
+    display: none;
+  }
+
+  .password-strength.show {
+    display: block;
+  }
+
+  .strength-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+  }
+
+  .strength-bar {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .strength-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+    width: 0%;
+  }
+
+  .strength-bar-fill.weak {
+    width: 33%;
+    background: #ef4444;
+  }
+
+  .strength-bar-fill.medium {
+    width: 66%;
+    background: #f59e0b;
+  }
+
+  .strength-bar-fill.strong {
+    width: 100%;
+    background: #10b981;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+  }
+
+  .btn i {
+    font-size: 1.125rem;
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    color: white;
+    width: 100%;
+  }
+
+  .btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3);
+    color: white;
+  }
+
+  .btn-danger:active {
+    transform: translateY(0);
+  }
+
+  /* Footer */
+  .setup-footer {
     text-align: center;
+    padding: 1.5rem 2.5rem 2.5rem;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .setup-footer a {
+    color: #dc2626;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .setup-footer a:hover {
+    color: #b91c1c;
+    text-decoration: underline;
+  }
+
+  /* Security Badge */
+  .security-badge {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 1rem;
     margin-top: 1.5rem;
-    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .security-badge-icon {
+    width: 36px;
+    height: 36px;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #dc2626;
+    font-size: 1.25rem;
+  }
+
+  .security-badge-text {
+    flex: 1;
+    font-size: 0.8125rem;
+    color: #991b1b;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .setup-container {
+      margin: 1.5rem auto;
+    }
+
+    .setup-header {
+      padding: 2rem 1.5rem 1.5rem;
+    }
+
+    .setup-body {
+      padding: 2rem 1.5rem;
+    }
+
+    .setup-footer {
+      padding: 1.5rem;
+    }
+
+    .setup-title {
+      font-size: 1.5rem;
+    }
+
+    .setup-icon {
+      width: 64px;
+      height: 64px;
+      font-size: 2rem;
+    }
   }
 </style>
-{% endblock %} {% block content %}
-<div class="auth-container">
-  <div class="card auth-card">
-    <div class="auth-header">
-      <i class="bi bi-shield-lock text-danger" style="font-size: 3rem"></i>
-      <h2>Crear Administrador</h2>
-      <p>Crea la primera cuenta de administrador del sistema</p>
+{% endblock %}
+
+{% block content %}
+<div class="setup-container">
+  <div class="setup-card">
+    <!-- Header -->
+    <div class="setup-header">
+      <div class="setup-icon">
+        <i class="bi bi-shield-lock-fill"></i>
+      </div>
+      <h1 class="setup-title">Crear Administrador</h1>
+      <p class="setup-subtitle">
+        Configura la primera cuenta de administrador del sistema
+      </p>
     </div>
 
-    <form method="post" novalidate>
-      {% csrf_token %}
-
-      <div class="mb-3">
-        <label for="{{ form.username.id_for_label }}" class="form-label">
-          <i class="bi bi-person me-1"></i>Usuario
-        </label>
-        {{ form.username }} {% if form.username.errors %}
-        <div class="text-danger small mt-1">{{ form.username.errors }}</div>
-        {% endif %}
+    <!-- Body -->
+    <div class="setup-body">
+      <!-- Alert -->
+      <div class="alert-setup">
+        <i class="bi bi-exclamation-triangle-fill alert-setup-icon"></i>
+        <div class="alert-setup-content">
+          <p>
+            <strong>Importante:</strong> Esta cuenta tendrá acceso completo al sistema. 
+            Asegúrate de usar una contraseña segura y guarda las credenciales en un lugar seguro.
+          </p>
+        </div>
       </div>
 
-      <div class="mb-3">
-        <label for="{{ form.email.id_for_label }}" class="form-label">
-          <i class="bi bi-envelope me-1"></i>Email
-        </label>
-        {{ form.email }} {% if form.email.errors %}
-        <div class="text-danger small mt-1">{{ form.email.errors }}</div>
-        {% endif %}
-      </div>
+      <!-- Form -->
+      <form method="post" novalidate id="setupForm">
+        {% csrf_token %}
 
-      <div class="mb-3">
-        <label for="{{ form.password1.id_for_label }}" class="form-label">
-          <i class="bi bi-lock me-1"></i>Contraseña
-        </label>
-        {{ form.password1 }} {% if form.password1.errors %}
-        <div class="text-danger small mt-1">{{ form.password1.errors }}</div>
-        {% endif %}
-        <small class="text-muted">Mínimo 8 caracteres</small>
-      </div>
+        <!-- Username -->
+        <div class="form-group">
+          <label for="id_username" class="form-label">
+            <i class="bi bi-person-circle"></i>
+            Nombre de Usuario
+            <span class="required-mark">*</span>
+          </label>
+          <div class="input-wrapper">
+            {{ form.username }}
+          </div>
+          {% if form.username.errors %}
+            {% for error in form.username.errors %}
+              <div class="invalid-feedback">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ error }}</span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <small class="form-text">
+              <i class="bi bi-info-circle"></i>
+              Debe ser único y sin espacios
+            </small>
+          {% endif %}
+        </div>
 
-      <div class="mb-3">
-        <label for="{{ form.password2.id_for_label }}" class="form-label">
-          <i class="bi bi-lock-fill me-1"></i>Confirmar Contraseña
-        </label>
-        {{ form.password2 }} {% if form.password2.errors %}
-        <div class="text-danger small mt-1">{{ form.password2.errors }}</div>
-        {% endif %}
-      </div>
+        <!-- Email -->
+        <div class="form-group">
+          <label for="id_email" class="form-label">
+            <i class="bi bi-envelope"></i>
+            Email
+            <span class="required-mark">*</span>
+          </label>
+          <div class="input-wrapper">
+            {{ form.email }}
+          </div>
+          {% if form.email.errors %}
+            {% for error in form.email.errors %}
+              <div class="invalid-feedback">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ error }}</span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <small class="form-text">
+              <i class="bi bi-info-circle"></i>
+              Será usado para recuperación de contraseña
+            </small>
+          {% endif %}
+        </div>
 
-      <button type="submit" class="btn btn-danger w-100 py-2 mt-3">
-        <i class="bi bi-check-circle me-2"></i>Crear Administrador
-      </button>
-    </form>
+        <!-- Password -->
+        <div class="form-group">
+          <label for="id_password1" class="form-label">
+            <i class="bi bi-lock"></i>
+            Contraseña
+            <span class="required-mark">*</span>
+          </label>
+          <div class="input-wrapper">
+            {{ form.password1 }}
+          </div>
+          {% if form.password1.errors %}
+            {% for error in form.password1.errors %}
+              <div class="invalid-feedback">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ error }}</span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <small class="form-text">
+              <i class="bi bi-info-circle"></i>
+              Mínimo 8 caracteres, debe incluir letras y números
+            </small>
+            <div class="password-strength" id="passwordStrength">
+              <div class="strength-label">Fortaleza de la contraseña</div>
+              <div class="strength-bar">
+                <div class="strength-bar-fill" id="strengthBarFill"></div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
 
-    <div class="auth-footer">
-      <a href="{% url 'login' %}" class="text-decoration-none"
-        >Volver al login</a
-      >
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label for="id_password2" class="form-label">
+            <i class="bi bi-lock-fill"></i>
+            Confirmar Contraseña
+            <span class="required-mark">*</span>
+          </label>
+          <div class="input-wrapper">
+            {{ form.password2 }}
+          </div>
+          {% if form.password2.errors %}
+            {% for error in form.password2.errors %}
+              <div class="invalid-feedback">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ error }}</span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <small class="form-text">
+              <i class="bi bi-info-circle"></i>
+              Repite la contraseña para confirmar
+            </small>
+          {% endif %}
+        </div>
+
+        <!-- Security Badge -->
+        <div class="security-badge">
+          <div class="security-badge-icon">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <div class="security-badge-text">
+            <strong>Seguridad:</strong> Tus credenciales serán cifradas y almacenadas de forma segura.
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-danger" style="margin-top: 1.5rem;">
+          <i class="bi bi-check-circle-fill"></i>
+          <span>Crear Administrador y Comenzar</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="setup-footer">
+      <a href="{% url 'login' %}">
+        <i class="bi bi-arrow-left"></i>
+        <span>Volver al login</span>
+      </a>
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('setupForm');
+  const inputs = form.querySelectorAll('input');
+  
+  // Aplicar clases a los inputs
+  inputs.forEach(input => {
+    if (!input.classList.contains('form-control')) {
+      input.classList.add('form-control');
+    }
+  });
+
+  // Marcar campos con errores
+  const errorFields = form.querySelectorAll('.invalid-feedback');
+  errorFields.forEach(error => {
+    const formGroup = error.closest('.form-group');
+    if (formGroup) {
+      const input = formGroup.querySelector('.form-control');
+      if (input) {
+        input.classList.add('is-invalid');
+      }
+    }
+  });
+
+  // Password strength indicator
+  const password1Input = document.getElementById('id_password1');
+  const strengthIndicator = document.getElementById('passwordStrength');
+  const strengthBarFill = document.getElementById('strengthBarFill');
+
+  if (password1Input && strengthIndicator) {
+    password1Input.addEventListener('input', function() {
+      const password = this.value;
+      
+      if (password.length === 0) {
+        strengthIndicator.classList.remove('show');
+        return;
+      }
+
+      strengthIndicator.classList.add('show');
+
+      let strength = 0;
+      
+      // Length check
+      if (password.length >= 8) strength++;
+      if (password.length >= 12) strength++;
+      
+      // Character variety
+      if (/[a-z]/.test(password)) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/[0-9]/.test(password)) strength++;
+      if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+      // Update bar
+      strengthBarFill.className = 'strength-bar-fill';
+      
+      if (strength <= 2) {
+        strengthBarFill.classList.add('weak');
+      } else if (strength <= 4) {
+        strengthBarFill.classList.add('medium');
+      } else {
+        strengthBarFill.classList.add('strong');
+      }
+    });
+  }
+
+  // Form validation feedback
+  inputs.forEach(input => {
+    input.addEventListener('input', function() {
+      if (this.classList.contains('is-invalid')) {
+        this.classList.remove('is-invalid');
+        const formGroup = this.closest('.form-group');
+        const feedback = formGroup.querySelector('.invalid-feedback');
+        if (feedback) {
+          feedback.style.display = 'none';
+        }
+      }
+    });
+
+    // Validar al perder el foco
+    input.addEventListener('blur', function() {
+      if (this.value.trim() !== '' && this.checkValidity()) {
+        this.style.borderColor = '#10b981';
+      }
+    });
+
+    // Remover color verde al enfocar
+    input.addEventListener('focus', function() {
+      this.style.borderColor = '';
+    });
+  });
+
+  // Animación suave al enviar
+  form.addEventListener('submit', function(e) {
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> <span>Creando administrador...</span>';
+  });
+
+  // Password match validation
+  const password2Input = document.getElementById('id_password2');
+  
+  if (password1Input && password2Input) {
+    password2Input.addEventListener('input', function() {
+      if (this.value && password1Input.value !== this.value) {
+        this.style.borderColor = '#ef4444';
+      } else if (this.value && password1Input.value === this.value) {
+        this.style.borderColor = '#10b981';
+      }
+    });
+  }
+});
+</script>
+
 {% endblock %}

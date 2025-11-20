@@ -4,209 +4,426 @@
 {% block extra_css %}
 <style>
   .delete-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .breadcrumb-item a {
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb-item a:hover {
+    color: #1e40af;
+  }
+
+  .breadcrumb-item.active {
+    color: #64748b;
+  }
+
+  .delete-card {
     background: white;
-    border-radius: 0.75rem;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     overflow: hidden;
   }
-  
+
   .delete-header {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
-    color: white;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-bottom: 2px solid #fbbf24;
     padding: 2rem;
-  }
-  
-  .delete-header h2 {
-    margin: 0;
-    font-size: 1.75rem;
-    font-weight: 700;
     display: flex;
     align-items: center;
     gap: 1rem;
   }
-  
+
+  .delete-icon {
+    width: 56px;
+    height: 56px;
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: #f59e0b;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+  }
+
+  .delete-title h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #92400e;
+  }
+
+  .delete-title p {
+    margin: 0.25rem 0 0 0;
+    color: #78350f;
+    font-size: 0.875rem;
+  }
+
   .delete-body {
     padding: 2rem;
   }
-  
-  .warning-box {
-    background-color: #fff3cd;
-    border: 2px solid #ffc107;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
+
+  /* Warning Alert */
+  .warning-alert {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 4px solid #ef4444;
+    border-radius: 8px;
+    padding: 1.25rem;
     margin-bottom: 2rem;
     display: flex;
     gap: 1rem;
   }
-  
-  .warning-icon {
+
+  .warning-alert-icon {
     font-size: 1.5rem;
-    color: #ff6b6b;
+    color: #dc2626;
     flex-shrink: 0;
+    margin-top: 0.125rem;
   }
-  
-  .warning-content h5 {
+
+  .warning-alert-content h5 {
     margin: 0 0 0.5rem 0;
-    color: #856404;
+    color: #991b1b;
     font-weight: 600;
+    font-size: 1rem;
   }
-  
-  .warning-content p {
+
+  .warning-alert-content p {
     margin: 0;
-    color: #856404;
+    color: #7f1d1d;
     line-height: 1.6;
-  }
-  
-  .customer-info {
-    background: #f8f9fa;
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    margin-bottom: 2rem;
-    border-left: 4px solid #dc3545;
-  }
-  
-  .customer-name {
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #212529;
-    margin-bottom: 0.5rem;
-  }
-  
-  .customer-details {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-  
-  .detail-item {
     font-size: 0.9rem;
   }
-  
-  .detail-item strong {
-    color: #6c757d;
+
+  /* Customer Info Card */
+  .customer-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
   }
-  
-  .form-footer {
+
+  .customer-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .customer-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .customer-main-info {
+    flex: 1;
+  }
+
+  .customer-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.25rem 0;
+  }
+
+  .customer-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+
+  .customer-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .detail-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .detail-value {
+    font-size: 0.9375rem;
+    color: #1e293b;
+    font-weight: 500;
+  }
+
+  /* Confirmation Box */
+  .confirmation-box {
+    background: white;
+    border: 2px solid #fecaca;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .confirmation-question {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #991b1b;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .confirmation-text {
+    font-size: 0.875rem;
+    color: #7f1d1d;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  /* Form Actions */
+  .form-actions {
     display: flex;
     gap: 1rem;
     justify-content: flex-end;
-    padding-top: 2rem;
+    padding-top: 1.5rem;
     border-top: 1px solid #e9ecef;
   }
-  
+
   .btn {
     padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
+    border-radius: 8px;
     font-weight: 500;
-    transition: all 0.3s ease;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
     border: none;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.95rem;
+    text-decoration: none;
   }
-  
-  .btn-danger {
-    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+
+  .btn i {
+    font-size: 1.125rem;
+  }
+
+  .btn-cancel {
+    background: white;
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+  }
+
+  .btn-cancel:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+  }
+
+  .btn-delete {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     color: white;
   }
-  
-  .btn-danger:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+
+  .btn-delete:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
   }
-  
-  .btn-outline-secondary {
-    border: 1.5px solid #6c757d;
-    color: #6c757d;
+
+  .badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.75rem;
   }
-  
-  .btn-outline-secondary:hover {
-    background-color: #e9ecef;
+
+  .badge.bg-success {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  .badge.bg-danger {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .delete-body {
+      padding: 1.5rem;
+    }
+
+    .customer-details-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+      flex-direction: column-reverse;
+    }
+
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<nav aria-label="breadcrumb" class="mt-4 mb-3">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="{% url 'customer_list' %}"><i class="bi bi-people me-1"></i>Clientes</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'customer_detail' object.pk %}">{{ object.name }}</a></li>
-    <li class="breadcrumb-item active">Eliminar</li>
-  </ol>
-</nav>
-
 <div class="delete-container">
-  <!-- Header -->
-  <div class="delete-header">
-    <h2>
-      <i class="bi bi-exclamation-triangle"></i>Eliminar Cliente
-    </h2>
-  </div>
-  
-  <!-- Body -->
-  <div class="delete-body">
-    <!-- Advertencia -->
-    <div class="warning-box">
-      <i class="bi bi-exclamation-triangle warning-icon"></i>
-      <div class="warning-content">
-        <h5>⚠️ Acción Irreversible</h5>
-        <p>
-          Esta acción no se puede deshacer. Se eliminará permanentemente este cliente 
-          y todos sus datos asociados del sistema.
-        </p>
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'customer_list' %}">
+          <i class="bi bi-people me-1"></i>Clientes
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'customer_detail' object.pk %}">{{ object.name }}</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Eliminar</li>
+    </ol>
+  </nav>
+
+  <!-- Delete Card -->
+  <div class="delete-card">
+    <!-- Header -->
+    <div class="delete-header">
+      <div class="delete-icon">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+      </div>
+      <div class="delete-title">
+        <h2>Confirmar Eliminación</h2>
+        <p>Esta acción no se puede deshacer</p>
       </div>
     </div>
-    
-    <!-- Información del Cliente -->
-    <div class="customer-info">
-      <div class="customer-name">
-        <i class="bi bi-person-circle me-2"></i>{{ object.name }}
+
+    <!-- Body -->
+    <div class="delete-body">
+      <!-- Warning Alert -->
+      <div class="warning-alert">
+        <i class="bi bi-shield-exclamation warning-alert-icon"></i>
+        <div class="warning-alert-content">
+          <h5>Acción Irreversible</h5>
+          <p>
+            Al confirmar esta acción, se eliminará permanentemente este cliente 
+            y todos sus datos asociados del sistema. Esta operación no se puede revertir.
+          </p>
+        </div>
       </div>
-      <div class="customer-details">
-        <div class="detail-item">
-          <strong>Email:</strong><br>{{ object.email }}
+
+      <!-- Customer Info -->
+      <div class="customer-card">
+        <div class="customer-header">
+          <div class="customer-avatar">
+            {{ object.name|slice:":1"|upper }}
+          </div>
+          <div class="customer-main-info">
+            <h3 class="customer-name">{{ object.name }}</h3>
+            <div class="customer-meta">
+              <span>
+                <i class="bi bi-envelope me-1"></i>{{ object.email }}
+              </span>
+              {% if object.is_active %}
+                <span class="badge bg-success">Activo</span>
+              {% else %}
+                <span class="badge bg-danger">Inactivo</span>
+              {% endif %}
+            </div>
+          </div>
         </div>
-        <div class="detail-item">
-          <strong>Teléfono:</strong><br>{{ object.phone|default:"No especificado" }}
-        </div>
-        <div class="detail-item">
-          <strong>Empresa:</strong><br>{{ object.company|default:"No especificada" }}
-        </div>
-        <div class="detail-item">
-          <strong>Estado:</strong><br>
-          {% if object.is_active %}
-            <span class="badge bg-success">Activo</span>
-          {% else %}
-            <span class="badge bg-danger">Inactivo</span>
+
+        <div class="customer-details-grid">
+          <div class="detail-item">
+            <span class="detail-label">
+              <i class="bi bi-telephone me-1"></i>Teléfono
+            </span>
+            <span class="detail-value">{{ object.phone|default:"No especificado" }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">
+              <i class="bi bi-building me-1"></i>Empresa
+            </span>
+            <span class="detail-value">{{ object.company|default:"No especificada" }}</span>
+          </div>
+          {% if object.created_at %}
+          <div class="detail-item">
+            <span class="detail-label">
+              <i class="bi bi-calendar-plus me-1"></i>Fecha de Registro
+            </span>
+            <span class="detail-value">{{ object.created_at|date:"d/m/Y" }}</span>
+          </div>
+          {% endif %}
+          {% if object.assigned_to %}
+          <div class="detail-item">
+            <span class="detail-label">
+              <i class="bi bi-person-badge me-1"></i>Asignado a
+            </span>
+            <span class="detail-value">{{ object.assigned_to.get_full_name|default:object.assigned_to.username }}</span>
+          </div>
           {% endif %}
         </div>
       </div>
-    </div>
-    
-    <!-- Confirmación -->
-    <div style="background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 0.5rem; padding: 1rem; margin-bottom: 2rem; color: #721c24;">
-      <strong>¿Estás seguro que deseas eliminar a <em>{{ object.name }}</em>?</strong>
-      <p class="mb-0 mt-1">Esta operación es permanente y no se puede revertir.</p>
-    </div>
-    
-    <!-- Formulario -->
-    <form method="post">
-      {% csrf_token %}
-      
-      <!-- Botones -->
-      <div class="form-footer">
-        <a href="{% url 'customer_detail' object.pk %}" class="btn btn-outline-secondary">
-          <i class="bi bi-x-circle"></i>Cancelar
-        </a>
-        <button type="submit" class="btn btn-danger">
-          <i class="bi bi-trash"></i>Sí, Eliminar Permanentemente
-        </button>
+
+      <!-- Confirmation Box -->
+      <div class="confirmation-box">
+        <p class="confirmation-question">
+          <i class="bi bi-question-circle-fill"></i>
+          ¿Estás completamente seguro de eliminar a <strong>{{ object.name }}</strong>?
+        </p>
+        <p class="confirmation-text">
+          Esta operación es permanente y no podrás recuperar la información posteriormente. 
+          Se eliminarán todos los registros asociados.
+        </p>
       </div>
-    </form>
+
+      <!-- Form -->
+      <form method="post">
+        {% csrf_token %}
+
+        <!-- Actions -->
+        <div class="form-actions">
+          <a href="{% url 'customer_detail' object.pk %}" class="btn btn-cancel">
+            <i class="bi bi-x-circle"></i>
+            <span>Cancelar</span>
+          </a>
+          <button type="submit" class="btn btn-delete">
+            <i class="bi bi-trash3"></i>
+            <span>Sí, Eliminar Permanentemente</span>
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
-
 {% endblock %}

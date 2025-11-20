@@ -1,55 +1,850 @@
 {% extends "base.html" %}
 {% block title %}Gestión de Usuarios - CRM Pro{% endblock %}
 
-{% block content %}
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-  <h2 class="mb-0">
-    <i class="bi bi-people-fill me-2"></i>Gestión de Usuarios
-  </h2>
-  <a href="{% url 'user_create' %}" class="btn btn-primary">
-    <i class="bi bi-person-plus me-2"></i>Nuevo Usuario
-  </a>
-</div>
+{% block extra_css %}
+<style>
+  .users-container {
+    max-width: 1600px;
+    margin: 0 auto;
+  }
 
-<div class="card">
-  <div class="card-body">
-    <table class="table table-hover align-middle">
-      <thead>
-        <tr>
-          <th>Usuario</th>
-          <th>Email</th>
-          <th>Rol</th>
-          <th>Teléfono</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for u in users %}
-        <tr>
-          <td>{{ u.username }}</td>
-          <td>{{ u.email }}</td>
-          <td>{{ u.profile.get_role_display }}</td>
-          <td>{{ u.profile.phone|default:"No especificado" }}</td>
-          <td>
-            <a href="{% url 'user_edit' u.profile.id %}" class="btn btn-sm btn-outline-primary me-1">
-              <i class="bi bi-pencil-square"></i>
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .breadcrumb-item a {
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb-item a:hover {
+    color: #1e40af;
+  }
+
+  .breadcrumb-item.active {
+    color: #64748b;
+  }
+
+  /* Page Header */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .page-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0;
+  }
+
+  .page-title h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+  }
+
+  .page-title i {
+    font-size: 2rem;
+    color: #3b82f6;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .stat-card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .stat-info {
+    flex: 1;
+  }
+
+  .stat-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+
+  .stat-icon.primary {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .stat-icon.success {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  .stat-icon.warning {
+    background: #fef3c7;
+    color: #d97706;
+  }
+
+  .stat-icon.danger {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  /* Search Card */
+  .search-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+  }
+
+  .search-header {
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-bottom: 2px solid #93c5fd;
+  }
+
+  .search-header-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 600;
+    color: #1e40af;
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  .search-header-title i {
+    font-size: 1.125rem;
+  }
+
+  .search-body {
+    padding: 1.5rem;
+  }
+
+  .search-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr auto;
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .form-control,
+  .form-select {
+    padding: 0.625rem 0.875rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    background-color: white;
+    color: #1e293b;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  /* Table Card */
+  .table-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .table {
+    width: 100%;
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+
+  .table thead {
+    background: #f8fafc;
+    border-bottom: 2px solid #e9ecef;
+  }
+
+  .table thead th {
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+
+  .table tbody tr {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.15s ease;
+  }
+
+  .table tbody tr:hover {
+    background: #f8fafc;
+  }
+
+  .table tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  .table tbody td {
+    padding: 1rem 1.25rem;
+    vertical-align: middle;
+    color: #475569;
+  }
+
+  /* User Info Cell */
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+  }
+
+  .user-details {
+    flex: 1;
+  }
+
+  .user-name {
+    font-weight: 600;
+    color: #1e293b;
+    display: block;
+    margin-bottom: 0.125rem;
+  }
+
+  .user-email {
+    font-size: 0.8125rem;
+    color: #64748b;
+  }
+
+  /* Badges ⭐ CORREGIDO ⭐ */
+  .badge {
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .badge-administrador {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  .badge-gerente {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  .badge-vendedor {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  /* Action Buttons */
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .btn-action {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    background: white;
+    text-decoration: none;
+    transition: all 0.2s;
+    padding: 0;
+  }
+
+  .btn-action:hover {
+    background: #f8fafc;
+    transform: translateY(-1px);
+  }
+
+  .btn-action.btn-edit:hover {
+    border-color: #3b82f6;
+    color: #3b82f6;
+  }
+
+  .btn-action.btn-delete:hover {
+    border-color: #ef4444;
+    color: #ef4444;
+  }
+
+  .btn-action:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Primary Button */
+  .btn {
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+  }
+
+  .btn i {
+    font-size: 1.125rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.3);
+    color: white;
+  }
+
+  .btn-secondary {
+    background: white;
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+  }
+
+  .btn-secondary:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #475569;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #94a3b8;
+  }
+
+  .empty-state-icon {
+    font-size: 4rem;
+    opacity: 0.3;
+    margin-bottom: 1.5rem;
+  }
+
+  .empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state p {
+    margin: 0 0 1.5rem 0;
+    font-size: 0.9375rem;
+  }
+
+  /* Pagination */
+  .pagination-wrapper {
+    padding: 1.5rem;
+    border-top: 1px solid #e9ecef;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .page-item .page-link {
+    padding: 0.5rem 0.875rem;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .page-item .page-link:hover {
+    background: #f8fafc;
+    border-color: #3b82f6;
+    color: #3b82f6;
+  }
+
+  .page-item.active .page-link {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-color: #3b82f6;
+    color: white;
+  }
+
+  .page-item.disabled .page-link {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .users-container {
+      padding: 0 1rem;
+    }
+
+    .page-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .search-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .table thead {
+      display: none;
+    }
+
+    .table tbody tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+    }
+
+    .table tbody td {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .table tbody td:last-child {
+      border-bottom: none;
+    }
+
+    .table tbody td:before {
+      content: attr(data-label);
+      font-weight: 600;
+      color: #64748b;
+      font-size: 0.8125rem;
+      text-transform: uppercase;
+    }
+
+    .user-info {
+      flex-direction: column;
+      text-align: center;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="users-container">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard' %}">
+          <i class="bi bi-house-door me-1"></i>Dashboard
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Gestión de Usuarios</li>
+    </ol>
+  </nav>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-title">
+      <i class="bi bi-people-fill"></i>
+      <h1>Gestión de Usuarios</h1>
+    </div>
+    <a href="{% url 'user_create' %}" class="btn btn-primary">
+      <i class="bi bi-person-plus"></i>
+      <span>Nuevo Usuario</span>
+    </a>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-card-content">
+        <div class="stat-info">
+          <div class="stat-label">Total Usuarios</div>
+          <div class="stat-value">{{ users.count }}</div>
+        </div>
+        <div class="stat-icon primary">
+          <i class="bi bi-people"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card-content">
+        <div class="stat-info">
+          <div class="stat-label">Administradores</div>
+          <div class="stat-value">{{ total_admins }}</div>
+        </div>
+        <div class="stat-icon danger">
+          <i class="bi bi-shield-check"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card-content">
+        <div class="stat-info">
+          <div class="stat-label">Gerentes</div>
+          <div class="stat-value">{{ total_managers }}</div>
+        </div>
+        <div class="stat-icon warning">
+          <i class="bi bi-briefcase"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-card-content">
+        <div class="stat-info">
+          <div class="stat-label">Vendedores</div>
+          <div class="stat-value">{{ total_salespeople }}</div>
+        </div>
+        <div class="stat-icon success">
+          <i class="bi bi-person-badge"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Card -->
+  <div class="search-card">
+    <div class="search-header">
+      <h2 class="search-header-title">
+        <i class="bi bi-search"></i>
+        <span>Buscar y Filtrar</span>
+      </h2>
+    </div>
+    <div class="search-body">
+      <form method="get" id="searchForm">
+        <div class="search-grid">
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-search"></i>
+              Búsqueda
+            </label>
+            <input 
+              type="text" 
+              name="search" 
+              class="form-control" 
+              placeholder="Buscar por nombre, email..." 
+              value="{{ request.GET.search }}">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="bi bi-funnel"></i>
+              Filtrar por Rol
+            </label>
+            <select name="role" class="form-select">
+              <option value="">Todos los roles</option>
+              <option value="administrador" {% if request.GET.role == 'administrador' %}selected{% endif %}>Administrador</option>
+              <option value="gerente" {% if request.GET.role == 'gerente' %}selected{% endif %}>Gerente</option>
+              <option value="vendedor" {% if request.GET.role == 'vendedor' %}selected{% endif %}>Vendedor</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" style="opacity: 0;">.</label>
+            <a href="{% url 'user_list' %}" class="btn btn-secondary" style="width: 100%;">
+              <i class="bi bi-arrow-counterclockwise"></i>
+              <span>Limpiar</span>
             </a>
-            {% if request.user.id != u.id %}
-            <a href="{% url 'user_delete' u.id %}" class="btn btn-sm btn-outline-danger">
-              <i class="bi bi-trash"></i>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="table-card">
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Rol</th>
+            <th>Teléfono</th>
+            <th>Último Acceso</th>
+            <th style="text-align: center;">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td data-label="Usuario">
+              <div class="user-info">
+                <div class="user-avatar">
+                  {{ u.username|first|upper }}
+                </div>
+                <div class="user-details">
+                  <span class="user-name">{{ u.username }}</span>
+                  <span class="user-email">{{ u.email }}</span>
+                </div>
+              </div>
+            </td>
+            <td data-label="Rol">
+              <span class="badge badge-{{ u.profile.role }}">
+                {% if u.profile.role == 'administrador' %}
+                  <i class="bi bi-shield-check"></i>
+                {% elif u.profile.role == 'gerente' %}
+                  <i class="bi bi-briefcase"></i>
+                {% else %}
+                  <i class="bi bi-person-badge"></i>
+                {% endif %}
+                {{ u.profile.get_role_display }}
+              </span>
+            </td>
+            <td data-label="Teléfono">
+              {{ u.profile.phone|default:"No especificado" }}
+            </td>
+            <td data-label="Último Acceso">
+              {{ u.last_login|date:"d/m/Y H:i"|default:"Nunca" }}
+            </td>
+            <td data-label="Acciones" style="text-align: center;">
+              <div class="action-buttons">
+                <a 
+                  href="{% url 'user_edit' u.profile.id %}" 
+                  class="btn-action btn-edit"
+                  title="Editar usuario"
+                  data-bs-toggle="tooltip">
+                  <i class="bi bi-pencil"></i>
+                </a>
+                {% if request.user.id != u.id %}
+                <a 
+                  href="{% url 'user_delete' u.id %}" 
+                  class="btn-action btn-delete"
+                  title="Eliminar usuario"
+                  data-bs-toggle="tooltip">
+                  <i class="bi bi-trash"></i>
+                </a>
+                {% else %}
+                <button 
+                  class="btn-action btn-delete" 
+                  disabled 
+                  title="No puedes eliminarte a ti mismo"
+                  data-bs-toggle="tooltip">
+                  <i class="bi bi-trash"></i>
+                </button>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <div class="empty-state-icon">
+                  <i class="bi bi-people"></i>
+                </div>
+                <h3>No hay usuarios registrados</h3>
+                <p>Comienza agregando el primer usuario al sistema</p>
+                <a href="{% url 'user_create' %}" class="btn btn-primary">
+                  <i class="bi bi-person-plus"></i>
+                  <span>Crear Primer Usuario</span>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination (si aplica) -->
+    {% if is_paginated %}
+    <div class="pagination-wrapper">
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}">
+              <i class="bi bi-chevron-bar-left"></i>
             </a>
-            {% endif %}
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="5" class="text-center text-muted">
-            No hay usuarios registrados aún.
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}">
+              <i class="bi bi-chevron-left"></i>
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link"><i class="bi bi-chevron-bar-left"></i></span>
+          </li>
+          <li class="page-item disabled">
+            <span class="page-link"><i class="bi bi-chevron-left"></i></span>
+          </li>
+        {% endif %}
+
+        <li class="page-item active">
+          <span class="page-link">
+            Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+          </span>
+        </li>
+
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.role %}&role={{ request.GET.role }}{% endif %}">
+              <i class="bi bi-chevron-bar-right"></i>
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link"><i class="bi bi-chevron-right"></i></span>
+          </li>
+          <li class="page-item disabled">
+            <span class="page-link"><i class="bi bi-chevron-bar-right"></i></span>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+    {% endif %}
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Inicializar tooltips
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+
+  // Auto-submit en búsqueda y filtro
+  const form = document.getElementById('searchForm');
+  const searchInput = form.querySelector('input[name="search"]');
+  const roleSelect = form.querySelector('select[name="role"]');
+  
+  let debounceTimer;
+  
+  // Búsqueda con debounce
+  searchInput.addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      form.submit();
+    }, 800);
+  });
+  
+  // Filtro inmediato
+  roleSelect.addEventListener('change', function() {
+    form.submit();
+  });
+});
+</script>
+
 {% endblock %}

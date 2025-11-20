@@ -1,167 +1,699 @@
-{% extends "base.html" %} {% block title %}Mi Perfil - CRM Pro{% endblock %}
-{%block extra_css %}
+{% extends "base.html" %}
+{% block title %}Mi Perfil - CRM Pro{% endblock %}
+
+{% block extra_css %}
 <style>
-  .profile-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 3rem 0;
-    border-radius: 1rem;
+  .profile-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .breadcrumb-item a {
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb-item a:hover {
+    color: #1e40af;
+  }
+
+  .breadcrumb-item.active {
+    color: #64748b;
+  }
+
+  /* Profile Header Card */
+  .profile-header-card {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border-radius: 16px;
+    padding: 3rem 2.5rem;
     margin-bottom: 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(139, 92, 246, 0.2);
+  }
+
+  .profile-header-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 400px;
+    height: 400px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+
+  .profile-header-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .profile-avatar-wrapper {
+    position: relative;
   }
 
   .profile-avatar {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     background: white;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3rem;
-    color: #667eea;
-    margin: 0 auto 1rem;
-    border: 4px solid rgba(255, 255, 255, 0.3);
+    font-size: 3.5rem;
+    color: #8b5cf6;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   }
 
+  .avatar-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 36px;
+    height: 36px;
+    background: #10b981;
+    border-radius: 50%;
+    border: 4px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+  }
+
+  .profile-info {
+    flex: 1;
+  }
+
+  .profile-name {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .profile-role {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    backdrop-filter: blur(10px);
+    margin-bottom: 0.75rem;
+  }
+
+  .profile-meta {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0.95;
+  }
+
+  .meta-item i {
+    font-size: 1.125rem;
+  }
+
+  /* Content Grid */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 1.5rem;
+  }
+
+  /* Info Card */
   .info-card {
     background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+  }
+
+  .card-header {
     padding: 1.5rem;
-    border-radius: 1rem;
-    margin-bottom: 1.5rem;
+    background: #f8fafc;
+    border-bottom: 1px solid #e9ecef;
   }
 
-  .info-card h5 {
+  .card-title {
+    font-size: 1.125rem;
     font-weight: 600;
-    margin-bottom: 1rem;
-    color: #212529;
-  }
-
-  .info-item {
+    color: #1e293b;
+    margin: 0;
     display: flex;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #f0f0f0;
+    align-items: center;
+    gap: 0.5rem;
   }
 
-  .info-item:last-child {
+  .card-title i {
+    color: #8b5cf6;
+    font-size: 1.25rem;
+  }
+
+  .card-body {
+    padding: 1.5rem;
+  }
+
+  /* Info List */
+  .info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .info-list-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .info-list-item:last-child {
     border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .info-list-item:first-child {
+    padding-top: 0;
+  }
+
+  .info-icon {
+    width: 40px;
+    height: 40px;
+    background: #f3e8ff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8b5cf6;
+    font-size: 1.125rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+  }
+
+  .info-content {
+    flex: 1;
   }
 
   .info-label {
-    font-weight: 500;
-    color: #6c757d;
-    min-width: 120px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.25rem;
   }
 
   .info-value {
-    color: #212529;
+    font-size: 0.9375rem;
+    color: #1e293b;
+    font-weight: 500;
+  }
+
+  /* Form Groups */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    font-size: 0.9375rem;
+  }
+
+  .form-control {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 0.9375rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background-color: white;
+    color: #1e293b;
+  }
+
+  .form-control:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  }
+
+  .form-control:disabled {
+    background-color: #f8fafc;
+    color: #94a3b8;
+    cursor: not-allowed;
+  }
+
+  .form-text {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    color: #64748b;
+  }
+
+  /* Invalid Feedback */
+  .invalid-feedback {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    color: #dc2626;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .invalid-feedback i {
+    font-size: 1rem;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+  }
+
+  .btn i {
+    font-size: 1.125rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3);
+    color: white;
+  }
+
+  .btn-outline-primary {
+    background: white;
+    border: 1.5px solid #8b5cf6;
+    color: #8b5cf6;
+  }
+
+  .btn-outline-primary:hover {
+    background: #f3e8ff;
+    border-color: #7c3aed;
+    color: #7c3aed;
+  }
+
+  /* Security Card */
+  .security-info {
+    background: #faf5ff;
+    border: 1px solid #e9d5ff;
+    border-left: 4px solid #8b5cf6;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .security-info-icon {
+    width: 36px;
+    height: 36px;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #8b5cf6;
+    font-size: 1.125rem;
+    flex-shrink: 0;
+  }
+
+  .security-info-text {
+    flex: 1;
+    font-size: 0.875rem;
+    color: #6b21a8;
+    line-height: 1.5;
+  }
+
+  /* Stats Card */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-item {
+    background: #f8fafc;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #8b5cf6;
+    margin-bottom: 0.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .profile-header-content {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .profile-meta {
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .profile-header-card {
+      padding: 2rem 1.5rem;
+    }
+
+    .profile-avatar {
+      width: 100px;
+      height: 100px;
+      font-size: 3rem;
+    }
+
+    .profile-name {
+      font-size: 1.5rem;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
-{% endblock %} {% block content %}
-<div class="row">
-  <div class="col-lg-12">
-    <div class="profile-header text-center">
-      <div class="profile-avatar">
-        <i class="bi bi-person-fill"></i>
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard' %}">
+          <i class="bi bi-house-door me-1"></i>Dashboard
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">Mi Perfil</li>
+    </ol>
+  </nav>
+
+  <!-- Profile Header -->
+  <div class="profile-header-card">
+    <div class="profile-header-content">
+      <div class="profile-avatar-wrapper">
+        <div class="profile-avatar">
+          <i class="bi bi-person-fill"></i>
+        </div>
+        <div class="avatar-badge" title="Cuenta activa">
+          <i class="bi bi-check-lg"></i>
+        </div>
       </div>
-      <h2 class="mb-1">{{ user.username }}</h2>
-      <p class="mb-0">
-        <span class="badge bg-light text-dark"
-          >{{ user.profile.get_role_display }}</span
-        >
-      </p>
+      
+      <div class="profile-info">
+        <h1 class="profile-name">{{ user.get_full_name|default:user.username }}</h1>
+        <div class="profile-role">
+          <i class="bi bi-briefcase me-1"></i>
+          {{ user.profile.get_role_display }}
+        </div>
+        <div class="profile-meta">
+          <div class="meta-item">
+            <i class="bi bi-at"></i>
+            <span>{{ user.username }}</span>
+          </div>
+          <div class="meta-item">
+            <i class="bi bi-envelope"></i>
+            <span>{{ user.email }}</span>
+          </div>
+          <div class="meta-item">
+            <i class="bi bi-calendar-check"></i>
+            <span>Miembro desde {{ user.date_joined|date:"d/m/Y" }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <!-- Sidebar -->
+    <div>
+      <!-- Personal Info Card -->
+      <div class="info-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="bi bi-person-vcard"></i>
+            <span>Información Personal</span>
+          </h2>
+        </div>
+        <div class="card-body">
+          <ul class="info-list">
+            <li class="info-list-item">
+              <div class="info-icon">
+                <i class="bi bi-person"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-label">Usuario</div>
+                <div class="info-value">{{ user.username }}</div>
+              </div>
+            </li>
+            <li class="info-list-item">
+              <div class="info-icon">
+                <i class="bi bi-envelope"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-label">Email</div>
+                <div class="info-value">{{ user.email }}</div>
+              </div>
+            </li>
+            <li class="info-list-item">
+              <div class="info-icon">
+                <i class="bi bi-briefcase"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-label">Rol</div>
+                <div class="info-value">{{ user.profile.get_role_display }}</div>
+              </div>
+            </li>
+            <li class="info-list-item">
+              <div class="info-icon">
+                <i class="bi bi-phone"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-label">Teléfono</div>
+                <div class="info-value">{{ user.profile.phone|default:"No especificado" }}</div>
+              </div>
+            </li>
+            <li class="info-list-item">
+              <div class="info-icon">
+                <i class="bi bi-calendar"></i>
+              </div>
+              <div class="info-content">
+                <div class="info-label">Miembro desde</div>
+                <div class="info-value">{{ user.date_joined|date:"d/m/Y" }}</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Activity Stats (if applicable) -->
+      {% if user.profile.role == 'vendedor' %}
+      <div class="info-card" style="margin-top: 1.5rem;">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="bi bi-graph-up"></i>
+            <span>Mis Estadísticas</span>
+          </h2>
+        </div>
+        <div class="card-body">
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-value">{{ user.assigned_customers.count }}</div>
+              <div class="stat-label">Clientes</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-value">{{ user.assigned_opportunities.count }}</div>
+              <div class="stat-label">Oportunidades</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Main Content -->
+    <div>
+      <!-- Edit Profile Card -->
+      <div class="info-card">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="bi bi-pencil-square"></i>
+            <span>Editar Perfil</span>
+          </h2>
+        </div>
+        <div class="card-body">
+          <form method="post">
+            {% csrf_token %}
+
+            <!-- Email -->
+            <div class="form-group">
+              <label for="{{ form.email.id_for_label }}" class="form-label">
+                Email
+              </label>
+              {{ form.email }}
+              {% if form.email.errors %}
+                {% for error in form.email.errors %}
+                  <div class="invalid-feedback">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    <span>{{ error }}</span>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            </div>
+
+            <!-- Phone -->
+            <div class="form-group">
+              <label for="{{ form.phone.id_for_label }}" class="form-label">
+                Teléfono
+              </label>
+              {{ form.phone }}
+              {% if form.phone.errors %}
+                {% for error in form.phone.errors %}
+                  <div class="invalid-feedback">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    <span>{{ error }}</span>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <small class="form-text">
+                  Incluye el código de país (ej: +57 300 1234567)
+                </small>
+              {% endif %}
+            </div>
+
+            <!-- Role (disabled) -->
+            <div class="form-group">
+              <label class="form-label">Rol en el Sistema</label>
+              <input
+                type="text"
+                class="form-control"
+                value="{{ user.profile.get_role_display }}"
+                disabled>
+              <small class="form-text">
+                <i class="bi bi-lock me-1"></i>
+                El rol solo puede ser modificado por un administrador
+              </small>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-circle"></i>
+              <span>Guardar Cambios</span>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Security Card -->
+      <div class="info-card" style="margin-top: 1.5rem;">
+        <div class="card-header">
+          <h2 class="card-title">
+            <i class="bi bi-shield-lock"></i>
+            <span>Seguridad de la Cuenta</span>
+          </h2>
+        </div>
+        <div class="card-body">
+          <div class="security-info">
+            <div class="security-info-icon">
+              <i class="bi bi-shield-check"></i>
+            </div>
+            <div class="security-info-text">
+              <strong>Mantén tu cuenta segura</strong><br>
+              Actualiza tu contraseña regularmente y usa una combinación fuerte de caracteres.
+            </div>
+          </div>
+
+          <a href="{% url 'password_change' %}" class="btn btn-outline-primary" style="width: 100%;">
+            <i class="bi bi-key"></i>
+            <span>Cambiar Contraseña</span>
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="row">
-  <div class="col-lg-4">
-    <div class="card info-card">
-      <h5><i class="bi bi-info-circle me-2"></i>Información General</h5>
-      <div class="info-item">
-        <span class="info-label"
-          ><i class="bi bi-person me-2"></i>Usuario:</span
-        >
-        <span class="info-value">{{ user.username }}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label"
-          ><i class="bi bi-envelope me-2"></i>Email:</span
-        >
-        <span class="info-value">{{ user.email }}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label"><i class="bi bi-briefcase me-2"></i>Rol:</span>
-        <span class="info-value">{{ user.profile.get_role_display }}</span>
-      </div>
-      <div class="info-item">
-        <span class="info-label"
-          ><i class="bi bi-phone me-2"></i>Teléfono:</span
-        >
-        <span class="info-value"
-          >{{ user.profile.phone|default:"No especificado" }}</span
-        >
-      </div>
-      <div class="info-item">
-        <span class="info-label"
-          ><i class="bi bi-calendar me-2"></i>Miembro desde:</span
-        >
-        <span class="info-value">{{ user.date_joined|date:"d/m/Y" }}</span>
-      </div>
-    </div>
-  </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Aplicar clases a los campos del formulario
+  const inputs = document.querySelectorAll('input[type="email"], input[type="text"], input[type="tel"]');
+  
+  inputs.forEach(input => {
+    if (!input.classList.contains('form-control')) {
+      input.classList.add('form-control');
+    }
+  });
 
-  <div class="col-lg-8">
-    <div class="card info-card">
-      <h5><i class="bi bi-pencil-square me-2"></i>Editar Perfil</h5>
-      <form method="post">
-        {% csrf_token %}
+  // Marcar campos con errores
+  const errorFields = document.querySelectorAll('.invalid-feedback');
+  errorFields.forEach(error => {
+    const formGroup = error.closest('.form-group');
+    if (formGroup) {
+      const input = formGroup.querySelector('.form-control');
+      if (input) {
+        input.style.borderColor = '#ef4444';
+      }
+    }
+  });
+});
+</script>
 
-        <div class="mb-3">
-          <label for="{{ form.email.id_for_label }}" class="form-label"
-            >Email</label
-          >
-          {{ form.email }} {% if form.email.errors %}
-          <div class="text-danger small mt-1">{{ form.email.errors }}</div>
-          {% endif %}
-        </div>
-
-        <div class="mb-3">
-          <label for="{{ form.phone.id_for_label }}" class="form-label"
-            >Teléfono</label
-          >
-          {{ form.phone }} {% if form.phone.errors %}
-          <div class="text-danger small mt-1">{{ form.phone.errors }}</div>
-          {% endif %}
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Rol</label>
-          <input
-            type="text"
-            class="form-control"
-            value="{{ user.profile.get_role_display }}"
-            disabled
-          />
-          <small class="text-muted"
-            >El rol solo puede ser cambiado por un administrador.</small
-          >
-        </div>
-
-        <button type="submit" class="btn btn-primary">
-          <i class="bi bi-check-circle me-2"></i>Guardar Cambios
-        </button>
-      </form>
-    </div>
-
-    <div class="card info-card">
-      <h5><i class="bi bi-shield-lock me-2"></i>Seguridad</h5>
-      <p class="text-muted mb-3">
-        Mantén tu cuenta segura actualizando tu contraseña regularmente.
-      </p>
-      <a href="{% url 'password_change' %}" class="btn btn-outline-primary">
-        <i class="bi bi-key me-2"></i>Cambiar Contraseña
-      </a>
-    </div>
-  </div>
-</div>
 {% endblock %}

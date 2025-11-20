@@ -1,152 +1,854 @@
 {% extends "base.html" %}
-
-{% block title %}Registro - CRM Pro{% endblock %}
+{% block title %}Crear Nuevo Usuario - CRM Pro{% endblock %}
 
 {% block extra_css %}
 <style>
-    .auth-container {
-        max-width: 500px;
-        margin: 3rem auto;
+  body {
+    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .register-container {
+    max-width: 550px;
+    width: 100%;
+    padding: 0 1rem;
+  }
+
+  /* Register Card */
+  .register-card {
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 10px 40px rgba(16, 185, 129, 0.15);
+    overflow: hidden;
+  }
+
+  .register-header {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 3rem 2.5rem 2.5rem;
+    text-align: center;
+    position: relative;
+  }
+
+  .register-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: white;
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+
+  .register-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2.5rem;
+    backdrop-filter: blur(10px);
+  }
+
+  .register-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .register-subtitle {
+    font-size: 0.9375rem;
+    opacity: 0.95;
+    margin: 0;
+  }
+
+  .register-body {
+    padding: 2.5rem;
+  }
+
+  /* Info Alert */
+  .info-alert {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-left: 4px solid #10b981;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .info-alert-icon {
+    color: #10b981;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .info-alert-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #166534;
+    line-height: 1.5;
+  }
+
+  /* Form Groups */
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    font-size: 0.9375rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .form-label i {
+    color: #10b981;
+    font-size: 1rem;
+  }
+
+  .required-mark {
+    color: #ef4444;
+    margin-left: 0.25rem;
+  }
+
+  .input-wrapper {
+    position: relative;
+  }
+
+  .form-control,
+  .form-select {
+    width: 100%;
+    padding: 0.875rem 3rem 0.875rem 1rem;
+    font-size: 0.9375rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background-color: white;
+    color: #1e293b;
+  }
+
+  .form-select {
+    padding-right: 2.5rem;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  }
+
+  .form-control.is-invalid,
+  .form-select.is-invalid {
+    border-color: #ef4444;
+    background-color: #fef2f2;
+  }
+
+  .form-control.is-valid {
+    border-color: #10b981;
+    background-color: #f0fdf4;
+  }
+
+  /* Toggle Password Button */
+  .toggle-password {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 0.25rem;
+    font-size: 1.125rem;
+    transition: color 0.2s;
+  }
+
+  .toggle-password:hover {
+    color: #10b981;
+  }
+
+  /* Help Text */
+  .form-text {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .form-text i {
+    font-size: 0.875rem;
+    color: #10b981;
+  }
+
+  /* Error Messages */
+  .invalid-feedback {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+    color: #dc2626;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    animation: slideDown 0.2s ease;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
     }
-    
-    .auth-card {
-        padding: 2.5rem;
-        background: white;
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
-    
-    .auth-header {
-        text-align: center;
-        margin-bottom: 2rem;
+  }
+
+  .invalid-feedback i {
+    font-size: 1rem;
+    margin-top: 0.125rem;
+    flex-shrink: 0;
+  }
+
+  /* Password Strength */
+  .password-strength {
+    margin-top: 0.75rem;
+    display: none;
+  }
+
+  .password-strength.show {
+    display: block;
+  }
+
+  .strength-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .strength-text {
+    font-weight: 700;
+  }
+
+  .strength-text.weak { color: #ef4444; }
+  .strength-text.medium { color: #f59e0b; }
+  .strength-text.strong { color: #10b981; }
+
+  .strength-bar {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .strength-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+    width: 0%;
+  }
+
+  .strength-bar-fill.weak {
+    width: 33%;
+    background: #ef4444;
+  }
+
+  .strength-bar-fill.medium {
+    width: 66%;
+    background: #f59e0b;
+  }
+
+  .strength-bar-fill.strong {
+    width: 100%;
+    background: #10b981;
+  }
+
+  /* Password Requirements */
+  .password-requirements {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 0.75rem;
+    display: none;
+  }
+
+  .password-requirements.show {
+    display: block;
+  }
+
+  .requirements-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #475569;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .requirement-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: #64748b;
+    padding: 0.25rem 0;
+  }
+
+  .requirement-item i {
+    font-size: 1rem;
+  }
+
+  .requirement-item.met {
+    color: #10b981;
+  }
+
+  .requirement-item.met i {
+    color: #10b981;
+  }
+
+  /* Role Info */
+  .role-info {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .role-info-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #075985;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .role-item {
+    font-size: 0.75rem;
+    color: #0c4a6e;
+    padding: 0.25rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.375rem;
+  }
+
+  .role-item i {
+    color: #0891b2;
+    margin-top: 0.125rem;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.875rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    text-decoration: none;
+  }
+
+  .btn i {
+    font-size: 1.125rem;
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    width: 100%;
+  }
+
+  .btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+    color: white;
+  }
+
+  .btn-success:active {
+    transform: translateY(0);
+  }
+
+  /* Footer */
+  .register-footer {
+    padding: 1.5rem 2.5rem;
+    border-top: 1px solid #f1f5f9;
+    text-align: center;
+  }
+
+  .register-footer p {
+    color: #64748b;
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  .register-footer a {
+    color: #10b981;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+  }
+
+  .register-footer a:hover {
+    color: #059669;
+    text-decoration: underline;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .register-container {
+      padding: 1rem;
     }
-    
-    .auth-header h2 {
-        font-weight: 700;
-        color: #212529;
-        margin-bottom: 0.5rem;
+
+    .register-header {
+      padding: 2rem 1.5rem 1.5rem;
     }
-    
-    .auth-header p {
-        color: #6c757d;
+
+    .register-body {
+      padding: 2rem 1.5rem;
     }
-    
-    .form-label {
-        font-weight: 500;
-        color: #495057;
+
+    .register-footer {
+      padding: 1.5rem;
     }
-    
-    .form-control {
-        padding: 0.75rem;
-        border-radius: 0.5rem;
-        border: 1px solid #dee2e6;
+
+    .register-title {
+      font-size: 1.5rem;
     }
-    
-    .form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+
+    .register-icon {
+      width: 64px;
+      height: 64px;
+      font-size: 2rem;
     }
-    
-    .auth-footer {
-        text-align: center;
-        margin-top: 1.5rem;
-        color: #6c757d;
-    }
-    
-    .icon-input {
-        position: relative;
-    }
-    
-    .icon-input i {
-        position: absolute;
-        top: 50%;
-        left: 1rem;
-        transform: translateY(-50%);
-        color: #6c757d;
-    }
-    
-    .icon-input .form-control {
-        padding-left: 2.75rem;
-    }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="auth-container">
-    <div class="card auth-card">
-        <div class="auth-header">
-            <i class="bi bi-person-plus-fill text-primary" style="font-size: 3rem;"></i>
-            <h2>Crear Usuario</h2>
-            <p>Completa el formulario para registrar</p>
-        </div>
-        
-        <form method="post" novalidate>
-            {% csrf_token %}
-            
-            <div class="mb-3">
-                <label for="{{ form.username.id_for_label }}" class="form-label">
-                    <i class="bi bi-person me-1"></i>Usuario
-                </label>
-                {{ form.username }}
-                {% if form.username.errors %}
-                    <div class="text-danger small mt-1">
-                        {{ form.username.errors }}
-                    </div>
-                {% endif %}
-            </div>
-            
-            <div class="mb-3">
-                <label for="{{ form.email.id_for_label }}" class="form-label">
-                    <i class="bi bi-envelope me-1"></i>Email
-                </label>
-                {{ form.email }}
-                {% if form.email.errors %}
-                    <div class="text-danger small mt-1">
-                        {{ form.email.errors }}
-                    </div>
-                {% endif %}
-            </div>
-            
-            <div class="mb-3">
-                <label for="{{ form.role.id_for_label }}" class="form-label">
-                    <i class="bi bi-briefcase me-1"></i>Rol
-                </label>
-                {{ form.role }}
-                {% if form.role.errors %}
-                    <div class="text-danger small mt-1">
-                        {{ form.role.errors }}
-                    </div>
-                {% endif %}
-            </div>
-            
-            <div class="mb-3">
-                <label for="{{ form.password1.id_for_label }}" class="form-label">
-                    <i class="bi bi-lock me-1"></i>Contraseña
-                </label>
-                {{ form.password1 }}
-                {% if form.password1.errors %}
-                    <div class="text-danger small mt-1">
-                        {{ form.password1.errors }}
-                    </div>
-                {% endif %}
-                <small class="text-muted">Mínimo 8 caracteres</small>
-            </div>
-            
-            <div class="mb-3">
-                <label for="{{ form.password2.id_for_label }}" class="form-label">
-                    <i class="bi bi-lock-fill me-1"></i>Confirmar Contraseña
-                </label>
-                {{ form.password2 }}
-                {% if form.password2.errors %}
-                    <div class="text-danger small mt-1">
-                        {{ form.password2.errors }}
-                    </div>
-                {% endif %}
-            </div>
-            
-            <button type="submit" class="btn btn-primary w-100 py-2 mt-3">
-                <i class="bi bi-check-circle me-2"></i>Registrar
-            </button>
-        </form>
-        
+<div class="register-container">
+  <div class="register-card">
+    <!-- Header -->
+    <div class="register-header">
+      <div class="register-icon">
+        <i class="bi bi-person-plus-fill"></i>
+      </div>
+      <h1 class="register-title">Crear Nuevo Usuario</h1>
+      <p class="register-subtitle">
+        Completa el formulario para registrar un nuevo miembro del equipo
+      </p>
     </div>
+
+    <!-- Body -->
+    <div class="register-body">
+      <!-- Info Alert -->
+      <div class="info-alert">
+        <i class="bi bi-info-circle-fill info-alert-icon"></i>
+        <div class="info-alert-content">
+          <p>
+            <strong>Nota:</strong> El nuevo usuario recibirá un email con sus credenciales de acceso. 
+            Asegúrate de que la dirección de email sea correcta.
+          </p>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form method="post" novalidate id="registerForm" autocomplete="off">
+        {% csrf_token %}
+
+        <!-- Username -->
+        <div class="form-group">
+          <label for="id_username" class="form-label">
+            <i class="bi bi-person-circle"></i>
+            Nombre de Usuario
+            <span class="required-mark">*</span>
+          </label>
+          <div class="input-wrapper">
+            <input 
+              type="text" 
+              name="username" 
+              id="id_username"
+              class="form-control"
+              autocomplete="off"
+              required>
+          </div>
+          {% if form.username.errors %}
+            {% for error in form.username.errors %}
+              <div class="invalid-feedback">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ error }}</span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <small class="form-text">
+              <i class="bi bi-info-circle"></i>
+              Solo letras, números, @, ., +, - y _
+            </small>
+          {% endif %}
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="id_email" class="form-label">
+            <i class="bi bi-envelope"></i>
+            Email
+            <span class="required-mark">*</span>
+          </label>
+          <div class="input-wrapper">
+            <input 
+              type="email" 
+              name="email" 
+              id="id_email"
+              class="form-control"
+              autocomplete="email"
+              required>
+          </div>
+          {% if form.email.errors %}
+            {% for error in form.email.errors %}
+              <div class="invalid-feedback">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ error }}</span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <small class="form-text">
+              <i class="bi bi-shield-check"></i>
+              Se enviará un email de bienvenida a esta dirección
+            </small>
+          {% endif %}
+        </div>
+
+        <!-- Role -->
+        <div class="form-group">
+          <label for="id_role" class="form-label">
+            <i class="bi bi-briefcase"></i>
+            Rol en el Sistema
+            <span class="required-mark">*</span>
+          </label>
+          <select name="role" id="id_role" class="form-select" required>
+            <option value="">Selecciona un rol...</option>
+            <option value="vendedor">Vendedor</option>
+            <option value="gerente">Gerente</option>
+            <option value="admin">Administrador</option>
+          </select>
+          {% if form.role.errors %}
+            {% for error in form.role.errors %}
+              <div class="invalid-feedback">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ error }}</span>
+              </div>
+            {% endfor %}
+          {% endif %}
+          
+          <div class="role-info" id="roleInfo" style="display: none;">
+            <div class="role-info-title">Permisos del rol seleccionado:</div>
+            <div id="rolePermissions"></div>
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="id_password1" class="form-label">
+            <i class="bi bi-key"></i>
+            Contraseña
+            <span class="required-mark">*</span>
+          </label>
+          <div class="input-wrapper">
+            <input 
+              type="password" 
+              name="password1" 
+              id="id_password1"
+              class="form-control"
+              autocomplete="new-password"
+              required>
+            <button type="button" class="toggle-password" onclick="togglePassword('id_password1', this)">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+          {% if form.password1.errors %}
+            {% for error in form.password1.errors %}
+              <div class="invalid-feedback">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ error }}</span>
+              </div>
+            {% endfor %}
+          {% endif %}
+          
+          <!-- Password Strength -->
+          <div class="password-strength" id="passwordStrength">
+            <div class="strength-label">
+              <span>Fortaleza de la contraseña</span>
+              <span class="strength-text" id="strengthText">—</span>
+            </div>
+            <div class="strength-bar">
+              <div class="strength-bar-fill" id="strengthBarFill"></div>
+            </div>
+          </div>
+
+          <!-- Requirements -->
+          <div class="password-requirements" id="passwordRequirements">
+            <div class="requirements-title">La contraseña debe contener:</div>
+            <div class="requirement-item" id="req-length">
+              <i class="bi bi-circle"></i>
+              <span>Al menos 8 caracteres</span>
+            </div>
+            <div class="requirement-item" id="req-uppercase">
+              <i class="bi bi-circle"></i>
+              <span>Una letra mayúscula</span>
+            </div>
+            <div class="requirement-item" id="req-lowercase">
+              <i class="bi bi-circle"></i>
+              <span>Una letra minúscula</span>
+            </div>
+            <div class="requirement-item" id="req-number">
+              <i class="bi bi-circle"></i>
+              <span>Un número</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label for="id_password2" class="form-label">
+            <i class="bi bi-lock-fill"></i>
+            Confirmar Contraseña
+            <span class="required-mark">*</span>
+          </label>
+          <div class="input-wrapper">
+            <input 
+              type="password" 
+              name="password2" 
+              id="id_password2"
+              class="form-control"
+              autocomplete="new-password"
+              required>
+            <button type="button" class="toggle-password" onclick="togglePassword('id_password2', this)">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+          {% if form.password2.errors %}
+            {% for error in form.password2.errors %}
+              <div class="invalid-feedback">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ error }}</span>
+              </div>
+            {% endfor %}
+          {% else %}
+            <small class="form-text">
+              <i class="bi bi-info-circle"></i>
+              Repite la contraseña para confirmar
+            </small>
+          {% endif %}
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-success">
+          <i class="bi bi-check-circle-fill"></i>
+          <span>Crear Usuario</span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Footer -->
+    <div class="register-footer">
+      <p>
+        ¿Ya tienes una cuenta? 
+        <a href="{% url 'login' %}">Iniciar sesión</a>
+      </p>
+    </div>
+  </div>
 </div>
+
+<script>
+// Toggle password visibility
+function togglePassword(inputId, button) {
+  const input = document.getElementById(inputId);
+  const icon = button.querySelector('i');
+  
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.classList.remove('bi-eye');
+    icon.classList.add('bi-eye-slash');
+  } else {
+    input.type = 'password';
+    icon.classList.remove('bi-eye-slash');
+    icon.classList.add('bi-eye');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('registerForm');
+  const password1 = document.getElementById('id_password1');
+  const password2 = document.getElementById('id_password2');
+  const roleSelect = document.getElementById('id_role');
+  const strengthIndicator = document.getElementById('passwordStrength');
+  const strengthBarFill = document.getElementById('strengthBarFill');
+  const strengthText = document.getElementById('strengthText');
+  const requirementsBox = document.getElementById('passwordRequirements');
+  const roleInfo = document.getElementById('roleInfo');
+  const rolePermissions = document.getElementById('rolePermissions');
+
+  // Role permissions info
+  const roleDescriptions = {
+    'vendedor': [
+      { icon: 'bi-people', text: 'Ver y gestionar sus clientes asignados' },
+      { icon: 'bi-graph-up', text: 'Crear y actualizar oportunidades' },
+      { icon: 'bi-chat-dots', text: 'Registrar seguimientos' }
+    ],
+    'gerente': [
+      { icon: 'bi-people', text: 'Ver todos los clientes del sistema' },
+      { icon: 'bi-graph-up', text: 'Ver todas las oportunidades' },
+      { icon: 'bi-bar-chart', text: 'Acceder a reportes y análisis' },
+      { icon: 'bi-people-fill', text: 'Ver el equipo de ventas' }
+    ],
+    'admin': [
+      { icon: 'bi-shield-check', text: 'Acceso completo al sistema' },
+      { icon: 'bi-person-plus', text: 'Crear y gestionar usuarios' },
+      { icon: 'bi-gear', text: 'Configurar el sistema' },
+      { icon: 'bi-database', text: 'Acceso a todos los datos' }
+    ]
+  };
+
+  // Show role permissions
+  roleSelect.addEventListener('change', function() {
+    const selectedRole = this.value;
+    if (selectedRole && roleDescriptions[selectedRole]) {
+      roleInfo.style.display = 'block';
+      rolePermissions.innerHTML = roleDescriptions[selectedRole]
+        .map(perm => `<div class="role-item"><i class="bi ${perm.icon}"></i> ${perm.text}</div>`)
+        .join('');
+    } else {
+      roleInfo.style.display = 'none';
+    }
+  });
+
+  // Mark fields with errors
+  const errorFields = form.querySelectorAll('.invalid-feedback');
+  errorFields.forEach(error => {
+    const formGroup = error.closest('.form-group');
+    if (formGroup) {
+      const input = formGroup.querySelector('.form-control, .form-select');
+      if (input) input.classList.add('is-invalid');
+    }
+  });
+
+  // Password strength checker
+  if (password1) {
+    password1.addEventListener('input', function() {
+      const password = this.value;
+      
+      if (password.length === 0) {
+        strengthIndicator.classList.remove('show');
+        requirementsBox.classList.remove('show');
+        return;
+      }
+
+      strengthIndicator.classList.add('show');
+      requirementsBox.classList.add('show');
+
+      const requirements = {
+        length: password.length >= 8,
+        uppercase: /[A-Z]/.test(password),
+        lowercase: /[a-z]/.test(password),
+        number: /[0-9]/.test(password)
+      };
+
+      updateRequirement('req-length', requirements.length);
+      updateRequirement('req-uppercase', requirements.uppercase);
+      updateRequirement('req-lowercase', requirements.lowercase);
+      updateRequirement('req-number', requirements.number);
+
+      const metCount = Object.values(requirements).filter(Boolean).length;
+      let strengthClass = '', strengthLabel = '';
+
+      if (metCount <= 2) {
+        strengthClass = 'weak';
+        strengthLabel = 'Débil';
+      } else if (metCount === 3) {
+        strengthClass = 'medium';
+        strengthLabel = 'Media';
+      } else {
+        strengthClass = 'strong';
+        strengthLabel = 'Fuerte';
+      }
+
+      strengthBarFill.className = 'strength-bar-fill ' + strengthClass;
+      strengthText.className = 'strength-text ' + strengthClass;
+      strengthText.textContent = strengthLabel;
+    });
+  }
+
+  // Password match validation
+  if (password2) {
+    password2.addEventListener('input', function() {
+      if (this.value && password1.value !== this.value) {
+        this.classList.remove('is-valid');
+        this.style.borderColor = '#ef4444';
+      } else if (this.value && password1.value === this.value) {
+        this.classList.add('is-valid');
+        this.style.borderColor = '#10b981';
+      }
+    });
+  }
+
+  // Remove invalid state on input
+  const inputs = form.querySelectorAll('.form-control, .form-select');
+  inputs.forEach(input => {
+    input.addEventListener('input', function() {
+      if (this.classList.contains('is-invalid')) {
+        this.classList.remove('is-invalid');
+        const formGroup = this.closest('.form-group');
+        const feedback = formGroup.querySelector('.invalid-feedback');
+        if (feedback) feedback.style.display = 'none';
+      }
+    });
+  });
+
+  // Form submission
+  form.addEventListener('submit', function() {
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> <span>Creando usuario...</span>';
+  });
+});
+
+function updateRequirement(elementId, isMet) {
+  const element = document.getElementById(elementId);
+  const icon = element.querySelector('i');
+  
+  if (isMet) {
+    element.classList.add('met');
+    icon.classList.remove('bi-circle');
+    icon.classList.add('bi-check-circle-fill');
+  } else {
+    element.classList.remove('met');
+    icon.classList.remove('bi-check-circle-fill');
+    icon.classList.add('bi-circle');
+  }
+}
+</script>
+
 {% endblock %}

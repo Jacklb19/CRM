@@ -1,23 +1,793 @@
 {% extends "base.html" %}
-{% block title %}Detalle Oportunidad - CRM Pro{% endblock %}
+{% block title %}{{ opportunity.title }} - Detalle Oportunidad{% endblock %}
+
+{% block extra_css %}
+<style>
+  .detail-container {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 1.5rem;
+  }
+
+  .breadcrumb-item a {
+    color: #3b82f6;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb-item a:hover {
+    color: #1e40af;
+  }
+
+  .breadcrumb-item.active {
+    color: #64748b;
+  }
+
+  /* Header Card */
+  .opportunity-header-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .opportunity-header-left {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+  }
+
+  .opportunity-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+  }
+
+  .opportunity-header-info {
+    flex: 1;
+  }
+
+  .opportunity-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .opportunity-meta {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .meta-item i {
+    font-size: 1rem;
+  }
+
+  .opportunity-header-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  /* Status Badge */
+  .badge-status {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.8125rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .badge-status.abierta {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .badge-status.calificada {
+    background-color: #e0e7ff;
+    color: #4338ca;
+  }
+
+  .badge-status.propuesta {
+    background-color: #fef3c7;
+    color: #92400e;
+  }
+
+  .badge-status.negociacion {
+    background-color: #fed7aa;
+    color: #9a3412;
+  }
+
+  .badge-status.ganada {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+
+  .badge-status.perdida {
+    background-color: #fee2e2;
+    color: #991b1b;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .btn i {
+    font-size: 1.125rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    color: white;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    color: white;
+  }
+
+  .btn-secondary {
+    background: white;
+    border: 1.5px solid #cbd5e1;
+    color: #475569;
+  }
+
+  .btn-secondary:hover {
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #475569;
+  }
+
+  .btn-danger {
+    background: white;
+    border: 1.5px solid #fca5a5;
+    color: #dc2626;
+  }
+
+  .btn-danger:hover {
+    background: #fef2f2;
+    border-color: #ef4444;
+    color: #dc2626;
+  }
+
+  /* Content Grid */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Info Section */
+  .info-section {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 1.25rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #f1f5f9;
+  }
+
+  .section-title i {
+    color: #8b5cf6;
+    font-size: 1.25rem;
+  }
+
+  .info-grid {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .info-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .info-value {
+    font-size: 0.9375rem;
+    color: #1e293b;
+    font-weight: 500;
+  }
+
+  .info-value a {
+    color: #8b5cf6;
+    text-decoration: none;
+  }
+
+  .info-value a:hover {
+    color: #7c3aed;
+    text-decoration: underline;
+  }
+
+  .info-value.amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #8b5cf6;
+  }
+
+  /* Description Section */
+  .description-section {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .description-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .description-title i {
+    color: #8b5cf6;
+  }
+
+  .description-content {
+    color: #475569;
+    line-height: 1.7;
+  }
+
+  .description-content p {
+    margin: 0 0 0.75rem 0;
+  }
+
+  .description-content p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Stats Card */
+  .stats-card {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border-radius: 12px;
+    padding: 1.5rem;
+    color: white;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .stat-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .stat-item:first-child {
+    padding-top: 0;
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  /* Progress Bar */
+  .progress-section {
+    margin-top: 1.5rem;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+
+  .progress {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+
+  /* Quick Info Card */
+  .quick-info-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .quick-info-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.375rem;
+  }
+
+  .quick-info-value {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  /* Badge */
+  .badge-custom {
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 0.8125rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  .badge-primary {
+    background-color: #dbeafe;
+    color: #1e40af;
+  }
+
+  .badge-purple {
+    background-color: #f3e8ff;
+    color: #6b21a8;
+  }
+
+  /* Timeline */
+  .timeline-section {
+    margin-top: 1.5rem;
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+
+  .timeline-icon {
+    color: #8b5cf6;
+    font-size: 1rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 1024px) {
+    .content-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .opportunity-header-card {
+      padding: 1.5rem;
+    }
+
+    .opportunity-avatar {
+      width: 64px;
+      height: 64px;
+      font-size: 1.5rem;
+    }
+
+    .opportunity-title {
+      font-size: 1.5rem;
+    }
+
+    .opportunity-header-left {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .opportunity-header-actions {
+      width: 100%;
+    }
+
+    .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    .opportunity-meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="mt-4 mb-3">
-  <h2><i class="bi bi-graph-up me-2"></i>{{ object.title }}</h2>
-</div>
+<div class="detail-container">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'dashboard' %}">
+          <i class="bi bi-house-door me-1"></i>Dashboard
+        </a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'opportunity_list' %}">
+          <i class="bi bi-bullseye me-1"></i>Oportunidades
+        </a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">{{ opportunity.title|truncatewords:5 }}</li>
+    </ol>
+  </nav>
 
-<div class="card">
-  <div class="card-body">
-    <p><strong>Cliente:</strong> {{ object.customer.name }}</p>
-    <p><strong>Asignado a:</strong> {{ object.assigned_to.username|default:"Sin asignar" }}</p>
-    <p><strong>Monto estimado:</strong> ${{ object.amount }}</p>
-    <p><strong>Estado:</strong> {{ object.get_status_display }}</p>
-    <p><strong>Fecha estimada de cierre:</strong> {{ object.expected_close_date|date:"d/m/Y" }}</p>
-    <p><strong>Descripción:</strong><br>{{ object.description|linebreaks }}</p>
+  <!-- Header Card -->
+  <div class="opportunity-header-card">
+    <div class="opportunity-header-left">
+      <div class="opportunity-avatar">
+        <i class="bi bi-graph-up"></i>
+      </div>
+      <div class="opportunity-header-info">
+        <h1 class="opportunity-title">
+          {{ opportunity.title }}
+          <span class="badge-status {{ opportunity.status }}">
+            {% if opportunity.status == 'abierta' %}
+              <i class="bi bi-star"></i>Abierta
+            {% elif opportunity.status == 'calificada' %}
+              <i class="bi bi-check-circle"></i>Calificada
+            {% elif opportunity.status == 'propuesta' %}
+              <i class="bi bi-file-earmark-text"></i>Propuesta
+            {% elif opportunity.status == 'negociacion' %}
+              <i class="bi bi-arrow-left-right"></i>Negociación
+            {% elif opportunity.status == 'ganada' %}
+              <i class="bi bi-trophy"></i>Ganada
+            {% else %}
+              <i class="bi bi-x-circle"></i>Perdida
+            {% endif %}
+          </span>
+        </h1>
+        <div class="opportunity-meta">
+          <span class="meta-item">
+            <i class="bi bi-person-circle"></i>
+            <span>Cliente: <a href="{% url 'customer_detail' opportunity.customer.pk %}">{{ opportunity.customer.name }}</a></span>
+          </span>
+          <span class="meta-item">
+            <i class="bi bi-currency-dollar"></i>
+            <span><strong>${{ opportunity.amount|floatformat:2 }}</strong></span>
+          </span>
+          <span class="meta-item">
+            <i class="bi bi-calendar-event"></i>
+            <span>Cierre: {{ opportunity.expected_close_date|date:"d/m/Y" }}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="opportunity-header-actions">
+      <a href="{% url 'opportunity_update' opportunity.pk %}" class="btn btn-primary">
+        <i class="bi bi-pencil-square"></i>
+        <span>Editar</span>
+      </a>
+      <a href="{% url 'opportunity_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i>
+        <span>Volver</span>
+      </a>
+      <a href="{% url 'opportunity_delete' opportunity.pk %}" class="btn btn-danger">
+        <i class="bi bi-trash3"></i>
+        <span>Eliminar</span>
+      </a>
+    </div>
+  </div>
 
-    <a href="{% url 'opportunity_update' object.pk %}" class="btn btn-primary me-2">Editar</a>
-    <a href="{% url 'opportunity_delete' object.pk %}" class="btn btn-danger">Eliminar</a>
-    <a href="{% url 'opportunity_list' %}" class="btn btn-outline-secondary ms-2">Volver a lista</a>
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <!-- Main Content -->
+    <div>
+      <!-- Opportunity Information -->
+      <div class="info-section">
+        <h2 class="section-title">
+          <i class="bi bi-info-circle"></i>
+          <span>Información de la Oportunidad</span>
+        </h2>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-currency-dollar"></i>Monto Estimado
+            </span>
+            <span class="info-value amount">${{ opportunity.amount|floatformat:2 }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-person-vcard"></i>Cliente
+            </span>
+            <span class="info-value">
+              <a href="{% url 'customer_detail' opportunity.customer.pk %}">
+                <i class="bi bi-box-arrow-up-right me-1"></i>{{ opportunity.customer.name }}
+              </a>
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-person-badge"></i>Asignado A
+            </span>
+            <span class="info-value">
+              {% if opportunity.assigned_to %}
+                <span class="badge-custom badge-primary">
+                  <i class="bi bi-person-circle"></i>
+                  {{ opportunity.assigned_to.get_full_name|default:opportunity.assigned_to.username }}
+                </span>
+              {% else %}
+                <span style="color: #94a3b8;">Sin asignar</span>
+              {% endif %}
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-diagram-3"></i>Etapa Actual
+            </span>
+            <span class="info-value">
+              <span class="badge-custom badge-purple">
+                <i class="bi bi-flag"></i>
+                {{ opportunity.get_status_display }}
+              </span>
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-calendar-check"></i>Fecha Estimada de Cierre
+            </span>
+            <span class="info-value">{{ opportunity.expected_close_date|date:"d/m/Y" }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-calendar-plus"></i>Fecha de Creación
+            </span>
+            <span class="info-value">{{ opportunity.created_at|date:"d/m/Y H:i" }}</span>
+          </div>
+
+          {% if opportunity.probability %}
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-percent"></i>Probabilidad de Cierre
+            </span>
+            <span class="info-value">{{ opportunity.probability }}%</span>
+          </div>
+          {% endif %}
+
+          {% if opportunity.priority %}
+          <div class="info-item">
+            <span class="info-label">
+              <i class="bi bi-exclamation-triangle"></i>Prioridad
+            </span>
+            <span class="info-value">{{ opportunity.get_priority_display }}</span>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Progress Bar -->
+        {% if opportunity.probability %}
+        <div class="progress-section">
+          <div class="progress-label">
+            <span><strong>Probabilidad de Cierre</strong></span>
+            <span><strong>{{ opportunity.probability }}%</strong></span>
+          </div>
+          <div class="progress">
+            <div class="progress-bar" style="width: {{ opportunity.probability }}%;"></div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Description Section -->
+      {% if opportunity.description %}
+      <div class="description-section">
+        <h3 class="description-title">
+          <i class="bi bi-journal-text"></i>
+          <span>Descripción de la Oportunidad</span>
+        </h3>
+        <div class="description-content">
+          {{ opportunity.description|linebreaks }}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Timeline Section -->
+      <div class="info-section timeline-section">
+        <h3 class="section-title">
+          <i class="bi bi-clock-history"></i>
+          <span>Historial</span>
+        </h3>
+        <div class="timeline-item">
+          <i class="bi bi-calendar-plus timeline-icon"></i>
+          <span><strong>Creado:</strong> {{ opportunity.created_at|date:"d/m/Y H:i" }}</span>
+        </div>
+        <div class="timeline-item">
+          <i class="bi bi-clock-history timeline-icon"></i>
+          <span><strong>Última actualización:</strong> {{ opportunity.updated_at|date:"d/m/Y H:i" }}</span>
+        </div>
+        {% if opportunity.expected_close_date %}
+        <div class="timeline-item">
+          <i class="bi bi-calendar-event timeline-icon"></i>
+          <span><strong>Cierre esperado:</strong> {{ opportunity.expected_close_date|date:"d/m/Y" }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+      <!-- Stats Card -->
+      <div class="stats-card">
+        <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0 0 1rem 0;">
+          Resumen Rápido
+        </h3>
+        <div class="stat-item">
+          <span class="stat-label">Valor</span>
+          <span class="stat-value">${{ opportunity.amount|floatformat:0 }}</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Estado</span>
+          <span class="stat-value" style="font-size: 1.125rem;">{{ opportunity.get_status_display }}</span>
+        </div>
+        {% if opportunity.probability %}
+        <div class="stat-item">
+          <span class="stat-label">Probabilidad</span>
+          <span class="stat-value">{{ opportunity.probability }}%</span>
+        </div>
+        {% endif %}
+        <div class="stat-item">
+          <span class="stat-label">Días Abierto</span>
+          <span class="stat-value">{{ days_since_created }}</span>
+        </div>
+      </div>
+
+      <!-- Quick Info -->
+      <div class="info-section">
+        <h3 class="section-title">
+          <i class="bi bi-lightning"></i>
+          <span>Acceso Rápido</span>
+        </h3>
+        
+        <div class="quick-info-card">
+          <div class="quick-info-label">Cliente</div>
+          <div class="quick-info-value">
+            <a href="{% url 'customer_detail' opportunity.customer.pk %}" style="color: #8b5cf6; text-decoration: none;">
+              {{ opportunity.customer.name }}
+            </a>
+          </div>
+        </div>
+
+        {% if opportunity.assigned_to %}
+        <div class="quick-info-card">
+          <div class="quick-info-label">Responsable</div>
+          <div class="quick-info-value">
+            {{ opportunity.assigned_to.get_full_name|default:opportunity.assigned_to.username }}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="quick-info-card">
+          <div class="quick-info-label">Fecha de Cierre</div>
+          <div class="quick-info-value">
+            {{ opportunity.expected_close_date|date:"d M Y" }}
+          </div>
+        </div>
+
+        {% if days_until_close is not None %}
+        <div class="quick-info-card">
+          <div class="quick-info-label">Días hasta cierre</div>
+          <div class="quick-info-value">
+            {% if days_until_close > 0 %}
+              <span style="color: #16a34a;">
+                <i class="bi bi-calendar-check"></i> {{ days_until_close }} días
+              </span>
+            {% elif days_until_close == 0 %}
+              <span style="color: #f59e0b;">
+                <i class="bi bi-exclamation-circle"></i> ¡Hoy!
+              </span>
+            {% else %}
+              <span style="color: #dc2626;">
+                <i class="bi bi-calendar-x"></i> Vencida
+              </span>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="quick-info-card">
+          <div class="quick-info-label">Etapa</div>
+          <div class="quick-info-value">
+            {{ opportunity.get_status_display }}
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

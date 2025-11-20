@@ -3,528 +3,1123 @@
 
 {% block extra_css %}
 <style>
+  .dashboard-container {
+    max-width: 1800px;
+    margin: 0 auto;
+  }
+
+  /* Welcome Banner */
+  .welcome-banner {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-radius: 16px;
+    padding: 2.5rem 2rem;
+    margin-bottom: 2rem;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(59, 130, 246, 0.2);
+  }
+
+  .welcome-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+
+  .welcome-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .welcome-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .welcome-subtitle {
+    font-size: 1rem;
+    opacity: 0.95;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    backdrop-filter: blur(10px);
+  }
+
+  /* Section Title */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 2.5rem 0 1.5rem 0;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .section-title i {
+    color: #3b82f6;
+    font-size: 1.75rem;
+  }
+
+  /* Stats Grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
   .stat-card {
     background: white;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    text-align: center;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    transition: transform 0.3s ease;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    padding: 1.75rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--card-color), var(--card-color-dark));
   }
 
   .stat-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
   }
 
-  .stat-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+  .stat-card.primary {
+    --card-color: #3b82f6;
+    --card-color-dark: #2563eb;
   }
 
-  .stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #212529;
+  .stat-card.success {
+    --card-color: #10b981;
+    --card-color-dark: #059669;
+  }
+
+  .stat-card.warning {
+    --card-color: #f59e0b;
+    --card-color-dark: #d97706;
+  }
+
+  .stat-card.info {
+    --card-color: #0891b2;
+    --card-color-dark: #0e7490;
+  }
+
+  .stat-card.danger {
+    --card-color: #ef4444;
+    --card-color-dark: #dc2626;
+  }
+
+  .stat-card.purple {
+    --card-color: #8b5cf6;
+    --card-color-dark: #7c3aed;
+  }
+
+  .stat-content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .stat-info {
+    flex: 1;
   }
 
   .stat-label {
-    color: #6c757d;
-    font-weight: 500;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.75rem;
   }
 
-  .welcome-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  .stat-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-change {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .stat-change.positive {
+    color: #10b981;
+  }
+
+  .stat-change.negative {
+    color: #ef4444;
+  }
+
+  .stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    background: var(--card-color);
     color: white;
-    border-radius: 1rem;
-    padding: 2rem;
+    flex-shrink: 0;
+  }
+
+  /* Charts Grid */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 1.5rem;
     margin-bottom: 2rem;
   }
 
-  .section-title {
-    font-weight: 600;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    color: #212529;
-    border-left: 4px solid #667eea;
-    padding-left: 1rem;
+  .chart-card {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
   }
 
-  .chart-container {
-    background: white;
-    border-radius: 1rem;
+  .chart-header {
     padding: 1.5rem;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    margin-bottom: 1.5rem;
-    position: relative;
-    height: 400px;
+    border-bottom: 1px solid #e9ecef;
+    background: #f8fafc;
   }
 
   .chart-title {
+    font-size: 1.125rem;
     font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .chart-title i {
+    color: #3b82f6;
+    font-size: 1.25rem;
+  }
+
+  .chart-body {
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 350px;
+  }
+
+  .chart-container.tall {
+    height: 400px;
+  }
+
+  /* Full Width Chart */
+  .chart-full-width {
+    grid-column: 1 / -1;
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #94a3b8;
+  }
+
+  .empty-state-icon {
+    font-size: 3.5rem;
+    opacity: 0.3;
     margin-bottom: 1rem;
-    color: #212529;
+  }
+
+  .empty-state h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state p {
+    margin: 0;
+    font-size: 0.9375rem;
+  }
+
+  /* Quick Actions */
+  .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .action-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    transition: all 0.2s;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .action-card:hover {
+    background: #f8fafc;
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .action-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 0.75rem;
+    font-size: 1.5rem;
+    color: #1e40af;
+  }
+
+  .action-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .dashboard-container {
+      padding: 0 1rem;
+    }
+
+    .welcome-banner {
+      padding: 2rem 1.5rem;
+    }
+
+    .welcome-title {
+      font-size: 1.5rem;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .charts-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .chart-container {
+      height: 300px;
+    }
+
+    .quick-actions {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="welcome-card">
-  <h1 class="mb-2">¡Bienvenido, {{ user.get_full_name|default:user.username }}! 👋</h1>
-  <p class="mb-0">
-    <i class="bi bi-person-badge me-2"></i>
-    <span class="badge bg-light text-dark">{{ user.profile.get_role_display }}</span>
-  </p>
-</div>
-
-<!-- ========== VISTA PARA VENDEDOR ========== -->
-{% if role == 'vendedor' %}
-<h4 class="section-title"><i class="bi bi-briefcase me-2"></i>Mis Métricas</h4>
-<div class="row mb-4">
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon text-primary">
-        <i class="bi bi-people-fill"></i>
-      </div>
-      <div class="stat-value">{{ total_customers }}</div>
-      <div class="stat-label">Clientes</div>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon text-success">
-        <i class="bi bi-check-circle-fill"></i>
-      </div>
-      <div class="stat-value">{{ active_customers }}</div>
-      <div class="stat-label">Activos</div>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon text-info">
-        <i class="bi bi-bullseye"></i>
-      </div>
-      <div class="stat-value">{{ my_opportunities }}</div>
-      <div class="stat-label">Oportunidades</div>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon text-warning">
-        <i class="bi bi-trophy-fill"></i>
-      </div>
-      <div class="stat-value">${{ total_won_value|floatformat:0 }}</div>
-      <div class="stat-label">Valor Ganado</div>
-    </div>
-  </div>
-</div>
-
-<!-- Gráficos para Vendedor -->
-<div class="row">
-  <div class="col-md-6">
-    <div class="chart-container">
-      <h5 class="chart-title">
-        <i class="bi bi-pie-chart-fill me-2"></i>Estado de Oportunidades
-      </h5>
-      <canvas id="opportunitiesChart"></canvas>
-    </div>
-  </div>
-  <div class="col-md-6">
-    <div class="chart-container">
-      <h5 class="chart-title">
-        <i class="bi bi-graph-up me-2"></i>Por Prioridad
-      </h5>
-      <canvas id="priorityChart"></canvas>
-    </div>
-  </div>
-</div>
-
-<!-- ========== VISTA PARA GERENTE ========== -->
-{% elif role == 'gerente' %}
-<h4 class="section-title">
-  <i class="bi bi-graph-up me-2"></i>Resumen General
-</h4>
-<div class="row mb-4">
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon text-primary">
-        <i class="bi bi-people-fill"></i>
-      </div>
-      <div class="stat-value">{{ total_customers }}</div>
-      <div class="stat-label">Clientes</div>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon text-success">
-        <i class="bi bi-bullseye"></i>
-      </div>
-      <div class="stat-value">${{ total_pipeline_value|floatformat:0 }}</div>
-      <div class="stat-label">Pipeline</div>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon text-warning">
-        <i class="bi bi-trophy-fill"></i>
-      </div>
-      <div class="stat-value">{{ opportunities_won }}</div>
-      <div class="stat-label">Ganadas</div>
-    </div>
-  </div>
-
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon text-info">
+<div class="dashboard-container">
+  <!-- Welcome Banner -->
+  <div class="welcome-banner">
+    <div class="welcome-content">
+      <h1 class="welcome-title">
+        <span>¡Bienvenido, {{ user.get_full_name|default:user.username }}!</span>
+        <span>👋</span>
+      </h1>
+      <p class="welcome-subtitle">
         <i class="bi bi-person-badge"></i>
+        <span class="role-badge">
+          {% if user.profile.role == 'admin' %}
+            <i class="bi bi-shield-check"></i>
+          {% elif user.profile.role == 'gerente' %}
+            <i class="bi bi-briefcase"></i>
+          {% else %}
+            <i class="bi bi-person-badge"></i>
+          {% endif %}
+          {{ user.profile.get_role_display }}
+        </span>
+      </p>
+    </div>
+  </div>
+
+  <!-- ========== VENDEDOR VIEW ========== -->
+  {% if role == 'vendedor' %}
+    <!-- Section Header -->
+    <div class="section-header">
+      <h2 class="section-title">
+        <i class="bi bi-graph-up-arrow"></i>
+        <span>Mis Métricas</span>
+      </h2>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card primary">
+        <div class="stat-content">
+          <div class="stat-info">
+            <div class="stat-label">Total Clientes</div>
+            <div class="stat-value">{{ total_customers }}</div>
+            <div class="stat-change positive">
+              <i class="bi bi-arrow-up-short"></i>
+              <span>+12% este mes</span>
+            </div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-people-fill"></i>
+          </div>
+        </div>
       </div>
-      <div class="stat-value">{{ total_salespeople }}</div>
-      <div class="stat-label">Vendedores</div>
-    </div>
-  </div>
-</div>
 
-<!-- Gráficos para Gerente -->
-<div class="row">
-  <div class="col-md-6">
-    <div class="chart-container">
-      <h5 class="chart-title">
-        <i class="bi bi-funnel-fill me-2"></i>Estados de Oportunidades
-      </h5>
-      <canvas id="statusChart"></canvas>
-    </div>
-  </div>
-  <div class="col-md-6">
-    <div class="chart-container">
-      <h5 class="chart-title">
-        <i class="bi bi-bar-chart-fill me-2"></i>Top Vendedores
-      </h5>
-      <canvas id="salesRepChart"></canvas>
-    </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-md-12">
-    <div class="chart-container" style="height: 350px;">
-      <h5 class="chart-title">
-        <i class="bi bi-graph-up-arrow me-2"></i>Evolución Mensual
-      </h5>
-      <canvas id="trendsChart"></canvas>
-    </div>
-  </div>
-</div>
-
-<!-- ========== VISTA PARA ADMINISTRADOR ========== -->
-{% elif role == 'administrador' %}
-<h4 class="section-title">
-  <i class="bi bi-bar-chart me-2"></i>Estadísticas del Sistema
-</h4>
-<div class="row mb-4">
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon text-primary">
-        <i class="bi bi-people-fill"></i>
+      <div class="stat-card success">
+        <div class="stat-content">
+          <div class="stat-info">
+            <div class="stat-label">Clientes Activos</div>
+            <div class="stat-value">{{ active_customers }}</div>
+            <div class="stat-change positive">
+              <i class="bi bi-check-circle"></i>
+              <span>{{ active_customers|floatformat:0 }}/{{ total_customers }}</span>
+            </div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-check-circle-fill"></i>
+          </div>
+        </div>
       </div>
-      <div class="stat-value">{{ total_customers }}</div>
-      <div class="stat-label">Clientes</div>
-    </div>
-  </div>
 
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon text-success">
-        <i class="bi bi-bullseye"></i>
+      <div class="stat-card info">
+        <div class="stat-content">
+          <div class="stat-info">
+            <div class="stat-label">Oportunidades</div>
+            <div class="stat-value">{{ my_opportunities }}</div>
+            <div class="stat-change positive">
+              <i class="bi bi-bullseye"></i>
+              <span>En proceso</span>
+            </div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-bullseye"></i>
+          </div>
+        </div>
       </div>
-      <div class="stat-value">{{ total_opportunities }}</div>
-      <div class="stat-label">Oportunidades</div>
-    </div>
-  </div>
 
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon text-warning">
-        <i class="bi bi-chat-dots-fill"></i>
+      <div class="stat-card warning">
+        <div class="stat-content">
+          <div class="stat-info">
+            <div class="stat-label">Valor Ganado</div>
+            <div class="stat-value">${{ total_won_value|floatformat:0 }}</div>
+            <div class="stat-change positive">
+              <i class="bi bi-trophy-fill"></i>
+              <span>Cerradas</span>
+            </div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-trophy-fill"></i>
+          </div>
+        </div>
       </div>
-      <div class="stat-value">{{ total_followups }}</div>
-      <div class="stat-label">Seguimientos</div>
     </div>
-  </div>
 
-  <div class="col-md-3">
-    <div class="stat-card">
-      <div class="stat-icon text-info">
-        <i class="bi bi-person-circle"></i>
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="bi bi-pie-chart-fill"></i>
+            <span>Estado de Oportunidades</span>
+          </h3>
+        </div>
+        <div class="chart-body">
+          <div class="chart-container">
+            <canvas id="opportunitiesChart"></canvas>
+          </div>
+        </div>
       </div>
-      <div class="stat-value">{{ total_users }}</div>
-      <div class="stat-label">Usuarios</div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="bi bi-bar-chart-fill"></i>
+            <span>Por Prioridad</span>
+          </h3>
+        </div>
+        <div class="chart-body">
+          <div class="chart-container">
+            <canvas id="priorityChart"></canvas>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+
+  <!-- ========== GERENTE VIEW ========== -->
+  {% elif role == 'gerente' %}
+    <!-- Section Header -->
+    <div class="section-header">
+      <h2 class="section-title">
+        <i class="bi bi-bar-chart-line"></i>
+        <span>Resumen General</span>
+      </h2>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card primary">
+        <div class="stat-content">
+          <div class="stat-info">
+            <div class="stat-label">Total Clientes</div>
+            <div class="stat-value">{{ total_customers }}</div>
+            <div class="stat-change positive">
+              <i class="bi bi-people"></i>
+              <span>En el sistema</span>
+            </div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-people-fill"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card success">
+        <div class="stat-content">
+          <div class="stat-info">
+            <div class="stat-label">Valor Pipeline</div>
+            <div class="stat-value">${{ total_pipeline_value|floatformat:0 }}</div>
+            <div class="stat-change positive">
+              <i class="bi bi-arrow-up"></i>
+              <span>En proceso</span>
+            </div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-cash-stack"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card warning">
+        <div class="stat-content">
+          <div class="stat-info">
+            <div class="stat-label">Oportunidades Ganadas</div>
+            <div class="stat-value">{{ opportunities_won }}</div>
+            <div class="stat-change positive">
+              <i class="bi bi-trophy"></i>
+              <span>Cerradas</span>
+            </div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-trophy-fill"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card info">
+        <div class="stat-content">
+          <div class="stat-info">
+            <div class="stat-label">Equipo de Ventas</div>
+            <div class="stat-value">{{ total_salespeople }}</div>
+            <div class="stat-change">
+              <i class="bi bi-people"></i>
+              <span>Vendedores</span>
+            </div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-person-badge"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="bi bi-funnel-fill"></i>
+            <span>Estado de Oportunidades</span>
+          </h3>
+        </div>
+        <div class="chart-body">
+          <div class="chart-container">
+            <canvas id="statusChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="bi bi-person-lines-fill"></i>
+            <span>Top Vendedores</span>
+          </h3>
+        </div>
+        <div class="chart-body">
+          <div class="chart-container">
+            <canvas id="salesRepChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card chart-full-width">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="bi bi-graph-up-arrow"></i>
+            <span>Evolución Mensual de Oportunidades</span>
+          </h3>
+        </div>
+        <div class="chart-body">
+          <div class="chart-container tall">
+            <canvas id="trendsChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- ========== ADMINISTRADOR VIEW ========== -->
+  {% elif role == 'administrador' %}
+    <!-- Section Header -->
+    <div class="section-header">
+      <h2 class="section-title">
+        <i class="bi bi-speedometer2"></i>
+        <span>Estadísticas del Sistema</span>
+      </h2>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card primary">
+        <div class="stat-content">
+          <div class="stat-info">
+            <div class="stat-label">Total Clientes</div>
+            <div class="stat-value">{{ total_customers }}</div>
+            <div class="stat-change positive">
+              <i class="bi bi-database"></i>
+              <span>En el sistema</span>
+            </div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-people-fill"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card success">
+        <div class="stat-content">
+          <div class="stat-info">
+            <div class="stat-label">Oportunidades</div>
+            <div class="stat-value">{{ total_opportunities }}</div>
+            <div class="stat-change positive">
+              <i class="bi bi-graph-up"></i>
+              <span>Totales</span>
+            </div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-bullseye"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card warning">
+        <div class="stat-content">
+          <div class="stat-info">
+            <div class="stat-label">Seguimientos</div>
+            <div class="stat-value">{{ total_followups }}</div>
+            <div class="stat-change positive">
+              <i class="bi bi-activity"></i>
+              <span>Registrados</span>
+            </div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-chat-dots-fill"></i>
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card info">
+        <div class="stat-content">
+          <div class="stat-info">
+            <div class="stat-label">Usuarios</div>
+            <div class="stat-value">{{ total_users }}</div>
+            <div class="stat-change">
+              <i class="bi bi-shield-check"></i>
+              <span>Activos</span>
+            </div>
+          </div>
+          <div class="stat-icon">
+            <i class="bi bi-person-circle"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="bi bi-people"></i>
+            <span>Distribución de Roles</span>
+          </h3>
+        </div>
+        <div class="chart-body">
+          <div class="chart-container">
+            <canvas id="rolesChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="bi bi-funnel-fill"></i>
+            <span>Estado de Oportunidades</span>
+          </h3>
+        </div>
+        <div class="chart-body">
+          <div class="chart-container">
+            <canvas id="opportunitiesStatusChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="bi bi-chat-square-text"></i>
+            <span>Tipos de Seguimientos</span>
+          </h3>
+        </div>
+        <div class="chart-body">
+          <div class="chart-container">
+            <canvas id="followupsChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3 class="chart-title">
+            <i class="bi bi-bar-chart-line"></i>
+            <span>Clientes por Estado</span>
+          </h3>
+        </div>
+        <div class="chart-body">
+          <div class="chart-container">
+            <canvas id="customersStatusChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 </div>
 
-<!-- Gráficos para Administrador -->
-<div class="row">
-  <div class="col-md-6">
-    <div class="chart-container">
-      <h5 class="chart-title">
-        <i class="bi bi-people me-2"></i>Distribución de Roles
-      </h5>
-      <canvas id="rolesChart"></canvas>
-    </div>
-  </div>
-  <div class="col-md-6">
-    <div class="chart-container">
-      <h5 class="chart-title">
-        <i class="bi bi-funnel-fill me-2"></i>Estados de Oportunidades
-      </h5>
-      <canvas id="opportunitiesStatusChart"></canvas>
-    </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="col-md-6">
-    <div class="chart-container">
-      <h5 class="chart-title">
-        <i class="bi bi-activity me-2"></i>Tipo de Seguimientos
-      </h5>
-      <canvas id="followupsChart"></canvas>
-    </div>
-  </div>
-  <div class="col-md-6">
-    <div class="chart-container">
-      <h5 class="chart-title">
-        <i class="bi bi-bar-chart-line me-2"></i>Clientes Activos/Inactivos
-      </h5>
-      <canvas id="customersStatusChart"></canvas>
-    </div>
-  </div>
-</div>
-
-{% endif %}
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script>
-  Chart.defaults.font.family = "'Inter', 'system-ui', sans-serif";
-  Chart.defaults.color = '#6c757d';
+// Chart.js Global Configuration
+Chart.defaults.font.family = "'Inter', 'system-ui', sans-serif";
+Chart.defaults.color = '#64748b';
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.padding = 15;
 
-  {% if role == 'vendedor' %}
-    // Estado de Oportunidades
-    new Chart(document.getElementById('opportunitiesChart'), {
-      type: 'doughnut',
-      data: {
-        labels: {{ status_labels|safe }},
-        datasets: [{
-          data: {{ status_data|safe }},
-          backgroundColor: ['#17a2b8', '#28a745', '#dc3545', '#ffc107', '#6f42c1', '#e83e8c'],
-          borderWidth: 2,
-          borderColor: '#fff'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom' }
-        }
-      }
-    });
+// Color Palettes
+const colors = {
+  primary: ['#3b82f6', '#2563eb', '#1d4ed8', '#1e40af', '#1e3a8a'],
+  success: ['#10b981', '#059669', '#047857', '#065f46'],
+  warning: ['#f59e0b', '#d97706', '#b45309', '#92400e'],
+  danger: ['#ef4444', '#dc2626', '#b91c1c', '#991b1b'],
+  info: ['#0891b2', '#0e7490', '#155e75', '#164e63'],
+  purple: ['#8b5cf6', '#7c3aed', '#6d28d9', '#5b21b6'],
+  mixed: ['#3b82f6', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6', '#0891b2']
+};
 
-    // Por Prioridad
-    new Chart(document.getElementById('priorityChart'), {
-      type: 'bar',
-      data: {
-        labels: {{ priority_labels|safe }},
-        datasets: [{
-          label: 'Cantidad',
-          data: {{ priority_data|safe }},
-          backgroundColor: ['#dc3545', '#ffc107', '#28a745'],
-          borderWidth: 1,
-          borderColor: '#fff'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { stepSize: 1 }
+{% if role == 'vendedor' %}
+  // Opportunities by Status
+  new Chart(document.getElementById('opportunitiesChart'), {
+    type: 'doughnut',
+    data: {
+      labels: {{ status_labels|safe }},
+      datasets: [{
+        data: {{ status_data|safe }},
+        backgroundColor: colors.mixed,
+        borderWidth: 3,
+        borderColor: '#fff',
+        hoverBorderWidth: 4,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 20,
+            font: { size: 13, weight: '500' }
           }
-        }
-      }
-    });
-
-  {% elif role == 'gerente' %}
-    // Estados
-    new Chart(document.getElementById('statusChart'), {
-      type: 'pie',
-      data: {
-        labels: {{ status_labels|safe }},
-        datasets: [{
-          data: {{ status_data|safe }},
-          backgroundColor: ['#17a2b8', '#28a745', '#dc3545', '#ffc107', '#6f42c1', '#e83e8c'],
-          borderWidth: 2,
-          borderColor: '#fff'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom' }
-        }
-      }
-    });
-
-    // Top Vendedores
-    new Chart(document.getElementById('salesRepChart'), {
-      type: 'barH',
-      data: {
-        labels: {{ salesrep_names|safe }},
-        datasets: [{
-          label: 'Ganadas',
-          data: {{ salesrep_won|safe }},
-          backgroundColor: '#667eea'
-        }]
-      },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false }
         },
-        scales: {
-          x: {
-            beginAtZero: true,
-            ticks: { stepSize: 1 }
-          }
+        tooltip: {
+          backgroundColor: '#1e293b',
+          padding: 12,
+          titleFont: { size: 14, weight: '600' },
+          bodyFont: { size: 13 },
+          cornerRadius: 8
+        }
+      },
+      cutout: '65%'
+    }
+  });
+
+  // Opportunities by Priority
+  new Chart(document.getElementById('priorityChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ priority_labels|safe }},
+      datasets: [{
+        label: 'Oportunidades',
+        data: {{ priority_data|safe }},
+        backgroundColor: colors.danger.concat(colors.warning, colors.success),
+        borderRadius: 8,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          padding: 12,
+          cornerRadius: 8
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 },
+          grid: { color: '#f1f5f9' }
+        },
+        x: {
+          grid: { display: false }
         }
       }
-    });
+    }
+  });
 
-    // Tendencias
-    new Chart(document.getElementById('trendsChart'), {
-      type: 'line',
-      data: {
-        labels: {{ months_labels|safe }},
-        datasets: [{
-          label: 'Oportunidades',
-          data: {{ opportunities_by_month|safe }},
-          borderColor: '#667eea',
-          backgroundColor: 'rgba(102, 126, 234, 0.1)',
-          tension: 0.4,
-          fill: true,
-          borderWidth: 2
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { stepSize: 1 }
+{% elif role == 'gerente' %}
+  // Status Chart
+  new Chart(document.getElementById('statusChart'), {
+    type: 'pie',
+    data: {
+      labels: {{ status_labels|safe }},
+      datasets: [{
+        data: {{ status_data|safe }},
+        backgroundColor: colors.mixed,
+        borderWidth: 3,
+        borderColor: '#fff',
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 20,
+            font: { size: 13, weight: '500' }
           }
+        },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          padding: 12,
+          cornerRadius: 8
         }
       }
-    });
+    }
+  });
 
-  {% elif role == 'administrador' %}
-    // Roles
-    new Chart(document.getElementById('rolesChart'), {
-      type: 'pie',
-      data: {
-        labels: ['Admins', 'Gerentes', 'Vendedores'],
-        datasets: [{
-          data: [{{ total_admins }}, {{ total_managers }}, {{ total_salespeople }}],
-          backgroundColor: ['#dc3545', '#007bff', '#28a745'],
-          borderWidth: 2,
-          borderColor: '#fff'
-        }]
+  // Top Sales Reps
+  new Chart(document.getElementById('salesRepChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ salesrep_names|safe }},
+      datasets: [{
+        label: 'Ganadas',
+        data: {{ salesrep_won|safe }},
+        backgroundColor: '#3b82f6',
+        borderRadius: 8,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          padding: 12,
+          cornerRadius: 8
+        }
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom' } }
-      }
-    });
-
-    // Estados
-    new Chart(document.getElementById('opportunitiesStatusChart'), {
-      type: 'doughnut',
-      data: {
-        labels: {{ status_labels|safe }},
-        datasets: [{
-          data: {{ status_data|safe }},
-          backgroundColor: ['#17a2b8', '#28a745', '#dc3545', '#ffc107', '#6f42c1', '#e83e8c'],
-          borderWidth: 2,
-          borderColor: '#fff'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom' } }
-      }
-    });
-
-    // Seguimientos
-    new Chart(document.getElementById('followupsChart'), {
-      type: 'bar',
-      data: {
-        labels: {{ followup_types|safe }},
-        datasets: [{
-          label: 'Cantidad',
-          data: {{ followup_counts|safe }},
-          backgroundColor: '#764ba2'
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { stepSize: 1 }
-          }
+      scales: {
+        x: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 },
+          grid: { color: '#f1f5f9' }
+        },
+        y: {
+          grid: { display: false }
         }
       }
-    });
+    }
+  });
 
-    // Clientes
-    new Chart(document.getElementById('customersStatusChart'), {
-      type: 'bar',
-      data: {
-        labels: ['Activos', 'Inactivos'],
-        datasets: [{
-          label: 'Clientes',
-          data: [{{ active_customers }}, {{ inactive_customers }}],
-          backgroundColor: ['#28a745', '#ffc107']
-        }]
+  // Monthly Trends
+  new Chart(document.getElementById('trendsChart'), {
+    type: 'line',
+    data: {
+      labels: {{ months_labels|safe }},
+      datasets: [{
+        label: 'Oportunidades Creadas',
+        data: {{ opportunities_by_month|safe }},
+        borderColor: '#3b82f6',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        tension: 0.4,
+        fill: true,
+        borderWidth: 3,
+        pointRadius: 5,
+        pointBackgroundColor: '#3b82f6',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2,
+        pointHoverRadius: 7
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'end'
+        },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          padding: 12,
+          cornerRadius: 8
+        }
       },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: { stepSize: 1 }
-          }
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 },
+          grid: { color: '#f1f5f9' }
+        },
+        x: {
+          grid: { display: false }
         }
       }
-    });
+    }
+  });
 
-  {% endif %}
+{% elif role == 'administrador' %}
+  // Roles Distribution
+  new Chart(document.getElementById('rolesChart'), {
+    type: 'pie',
+    data: {
+      labels: ['Administradores', 'Gerentes', 'Vendedores'],
+      datasets: [{
+        data: [{{ total_admins }}, {{ total_managers }}, {{ total_salespeople }}],
+        backgroundColor: [colors.danger[0], colors.warning[0], colors.success[0]],
+        borderWidth: 3,
+        borderColor: '#fff',
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 20,
+            font: { size: 13, weight: '500' }
+          }
+        },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          padding: 12,
+          cornerRadius: 8
+        }
+      }
+    }
+  });
+
+  // Opportunities Status
+  new Chart(document.getElementById('opportunitiesStatusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: {{ status_labels|safe }},
+      datasets: [{
+        data: {{ status_data|safe }},
+        backgroundColor: colors.mixed,
+        borderWidth: 3,
+        borderColor: '#fff',
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 20,
+            font: { size: 13, weight: '500' }
+          }
+        },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          padding: 12,
+          cornerRadius: 8
+        }
+      },
+      cutout: '65%'
+    }
+  });
+
+  // Followups Types
+  new Chart(document.getElementById('followupsChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ followup_types|safe }},
+      datasets: [{
+        label: 'Seguimientos',
+        data: {{ followup_counts|safe }},
+        backgroundColor: '#8b5cf6',
+        borderRadius: 8,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          padding: 12,
+          cornerRadius: 8
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 },
+          grid: { color: '#f1f5f9' }
+        },
+        x: {
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  // Customers Status
+  new Chart(document.getElementById('customersStatusChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Activos', 'Inactivos'],
+      datasets: [{
+        label: 'Clientes',
+        data: [{{ active_customers }}, {{ inactive_customers }}],
+        backgroundColor: [colors.success[0], colors.warning[0]],
+        borderRadius: 8,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          padding: 12,
+          cornerRadius: 8
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 1 },
+          grid: { color: '#f1f5f9' }
+        },
+        x: {
+          grid: { display: false }
+        }
+      }
+    }
+  });
+{% endif %}
 </script>
+
 {% endblock %}
