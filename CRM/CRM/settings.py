@@ -12,23 +12,24 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # ==============================================================================
 # CORE SETTINGS
 # ==============================================================================
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0vurr4$hozjf%uh*-_4n8d$_m9@&53g4q-=qo+wrv!t=+s-l^i'
+# DEBUG and SECRET_KEY from environment
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-change-this-in-production')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
+# ALLOWED_HOSTS configuration
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # ==============================================================================
 # APPLICATION DEFINITION
@@ -55,6 +56,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Para servir static files en producción
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -83,30 +85,29 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'CRM.wsgi.application'
 
-
 # ==============================================================================
 # DATABASE CONFIGURATION
 # ==============================================================================
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Usar PostgreSQL en producción, SQLite en desarrollo
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
-
-# Para producción con PostgreSQL (descomentar cuando tengas psycopg configurado):
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.environ.get('DB_NAME', 'crm_db'),
-#         'USER': os.environ.get('DB_USER', 'postgres'),
-#         'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-#         'HOST': os.environ.get('DB_HOST', 'localhost'),
-#         'PORT': os.environ.get('DB_PORT', '5432'),
-#     }
-# }
-
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME', 'crm_db'),
+            'USER': os.getenv('DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('DB_PASSWORD'),
+            'HOST': os.getenv('DB_HOST', 'localhost'),
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
+    }
 
 # ==============================================================================
 # PASSWORD VALIDATION
@@ -127,19 +128,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # ==============================================================================
 # INTERNATIONALIZATION
 # ==============================================================================
 
 LANGUAGE_CODE = 'es-es'  # Español
-
 TIME_ZONE = 'America/Bogota'  # Ajusta según tu zona horaria
-
 USE_I18N = True
-
 USE_TZ = True
-
 
 # ==============================================================================
 # STATIC FILES (CSS, JavaScript, Images)
@@ -152,17 +148,19 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+# Para producción, usar compressed storage
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Media files (uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
 
 # ==============================================================================
 # DEFAULT PRIMARY KEY FIELD TYPE
 # ==============================================================================
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 # ==============================================================================
 # AUTHENTICATION & AUTHORIZATION
@@ -172,24 +170,23 @@ LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
 
-
 # ==============================================================================
 # EMAIL CONFIGURATION
 # ==============================================================================
 
-# Para desarrollo (muestra emails en consola)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
-# Para producción con SMTP (descomentar y configurar):
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-# EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
-# EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+if DEBUG:
+    # Para desarrollo (muestra emails en consola)
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    # Para producción con SMTP
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
+    EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 
 DEFAULT_FROM_EMAIL = 'crm@tuempresa.com'
-
 
 # ==============================================================================
 # LOGGING CONFIGURATION
@@ -257,7 +254,6 @@ LOGGING = {
     },
 }
 
-
 # ==============================================================================
 # CUSTOM PROJECT SETTINGS
 # ==============================================================================
@@ -265,18 +261,17 @@ LOGGING = {
 # Configuración de recordatorios
 FOLLOWUP_REMINDER_ENABLED = True
 
-
 # ==============================================================================
 # SECURITY SETTINGS (PARA PRODUCCIÓN)
 # ==============================================================================
 
-# Descomentar estas líneas cuando despliegues a producción:
-# SECURE_SSL_REDIRECT = True
-# SESSION_COOKIE_SECURE = True
-# CSRF_COOKIE_SECURE = True
-# SECURE_BROWSER_XSS_FILTER = True
-# SECURE_CONTENT_TYPE_NOSNIFF = True
-# X_FRAME_OPTIONS = 'DENY'
-# SECURE_HSTS_SECONDS = 31536000
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-# SECURE_HSTS_PRELOAD = True
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
