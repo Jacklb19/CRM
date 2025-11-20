@@ -3,200 +3,447 @@
 
 {% block extra_css %}
 <style>
-  .search-filters {
-    background: #f8f9fa;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 2rem 0 1.5rem 0;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #e9ecef;
   }
   
-  .filter-section {
+  .header-section h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #212529;
+  }
+  
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: all 0.3s ease;
+  }
+  
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+  }
+  
+  .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  
+  .stat-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-weight: 500;
+  }
+  
+  .stat-value.total { color: #667eea; }
+  .stat-value.active { color: #28a745; }
+  .stat-value.inactive { color: #ffc107; }
+  .stat-value.found { color: #17a2b8; }
+  
+  .search-container {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 2rem;
+  }
+  
+  .search-header {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  .search-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .form-label {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .form-control {
+    padding: 0.75rem;
+    border: 1.5px solid #e9ecef;
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+  }
+  
+  .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  }
+  
+  .search-actions {
+    display: flex;
+    gap: 0.75rem;
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+  
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+  
+  .btn-outline-secondary {
+    border: 1.5px solid #6c757d;
+    color: #6c757d;
+  }
+  
+  .btn-outline-secondary:hover {
+    background-color: #e9ecef;
+  }
+  
+  .table-container {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    overflow: hidden;
+  }
+  
+  .table {
+    margin-bottom: 0;
+    font-size: 0.95rem;
+  }
+  
+  .table thead {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #6c757d;
+    border-bottom: 2px solid #e9ecef;
+  }
+  
+  .table thead th {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+  
+  .table tbody tr {
+    border-bottom: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+  }
+  
+  .table tbody tr:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+  }
+  
+  .customer-name {
+    font-weight: 600;
+    color: #212529;
+  }
+  
+  .customer-name a {
+    color: #667eea;
+    text-decoration: none;
+  }
+  
+  .customer-name a:hover {
+    text-decoration: underline;
+  }
+  
+  .badge {
+    padding: 0.5rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
+  
+  .badge-success {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .badge-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .btn-group-sm .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+  }
+  
+  .btn-outline-primary {
+    border: 1px solid #667eea;
+    color: #667eea;
+  }
+  
+  .btn-outline-primary:hover {
+    background: #667eea;
+    color: white;
+  }
+  
+  .btn-outline-danger {
+    border: 1px solid #dc3545;
+    color: #dc3545;
+  }
+  
+  .btn-outline-danger:hover {
+    background: #dc3545;
+    color: white;
+  }
+  
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+  }
+  
+  .empty-state i {
+    font-size: 3rem;
+    opacity: 0.3;
     margin-bottom: 1rem;
   }
   
-  .filter-section h6 {
-    font-weight: 600;
+  .pagination {
+    margin-top: 2rem;
+  }
+  
+  .pagination .page-link {
     color: #667eea;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
+    border-color: #e9ecef;
   }
   
-  .stats-card {
-    background: white;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    text-align: center;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  .pagination .page-link:hover {
+    background-color: #667eea;
+    border-color: #667eea;
+    color: white;
   }
   
-  .stats-value {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #667eea;
-  }
-  
-  .stats-label {
-    font-size: 0.85rem;
-    color: #6c757d;
+  .pagination .page-item.active .page-link {
+    background-color: #667eea;
+    border-color: #667eea;
   }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-  <h2 class="mb-0">
-    <i class="bi bi-people me-2"></i>Clientes
+<!-- Header -->
+<div class="header-section">
+  <h2>
+    <i class="bi bi-people"></i>Clientes
   </h2>
   <a href="{% url 'customer_create' %}" class="btn btn-primary">
-    <i class="bi bi-plus-circle me-2"></i>Nuevo Cliente
+    <i class="bi bi-person-plus"></i>Nuevo Cliente
   </a>
 </div>
 
-<!-- Estadísticas Rápidas -->
-<div class="row mb-4">
-  <div class="col-md-3">
-    <div class="stats-card">
-      <div class="stats-value">{{ total_customers }}</div>
-      <div class="stats-label">Total de Clientes</div>
-    </div>
+<!-- Estadísticas -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-value total">{{ total_customers }}</div>
+    <div class="stat-label">Total de Clientes</div>
   </div>
-  <div class="col-md-3">
-    <div class="stats-card">
-      <div class="stats-value text-success">{{ active_customers }}</div>
-      <div class="stats-label">Clientes Activos</div>
-    </div>
+  <div class="stat-card">
+    <div class="stat-value active">{{ active_customers }}</div>
+    <div class="stat-label">Clientes Activos</div>
   </div>
-  <div class="col-md-3">
-    <div class="stats-card">
-      <div class="stats-value text-warning">{{ inactive_customers }}</div>
-      <div class="stats-label">Clientes Inactivos</div>
-    </div>
+  <div class="stat-card">
+    <div class="stat-value inactive">{{ inactive_customers }}</div>
+    <div class="stat-label">Clientes Inactivos</div>
   </div>
-  <div class="col-md-3">
-    <div class="stats-card">
-      <div class="stats-value text-info">{{ paginator.count }}</div>
-      <div class="stats-label">Resultados Encontrados</div>
-    </div>
+  <div class="stat-card">
+    <div class="stat-value found">{{ paginator.count }}</div>
+    <div class="stat-label">En esta búsqueda</div>
   </div>
 </div>
 
 <!-- Búsqueda Avanzada -->
-<div class="search-filters">
-  <h5 class="mb-3"><i class="bi bi-search me-2"></i>Búsqueda Avanzada</h5>
-  <form method="get" id="search-form">
-    <div class="row g-3">
-      <!-- Búsqueda General -->
-      <div class="col-md-4">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-search me-1"></i>Búsqueda General</label>
-          {{ form.search_query }}
-          <small class="text-muted d-block mt-1">Busca en nombre, email, ID o empresa</small>
-        </div>
-      </div>
-      
-      <!-- Tipo de Búsqueda -->
-      <div class="col-md-3">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-funnel me-1"></i>Tipo</label>
-          {{ form.search_by }}
-        </div>
-      </div>
-      
-      <!-- Estado -->
-      <div class="col-md-3">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-check-circle me-1"></i>Estado</label>
-          {{ form.status }}
-        </div>
-      </div>
-      
-      <!-- Vendedor -->
-      <div class="col-md-6">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-person-badge me-1"></i>Asignado a</label>
-          {{ form.assigned_to }}
-        </div>
-      </div>
-      
-      <!-- Fecha Desde -->
-      <div class="col-md-3">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-calendar me-1"></i>Desde</label>
-          {{ form.date_from }}
-        </div>
-      </div>
-      
-      <!-- Fecha Hasta -->
-      <div class="col-md-3">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-calendar me-1"></i>Hasta</label>
-          {{ form.date_to }}
-        </div>
-      </div>
-      
-      <!-- Ordenamiento -->
-      <div class="col-md-4">
-        <div class="filter-section">
-          <label class="form-label"><i class="bi bi-sort-down me-1"></i>Ordenar por</label>
-          {{ form.order_by }}
-        </div>
-      </div>
-      
-      <!-- Botones -->
-      <div class="col-md-8 d-flex gap-2 align-items-end">
-        <button type="submit" class="btn btn-primary flex-grow-1">
-          <i class="bi bi-search me-1"></i>Buscar
-        </button>
-        <a href="{% url 'customer_list' %}" class="btn btn-outline-secondary">
-          <i class="bi bi-arrow-clockwise me-1"></i>Limpiar
-        </a>
-      </div>
+<div class="search-container">
+  <div class="search-header">
+    <i class="bi bi-search"></i>Búsqueda Avanzada
+  </div>
+  <form method="get" id="search-form" class="search-form">
+    <div class="form-group">
+      <label class="form-label"><i class="bi bi-search me-1"></i>Búsqueda General</label>
+      <input type="text" name="search_query" class="form-control" placeholder="Buscar cliente..." value="{{ request.GET.search_query }}">
+      <small class="text-muted mt-1">Busca en nombre, email, ID o empresa</small>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label"><i class="bi bi-funnel me-1"></i>Tipo</label>
+      <select name="search_by" class="form-control">
+        <option value="">Todos</option>
+        <option value="name" {% if request.GET.search_by == 'name' %}selected{% endif %}>Por Nombre</option>
+        <option value="email" {% if request.GET.search_by == 'email' %}selected{% endif %}>Por Email</option>
+        <option value="company" {% if request.GET.search_by == 'company' %}selected{% endif %}>Por Empresa</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label"><i class="bi bi-check-circle me-1"></i>Estado</label>
+      <select name="status" class="form-control">
+        <option value="">Todos</option>
+        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Activos</option>
+        <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactivos</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label"><i class="bi bi-person-badge me-1"></i>Asignado a</label>
+      <select name="assigned_to" class="form-control">
+        <option value="">Todos</option>
+        {% for vendor in vendors %}
+          <option value="{{ vendor.id }}" {% if request.GET.assigned_to == vendor.id|stringformat:'s' %}selected{% endif %}>{{ vendor.username }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label"><i class="bi bi-calendar me-1"></i>Desde</label>
+      <input type="date" name="date_from" class="form-control" value="{{ request.GET.date_from }}">
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label"><i class="bi bi-calendar me-1"></i>Hasta</label>
+      <input type="date" name="date_to" class="form-control" value="{{ request.GET.date_to }}">
+    </div>
+    
+    <div class="form-group">
+      <label class="form-label"><i class="bi bi-sort-down me-1"></i>Ordenar por</label>
+      <select name="order_by" class="form-control">
+        <option value="-created_at" {% if request.GET.order_by == '-created_at' %}selected{% endif %}>Más recientes</option>
+        <option value="created_at" {% if request.GET.order_by == 'created_at' %}selected{% endif %}>Más antiguos</option>
+        <option value="name" {% if request.GET.order_by == 'name' %}selected{% endif %}>Nombre A-Z</option>
+        <option value="-name" {% if request.GET.order_by == '-name' %}selected{% endif %}>Nombre Z-A</option>
+      </select>
+    </div>
+    
+    <div class="search-actions">
+      <a href="{% url 'customer_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-clockwise"></i>Limpiar
+      </a>
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-search"></i>Buscar
+      </button>
     </div>
   </form>
 </div>
 
 <!-- Tabla de Resultados -->
-<div class="card">
+<div class="table-container">
   <div class="table-responsive">
-    <table class="table table-hover align-middle mb-0">
+    <table class="table table-hover align-middle">
       <thead>
         <tr>
-          <th style="width: 50px;">#ID</th>
+          <th style="width: 50px;">ID</th>
           <th>Nombre</th>
           <th>Email</th>
           <th>Teléfono</th>
           <th>Empresa</th>
           <th>Vendedor</th>
-          <th style="width: 80px;">Estado</th>
-          <th style="width: 100px;">Acciones</th>
+          <th style="width: 100px;">Estado</th>
+          <th style="width: 120px;">Acciones</th>
         </tr>
       </thead>
       <tbody>
         {% for customer in customers %}
         <tr>
-          <td><small class="text-muted">#{{ customer.id }}</small></td>
           <td>
-            <a href="{% url 'customer_detail' customer.pk %}" class="text-decoration-none">
-              <strong>{{ customer.name }}</strong>
+            <small class="text-muted">#{{ customer.id }}</small>
+          </td>
+          <td>
+            <a href="{% url 'customer_detail' customer.pk %}" class="customer-name">
+              {{ customer.name }}
             </a>
           </td>
           <td>
-            <small>{{ customer.email }}</small>
+            <a href="mailto:{{ customer.email }}" class="text-decoration-none">
+              <small>{{ customer.email }}</small>
+            </a>
           </td>
-          <td>{{ customer.phone|default:"N/A" }}</td>
-          <td>{{ customer.company|default:"N/A" }}</td>
           <td>
-            <small class="text-muted">{{ customer.assigned_to.username|default:"Sin asignar" }}</small>
+            <small class="text-muted">{{ customer.phone|default:"—" }}</small>
+          </td>
+          <td>
+            <small class="text-muted">{{ customer.company|default:"—" }}</small>
+          </td>
+          <td>
+            <small class="text-muted">
+              {{ customer.assigned_to.username|default:"Sin asignar" }}
+            </small>
           </td>
           <td>
             {% if customer.is_active %}
-              <span class="badge bg-success">Activo</span>
+              <span class="badge badge-success">
+                <i class="bi bi-check-circle me-1"></i>Activo
+              </span>
             {% else %}
-              <span class="badge bg-danger">Inactivo</span>
+              <span class="badge badge-danger">
+                <i class="bi bi-x-circle me-1"></i>Inactivo
+              </span>
             {% endif %}
           </td>
           <td>
-            <div class="btn-group btn-group-sm" role="group">
+            <div class="action-buttons btn-group btn-group-sm" role="group">
+              <a href="{% url 'customer_detail' customer.pk %}" class="btn btn-outline-primary" title="Ver">
+                <i class="bi bi-eye"></i>
+              </a>
               <a href="{% url 'customer_update' customer.pk %}" class="btn btn-outline-primary" title="Editar">
                 <i class="bi bi-pencil-square"></i>
               </a>
@@ -208,9 +455,11 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="8" class="text-center py-4">
-            <i class="bi bi-inbox text-muted" style="font-size: 2rem;"></i>
-            <p class="text-muted mt-2">No hay clientes que coincidan con tu búsqueda</p>
+          <td colspan="8">
+            <div class="empty-state">
+              <i class="bi bi-inbox"></i>
+              <p><strong>No hay clientes</strong><br>que coincidan con tu búsqueda</p>
+            </div>
           </td>
         </tr>
         {% endfor %}
@@ -225,27 +474,63 @@
   <ul class="pagination justify-content-center">
     {% if page_obj.has_previous %}
     <li class="page-item">
-      <a class="page-link" href="?page=1{{ request.GET|urlencode }}">Primera</a>
+      <a class="page-link" href="?page=1{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">
+        <i class="bi bi-chevron-double-left"></i>
+      </a>
     </li>
     <li class="page-item">
-      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{{ request.GET|urlencode }}">Anterior</a>
+      <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">
+        <i class="bi bi-chevron-left"></i>
+      </a>
     </li>
     {% endif %}
     
     <li class="page-item active">
-      <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
     </li>
     
     {% if page_obj.has_next %}
     <li class="page-item">
-      <a class="page-link" href="?page={{ page_obj.next_page_number }}{{ request.GET|urlencode }}">Siguiente</a>
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">
+        <i class="bi bi-chevron-right"></i>
+      </a>
     </li>
     <li class="page-item">
-      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{{ request.GET|urlencode }}">Última</a>
+      <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">
+        <i class="bi bi-chevron-double-right"></i>
+      </a>
     </li>
     {% endif %}
   </ul>
 </nav>
 {% endif %}
+
+<script>
+// Búsqueda en tiempo real
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('search-form');
+    const searchInput = form.querySelector('input[name="search_query"]');
+    const selects = form.querySelectorAll('select');
+    
+    let debounceTimer;
+    
+    // Buscar mientras escribes
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+          form.submit();
+        }, 800);
+      });
+    }
+    
+    // Cambiar opciones inmediatamente
+    selects.forEach(select => {
+      select.addEventListener('change', function() {
+        form.submit();
+      });
+    });
+});
+</script>
 
 {% endblock %}
