@@ -10,14 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# ==============================================================================
+# CORE SETTINGS
+# ==============================================================================
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-0vurr4$hozjf%uh*-_4n8d$_m9@&53g4q-=qo+wrv!t=+s-l^i'
@@ -27,22 +29,28 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-# Application definition
+
+# ==============================================================================
+# APPLICATION DEFINITION
+# ==============================================================================
 
 INSTALLED_APPS = [
+    # Django core apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users',
-    'customers',
-    'opportunities',
-    'followups',
-    'dashboard',
-    'reports',
-    'sales_team'
+    
+    # Project apps
+    'users.apps.UsersConfig',
+    'customers.apps.CustomersConfig',
+    'opportunities.apps.OpportunitiesConfig',
+    'followups.apps.FollowupsConfig',
+    'dashboard.apps.DashboardConfig',
+    'reports.apps.ReportsConfig',
+    'sales_team.apps.SalesTeamConfig',
 ]
 
 MIDDLEWARE = [
@@ -64,6 +72,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -75,8 +84,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'CRM.wsgi.application'
 
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+# ==============================================================================
+# DATABASE CONFIGURATION
+# ==============================================================================
 
 DATABASES = {
     'default': {
@@ -85,9 +95,22 @@ DATABASES = {
     }
 }
 
+# Para producción con PostgreSQL (descomentar cuando tengas psycopg configurado):
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': os.environ.get('DB_NAME', 'crm_db'),
+#         'USER': os.environ.get('DB_USER', 'postgres'),
+#         'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+#         'HOST': os.environ.get('DB_HOST', 'localhost'),
+#         'PORT': os.environ.get('DB_PORT', '5432'),
+#     }
+# }
 
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+
+# ==============================================================================
+# PASSWORD VALIDATION
+# ==============================================================================
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -105,51 +128,72 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
+# ==============================================================================
+# INTERNATIONALIZATION
+# ==============================================================================
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-es'  # Español
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Bogota'  # Ajusta según tu zona horaria
 
 USE_I18N = True
 
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
+# ==============================================================================
+# STATIC FILES (CSS, JavaScript, Images)
+# ==============================================================================
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+# Media files (uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+
+# ==============================================================================
+# DEFAULT PRIMARY KEY FIELD TYPE
+# ==============================================================================
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ==============================================================================
+# AUTHENTICATION & AUTHORIZATION
+# ==============================================================================
 
 LOGIN_REDIRECT_URL = 'dashboard'
 LOGOUT_REDIRECT_URL = 'login'
 LOGIN_URL = 'login'
 
-# Email Configuration
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Para desarrollo (muestra en consola)
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Para producción
+
+# ==============================================================================
+# EMAIL CONFIGURATION
+# ==============================================================================
+
+# Para desarrollo (muestra emails en consola)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Para producción con SMTP (descomentar y configurar):
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+# EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+# EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
 DEFAULT_FROM_EMAIL = 'crm@tuempresa.com'
 
-# Solo si usas SMTP en producción:
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'tu_email@gmail.com'
-EMAIL_HOST_PASSWORD = 'tu_contraseña_app'  # Usa variables de entorno en producción
 
-# Configuración de recordatorios
-FOLLOWUP_REMINDER_ENABLED = True
-import os
-from pathlib import Path
-
-BASE_DIR = Path(__file__).resolve().parent.parent
+# ==============================================================================
+# LOGGING CONFIGURATION
+# ==============================================================================
 
 # Crear directorio de logs si no existe
 LOGS_DIR = BASE_DIR / 'logs'
@@ -190,16 +234,49 @@ LOGGING = {
             'formatter': 'verbose',
         },
     },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
     'loggers': {
         'django': {
             'handlers': ['console', 'file'],
             'level': 'INFO',
-            'propagate': True,
+            'propagate': False,
         },
         'reports': {
-            'handlers': ['reports_file'],
+            'handlers': ['console', 'reports_file'],
             'level': 'INFO',
+            'propagate': False,
+        },
+        'sales_team': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
             'propagate': False,
         },
     },
 }
+
+
+# ==============================================================================
+# CUSTOM PROJECT SETTINGS
+# ==============================================================================
+
+# Configuración de recordatorios
+FOLLOWUP_REMINDER_ENABLED = True
+
+
+# ==============================================================================
+# SECURITY SETTINGS (PARA PRODUCCIÓN)
+# ==============================================================================
+
+# Descomentar estas líneas cuando despliegues a producción:
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+# SECURE_BROWSER_XSS_FILTER = True
+# SECURE_CONTENT_TYPE_NOSNIFF = True
+# X_FRAME_OPTIONS = 'DENY'
+# SECURE_HSTS_SECONDS = 31536000
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True

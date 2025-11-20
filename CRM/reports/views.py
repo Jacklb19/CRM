@@ -716,260 +716,398 @@ def export_to_excel(report_data, title, report_type):
     
     return response
 
-
 def export_to_pdf(report_data, title, report_type):
-    """Exportar reporte a PDF"""
+    """Exportar reporte a PDF - VERSIÓN COMPLETA Y CORREGIDA"""
+    
+    # Importar DENTRO de la función para evitar errores de módulo
     try:
         from reportlab.lib.pagesizes import letter
         from reportlab.lib import colors
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.lib.units import inch
         from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
-    except ImportError:
-        return HttpResponse("Error: reportlab no está instalado. Ejecuta: pip install reportlab", status=500)
+        logger.info(f"[OK] ReportLab imports successful")
+    except ImportError as e:
+        logger.error(f"[ERROR] ReportLab ImportError: {str(e)}", exc_info=True)
+        return HttpResponse(f"Error: reportlab no esta instalado. {str(e)}", status=500)
+    except Exception as e:
+        logger.error(f"[ERROR] Unexpected error in imports: {str(e)}", exc_info=True)
+        return HttpResponse(f"Error inesperado: {str(e)}", status=500)
     
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="reporte_{report_type}_{timezone.now().strftime("%d%m%Y")}.pdf"'
-    
-    doc = SimpleDocTemplate(response, pagesize=letter)
-    elements = []
-    styles = getSampleStyleSheet()
-    
-    # Título
-    title_style = ParagraphStyle(
-        'CustomTitle',
-        parent=styles['Heading1'],
-        fontSize=16,
-        textColor=colors.HexColor('#667eea'),
-        spaceAfter=20,
-        alignment=1,
-        fontName='Helvetica-Bold'
-    )
-    elements.append(Paragraph(title, title_style))
-    
-    # Fecha
-    fecha_style = ParagraphStyle(
-        'CustomDate',
-        parent=styles['Normal'],
-        fontSize=9,
-        textColor=colors.grey,
-        alignment=0
-    )
-    elements.append(Paragraph(f"Generado: {timezone.now().strftime('%d/%m/%Y %H:%M')}", fecha_style))
-    elements.append(Spacer(1, 0.2 * inch))
-    
-    # Contenido según tipo
-    if report_type == 'sales':
-        data = [['Métrica', 'Valor']]
-        data.append(['Valor Total', f"${report_data['summary']['total_value']:,.2f}"])
-        data.append(['Total de Deals', str(report_data['summary']['total_deals'])])
-        data.append(['Deal Promedio', f"${report_data['summary']['average_deal']:,.2f}"])
+    try:
+        # Validar datos
+        if not report_data:
+            logger.warning("report_data is empty")
+            return HttpResponse("Error: No hay datos para exportar", status=400)
         
-        table = Table(data, colWidths=[3 * inch, 3 * inch])
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ]))
-        elements.append(table)
-    
-    elif report_type == 'customers':
-        # Resumen
-        data = [['Métrica', 'Cantidad']]
-        for key, value in report_data['summary'].items():
-            data.append([key.replace('_', ' ').title(), str(value)])
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="reporte_{report_type}_{timezone.now().strftime("%d%m%Y")}.pdf"'
         
-        table = Table(data, colWidths=[3 * inch, 2 * inch])
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ]))
-        elements.append(table)
+        doc = SimpleDocTemplate(response, pagesize=letter)
+        elements = []
+        styles = getSampleStyleSheet()
         
-        # Clientes principales
-        elements.append(Spacer(1, 0.3 * inch))
-        elements.append(Paragraph("Clientes Principales", styles['Heading3']))
-        elements.append(Spacer(1, 0.1 * inch))
+        # Título
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=16,
+            textColor=colors.HexColor('#667eea'),
+            spaceAfter=20,
+            alignment=1,
+            fontName='Helvetica-Bold'
+        )
+        elements.append(Paragraph(title, title_style))
         
-        if report_data.get('top_customers'):
-            data = [['Cliente', 'Vendedor', 'Opor.', 'Valor']]
-            for customer in report_data['top_customers']:
-                data.append([
-                    customer['name'],
-                    customer.get('assigned_to__username', 'N/A'),
-                    str(customer['opp_count']),
-                    f"${float(customer['opp_value'] or 0):,.0f}"
-                ])
+        # Fecha
+        fecha_style = ParagraphStyle(
+            'CustomDate',
+            parent=styles['Normal'],
+            fontSize=9,
+            textColor=colors.grey,
+            alignment=0
+        )
+        elements.append(Paragraph(f"Generado: {timezone.now().strftime('%d/%m/%Y %H:%M')}", fecha_style))
+        elements.append(Spacer(1, 0.2 * inch))
+        
+        # Contenido según tipo
+        if report_type == 'sales':
+            data = [['Métrica', 'Valor']]
+            summary = report_data.get('summary', {})
+            data.append(['Valor Total', f"${float(summary.get('total_value', 0) or 0):,.2f}"])
+            data.append(['Total de Deals', str(summary.get('total_deals', 0))])
+            data.append(['Deal Promedio', f"${float(summary.get('average_deal', 0) or 0):,.2f}"])
             
-            table = Table(data, colWidths=[1.5 * inch, 1.5 * inch, 1 * inch, 1.5 * inch])
+            table = Table(data, colWidths=[3 * inch, 3 * inch])
             table.setStyle(TableStyle([
                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
                 ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
                 ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
                 ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                ('FONTSIZE', (0, 0), (-1, -1), 8),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
                 ('GRID', (0, 0), (-1, -1), 1, colors.black),
             ]))
             elements.append(table)
+            
+            # Ventas por vendedor
+            elements.append(Spacer(1, 0.3 * inch))
+            elements.append(Paragraph("Ventas por Vendedor", styles['Heading3']))
+            elements.append(Spacer(1, 0.1 * inch))
+            
+            data = [['Vendedor', 'Cantidad', 'Total', 'Promedio']]
+            for seller in report_data.get('by_seller', []):
+                data.append([
+                    seller.get('assigned_to__username', 'N/A'),
+                    str(seller.get('count', 0)),
+                    f"${float(seller.get('total', 0) or 0):,.2f}",
+                    f"${float(seller.get('avg', 0) or 0):,.2f}"
+                ])
+            
+            if len(data) > 1:
+                table = Table(data, colWidths=[2 * inch, 1.2 * inch, 1.5 * inch, 1.5 * inch])
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 8),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ]))
+                elements.append(table)
+        
+        elif report_type == 'customers':
+            # Resumen
+            data = [['Métrica', 'Cantidad']]
+            for key, value in report_data.get('summary', {}).items():
+                data.append([key.replace('_', ' ').title(), str(value)])
+            
+            table = Table(data, colWidths=[3 * inch, 2 * inch])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ]))
+            elements.append(table)
+            
+            # Clientes principales
+            elements.append(Spacer(1, 0.3 * inch))
+            elements.append(Paragraph("Clientes Principales", styles['Heading3']))
+            elements.append(Spacer(1, 0.1 * inch))
+            
+            if report_data.get('top_customers'):
+                data = [['Cliente', 'Vendedor', 'Opor.', 'Valor']]
+                for customer in report_data['top_customers']:
+                    data.append([
+                        customer.get('name', 'N/A')[:25],
+                        customer.get('assigned_to__username', 'N/A'),
+                        str(customer.get('opp_count', 0)),
+                        f"${float(customer.get('opp_value', 0) or 0):,.0f}"
+                    ])
+                
+                table = Table(data, colWidths=[1.5 * inch, 1.5 * inch, 1 * inch, 1.5 * inch])
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 8),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ]))
+                elements.append(table)
+            
+            # Clientes sin actividad
+            if report_data.get('dormant_customers'):
+                elements.append(Spacer(1, 0.3 * inch))
+                elements.append(Paragraph("Clientes Sin Actividad", styles['Heading3']))
+                elements.append(Spacer(1, 0.1 * inch))
+                
+                data = [['Cliente', 'Email', 'Teléfono']]
+                for customer in report_data['dormant_customers'][:10]:
+                    data.append([
+                        customer.get('name', 'N/A')[:25],
+                        customer.get('email', 'N/A'),
+                        customer.get('phone', 'N/A')
+                    ])
+                
+                table = Table(data, colWidths=[2 * inch, 2 * inch, 1.5 * inch])
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#dc3545')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 8),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ]))
+                elements.append(table)
+        
+        elif report_type == 'sellers':
+            data = [['Vendedor', 'Opor.', 'Ganadas', 'Pipeline', 'Win Rate', 'Promedio']]
+            for seller in report_data.get('sellers', [])[:15]:
+                data.append([
+                    seller.get('name', 'N/A')[:20],
+                    str(seller.get('total_opportunities', 0)),
+                    str(seller.get('won_opportunities', 0)),
+                    f"${float(seller.get('pipeline_value', 0) or 0):,.0f}",
+                    f"{float(seller.get('win_rate', 0) or 0):.1f}%",
+                    f"${float(seller.get('avg_deal_size', 0) or 0):,.0f}"
+                ])
+            
+            table = Table(data, colWidths=[1.2 * inch, 0.7 * inch, 0.7 * inch, 1.2 * inch, 0.7 * inch, 0.8 * inch])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 7),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ]))
+            elements.append(table)
+        
+        elif report_type == 'followups':
+            # Resumen
+            data = [['Estado', 'Cantidad']]
+            summary = report_data.get('summary', {})
+            data.append(['Total', str(summary.get('total', 0))])
+            data.append(['Pendientes', str(summary.get('pending', 0))])
+            data.append(['Completados', str(summary.get('completed', 0))])
+            data.append(['Vencidos', str(summary.get('overdue', 0))])
+            
+            table = Table(data, colWidths=[3 * inch, 2 * inch])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ]))
+            elements.append(table)
+            
+            # Por tipo
+            elements.append(Spacer(1, 0.3 * inch))
+            elements.append(Paragraph("Seguimientos por Tipo", styles['Heading3']))
+            elements.append(Spacer(1, 0.1 * inch))
+            
+            type_map = {'llamada': 'Llamada', 'email': 'Email', 'reunion': 'Reunión', 'nota': 'Nota'}
+            data = [['Tipo', 'Cantidad']]
+            for item in report_data.get('by_type', []):
+                data.append([type_map.get(item.get('type', 'otro'), item.get('type', 'Otro')), str(item.get('count', 0))])
+            
+            if len(data) > 1:
+                table = Table(data, colWidths=[2.5 * inch, 2.5 * inch])
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 9),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ]))
+                elements.append(table)
+            
+            # Por vendedor
+            elements.append(Spacer(1, 0.3 * inch))
+            elements.append(Paragraph("Actividad por Vendedor", styles['Heading3']))
+            elements.append(Spacer(1, 0.1 * inch))
+            
+            data = [['Vendedor', 'Total', 'Completados', 'Tasa %']]
+            for seller in report_data.get('by_seller', []):
+                total = seller.get('count', 0)
+                completed = seller.get('completed_count', 0)
+                tasa = (completed / total * 100) if total > 0 else 0
+                data.append([
+                    seller.get('user__username', 'N/A')[:20],
+                    str(total),
+                    str(completed),
+                    f"{tasa:.1f}%"
+                ])
+            
+            if len(data) > 1:
+                table = Table(data, colWidths=[1.8 * inch, 1 * inch, 1.2 * inch, 1 * inch])
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 8),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ]))
+                elements.append(table)
+        
+        elif report_type == 'opportunities':
+            # Resumen
+            data = [['Métrica', 'Valor']]
+            summary = report_data.get('summary', {})
+            data.append(['Total', str(summary.get('total', 0))])
+            data.append(['Valor Total', f"${float(summary.get('total_value', 0) or 0):,.0f}"])
+            data.append(['Promedio', f"${float(summary.get('avg_value', 0) or 0):,.0f}"])
+            data.append(['Vencen Pronto', str(summary.get('due_soon', 0))])
+            
+            table = Table(data, colWidths=[3 * inch, 2 * inch])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ]))
+            elements.append(table)
+            
+            # Detalle
+            elements.append(Spacer(1, 0.3 * inch))
+            elements.append(Paragraph("Detalle de Oportunidades", styles['Heading3']))
+            elements.append(Spacer(1, 0.1 * inch))
+            
+            data = [['Título', 'Cliente', 'Monto', 'Estado', 'Vencimiento']]
+            for opp in report_data.get('opportunities', [])[:15]:
+                data.append([
+                    opp.get('title', 'N/A')[:18],
+                    opp.get('customer__name', 'N/A')[:15],
+                    f"${float(opp.get('amount', 0) or 0):,.0f}",
+                    opp.get('status', 'N/A')[:8],
+                    str(opp.get('expected_close_date', ''))[:10]
+                ])
+            
+            if len(data) > 1:
+                table = Table(data, colWidths=[1.3 * inch, 1.3 * inch, 1 * inch, 1 * inch, 1 * inch])
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 7),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ]))
+                elements.append(table)
+        
+        elif report_type == 'pipeline':
+            # Resumen
+            data = [['Métrica', 'Valor']]
+            total_pipeline = float(report_data.get('total_pipeline', 0) or 0)
+            data.append(['Pipeline Total', f"${total_pipeline:,.0f}"])
+            data.append(['Pronóstico Ponderado', f"${float(report_data.get('weighted_forecast', 0) or 0):,.0f}"])
+            
+            table = Table(data, colWidths=[3 * inch, 2 * inch])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, -1), 9),
+                ('GRID', (0, 0), (-1, -1), 1, colors.black),
+            ]))
+            elements.append(table)
+            
+            # Por etapa
+            elements.append(Spacer(1, 0.3 * inch))
+            elements.append(Paragraph("Pipeline por Etapa", styles['Heading3']))
+            elements.append(Spacer(1, 0.1 * inch))
+            
+            data = [['Etapa', 'Valor', '%']]
+            for stage, value in report_data.get('pipeline_stages', {}).items():
+                percentage = (value / total_pipeline * 100) if total_pipeline > 0 else 0
+                data.append([
+                    stage.title(),
+                    f"${float(value or 0):,.0f}",
+                    f"{percentage:.1f}%"
+                ])
+            
+            if len(data) > 1:
+                table = Table(data, colWidths=[1.5 * inch, 2 * inch, 1 * inch])
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 9),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ]))
+                elements.append(table)
+            
+            # Por vendedor
+            elements.append(Spacer(1, 0.3 * inch))
+            elements.append(Paragraph("Pipeline por Vendedor", styles['Heading3']))
+            elements.append(Spacer(1, 0.1 * inch))
+            
+            if report_data.get('by_seller'):
+                data = [['Vendedor', 'Valor', 'Oportunidades', '%']]
+                for seller in report_data['by_seller']:
+                    seller_value = float(seller.get('value', 0) or 0)
+                    seller_percentage = (seller_value / total_pipeline * 100) if total_pipeline > 0 else 0
+                    data.append([
+                        seller.get('assigned_to__username', 'N/A')[:20],
+                        f"${seller_value:,.0f}",
+                        str(seller.get('count', 0)),
+                        f"{seller_percentage:.1f}%"
+                    ])
+                
+                table = Table(data, colWidths=[1.5 * inch, 1.5 * inch, 1.5 * inch, 0.8 * inch])
+                table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 8),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black),
+                ]))
+                elements.append(table)
+        
+        # Construir PDF
+        doc.build(elements)
+        logger.info(f"✓ Reporte {report_type} exportado a PDF correctamente")
+        
+        return response
     
-    elif report_type == 'sellers':
-        data = [['Vendedor', 'Opor.', 'Ganadas', 'Pipeline', 'Win Rate']]
-        for seller in report_data.get('sellers', [])[:10]:
-            data.append([
-                seller['name'],
-                str(seller['total_opportunities']),
-                str(seller['won_opportunities']),
-                f"${seller['pipeline_value']:,.0f}",
-                f"{seller['win_rate']:.1f}%"
-            ])
-        
-        table = Table(data, colWidths=[1.5 * inch, 0.8 * inch, 0.8 * inch, 1.5 * inch, 0.8 * inch])
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 8),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ]))
-        elements.append(table)
+    except KeyError as e:
+        logger.error(f"✗ KeyError en export_to_pdf [{report_type}]: {str(e)}", exc_info=True)
+        return HttpResponse(f"Error: Clave faltante en datos - {str(e)}", status=500)
     
-    elif report_type == 'followups':
-        # Resumen
-        data = [['Estado', 'Cantidad']]
-        data.append(['Total', str(report_data['summary']['total'])])
-        data.append(['Pendientes', str(report_data['summary']['pending'])])
-        data.append(['Completados', str(report_data['summary']['completed'])])
-        data.append(['Vencidos', str(report_data['summary']['overdue'])])
-        
-        table = Table(data, colWidths=[3 * inch, 2 * inch])
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ]))
-        elements.append(table)
-        
-        # Por tipo
-        elements.append(Spacer(1, 0.3 * inch))
-        elements.append(Paragraph("Seguimientos por Tipo", styles['Heading3']))
-        elements.append(Spacer(1, 0.1 * inch))
-        
-        type_map = {'llamada': 'Llamada', 'email': 'Email', 'reunion': 'Reunión', 'nota': 'Nota'}
-        data = [['Tipo', 'Cantidad']]
-        for item in report_data.get('by_type', []):
-            data.append([type_map.get(item['type'], item['type']), str(item['count'])])
-        
-        table = Table(data, colWidths=[2.5 * inch, 2.5 * inch])
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ]))
-        elements.append(table)
-    
-    elif report_type == 'opportunities':
-        # Resumen
-        data = [['Métrica', 'Valor']]
-        data.append(['Total', str(report_data['summary']['total'])])
-        data.append(['Valor Total', f"${report_data['summary']['total_value']:,.0f}"])
-        data.append(['Promedio', f"${report_data['summary']['avg_value']:,.0f}"])
-        data.append(['Vencen Pronto', str(report_data['summary']['due_soon'])])
-        
-        table = Table(data, colWidths=[3 * inch, 2 * inch])
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ]))
-        elements.append(table)
-        
-        # Detalle
-        elements.append(Spacer(1, 0.3 * inch))
-        elements.append(Paragraph("Detalle de Oportunidades", styles['Heading3']))
-        elements.append(Spacer(1, 0.1 * inch))
-        
-        data = [['Título', 'Cliente', 'Monto', 'Estado']]
-        for opp in report_data.get('opportunities', [])[:15]:  # Limitar a 15
-            data.append([
-                opp['title'][:20],
-                opp['customer__name'][:15],
-                f"${float(opp['amount']):,.0f}",
-                opp['status']
-            ])
-        
-        table = Table(data, colWidths=[1.5 * inch, 1.5 * inch, 1.2 * inch, 1.2 * inch])
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 8),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ]))
-        elements.append(table)
-    
-    elif report_type == 'pipeline':
-        # Resumen
-        data = [['Métrica', 'Valor']]
-        data.append(['Pipeline Total', f"${report_data['total_pipeline']:,.0f}"])
-        data.append(['Pronóstico Ponderado', f"${report_data['weighted_forecast']:,.0f}"])
-        
-        table = Table(data, colWidths=[3 * inch, 2 * inch])
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ]))
-        elements.append(table)
-        
-        # Por etapa
-        elements.append(Spacer(1, 0.3 * inch))
-        elements.append(Paragraph("Pipeline por Etapa", styles['Heading3']))
-        elements.append(Spacer(1, 0.1 * inch))
-        
-        data = [['Etapa', 'Valor', '%']]
-        for stage, value in report_data.get('pipeline_stages', {}).items():
-            percentage = (value / report_data['total_pipeline'] * 100) if report_data['total_pipeline'] > 0 else 0
-            data.append([
-                stage.title(),
-                f"${float(value):,.0f}",
-                f"{percentage:.1f}%"
-            ])
-        
-        table = Table(data, colWidths=[1.5 * inch, 2 * inch, 1 * inch])
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#667eea')),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, -1), 9),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ]))
-        elements.append(table)
-    
-    doc.build(elements)
-    logger.info(f"Reporte {report_type} exportado a PDF")
-    
-    return response
+    except Exception as e:
+        logger.error(f"✗ Error inesperado en export_to_pdf [{report_type}]: {str(e)}", exc_info=True)
+        return HttpResponse(f"Error al generar PDF: {str(e)}", status=500)
